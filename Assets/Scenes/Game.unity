@@ -2854,6 +2854,7 @@ GameObject:
   - component: {fileID: 1842462757}
   - component: {fileID: 1842462756}
   - component: {fileID: 1842462761}
+  - component: {fileID: 1842462762}
   - component: {fileID: 1842462760}
   m_Layer: 3
   m_Name: Player_1
@@ -2923,7 +2924,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!212 &1842462758
 SpriteRenderer:
@@ -3040,6 +3041,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 9353de1f-6aa5-4fc3-ad81-36bbb5140202
     m_ActionName: 'Movement/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1842462762}
+        m_TargetAssemblyTypeName: PlayerDash, Assembly-CSharp
+        m_MethodName: Dash
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 8d39198c-7daf-4d46-9780-86685a9cd119
+    m_ActionName: 'Movement/Dash[/Keyboard/space,/Keyboard/leftShift]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Movement
@@ -3058,6 +3075,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 5
+--- !u!114 &1842462762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1842462755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb866ac669ac5ba4c82bf12ef52dda7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
+  dashSpeed: 20
+  dashDuration: 0.15
+  dashCooldown: 1
 --- !u!4 &1916304755 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2454471460132278717, guid: 33c93ca49ac38794dac6dda9cb86ebe1, type: 3}
