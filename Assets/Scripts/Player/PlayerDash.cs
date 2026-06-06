@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(PlayerMovement))]
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerDash : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -8,6 +11,8 @@ public class PlayerDash : MonoBehaviour
     private PlayerMovement playerMovement;
 
     public float dashSpeed = 14f, dashDuration = 0.15f, dashCooldown = 1f;
+
+    public ParticleSystem dustEffect;
 
     private bool isDashing = false, canDash = true;
     private Vector2 dashDirection;
@@ -34,6 +39,7 @@ public class PlayerDash : MonoBehaviour
             {
                 isDashing = false;
                 canDash = false;
+                rb.linearVelocity = Vector2.zero;
                 cooldownTimer = dashCooldown;
             }
         }
@@ -57,9 +63,12 @@ public class PlayerDash : MonoBehaviour
             return;
 
         dashDirection = playerMovement.GetLastMoveDirection();
-
         isDashing = true;
         dashTimer = dashDuration;
+
+        float angle = Mathf.Atan2(-dashDirection.y, -dashDirection.x) * Mathf.Rad2Deg;
+        dustEffect.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+        dustEffect.Play();
     }
 
     public bool IsDashing()
