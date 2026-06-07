@@ -4,11 +4,14 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerInput))]
+[RequireComponent(typeof(Health))]
+
 public class PlayerDash : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private Rigidbody2D rb;
     private PlayerMovement playerMovement;
+    private Health health;
 
     public float dashSpeed = 14f, dashDuration = 0.15f, dashCooldown = 1f;
 
@@ -28,6 +31,8 @@ public class PlayerDash : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponent<PlayerMovement>();
+        health = GetComponent<Health>();
+        health.OnDeath += HandleDeath;
     }
 
     void Update()
@@ -74,5 +79,17 @@ public class PlayerDash : MonoBehaviour
     public bool IsDashing()
     {
         return isDashing;
+    }
+
+    private void HandleDeath(DamageInfo damageInfo)
+    {
+        isDashing = false;
+        rb.linearVelocity = Vector2.zero;
+        enabled = false;
+    }
+
+    private void OnDestroy()
+    {
+        health.OnDeath -= HandleDeath;
     }
 }

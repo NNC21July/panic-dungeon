@@ -4,12 +4,14 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(PlayerDash))]
+[RequireComponent(typeof(Health))]
 public class PlayerMovement : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     private Rigidbody2D rb;
     private PlayerDash playerDash;
+    private Health health;
     public float moveSpeed = 5f;
     private Vector2 moveInput, lastMoveDirection = new Vector2(1, 0);
 
@@ -23,6 +25,8 @@ public class PlayerMovement : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         playerDash = GetComponent<PlayerDash>();
+        health = GetComponent<Health>();
+        health.OnDeath += HandleDeath;
     }
 
     void FixedUpdate()
@@ -43,5 +47,16 @@ public class PlayerMovement : MonoBehaviour
     public Vector2 GetLastMoveDirection()
     {
         return lastMoveDirection;
+    }
+
+    private void HandleDeath(DamageInfo damageInfo)
+    {
+        rb.linearVelocity = Vector2.zero;
+        enabled = false;
+    }
+
+    private void OnDestroy()
+    {
+        health.OnDeath -= HandleDeath;
     }
 }
