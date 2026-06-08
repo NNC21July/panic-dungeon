@@ -48,4 +48,9 @@ public class Health : MonoBehaviour, IDamageable
     {
         return currentHealth;
     }
+
+    public bool IsDead()
+    {
+        return isDead;
+    }
 }

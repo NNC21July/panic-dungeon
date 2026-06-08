@@ -64,7 +64,7 @@ public class PlayerDash : MonoBehaviour
 
     public void Dash(InputAction.CallbackContext context)
     {
-        if (!context.performed || !canDash || isDashing)
+        if (!context.performed || !canDash || isDashing || health.IsDead())
             return;
 
         dashDirection = playerMovement.GetLastMoveDirection();
