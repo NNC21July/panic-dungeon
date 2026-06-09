@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8660178717716219044}
   - component: {fileID: 2753618772539717533}
   - component: {fileID: 6507163448059211190}
+  - component: {fileID: 2521328882001011978}
   m_Layer: 7
   m_Name: Spike
   m_TagString: Untagged
@@ -106,8 +107,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spike
   warningDuration: 3
-  warningFlashSpeed: 1
+  warningFlashDuration: 1
+  damage: 25
+  moveDuration: 2
+  retractDelay: 1
   warningFlashColor: {r: 1, g: 0, b: 0, a: 0}
+  originPos: {x: 0, y: 0}
+  targetPos: {x: 0, y: 0}
 --- !u!60 &6507163448059211190
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -158,3 +164,30 @@ PolygonCollider2D:
       - {x: -0.5, y: -0.28866667}
       - {x: 0.5, y: -0.28866667}
   m_UseDelaunayMesh: 1
+--- !u!50 &2521328882001011978
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 609061898390174137}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 1
+  m_Constraints: 0

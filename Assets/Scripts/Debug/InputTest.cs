@@ -15,7 +15,7 @@ public class InputTest : MonoBehaviour
             DamageTarget();
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
-            SpikeWarning();
+            SpikeActivate();
     }
 
     private void DamageTarget()
@@ -30,11 +30,11 @@ public class InputTest : MonoBehaviour
         Debug.Log(damageTarget.GetCurrentHealth());
     }
 
-    private void SpikeWarning()
+    private void SpikeActivate()
     {
         Spike[] spikes = FindObjectsByType<Spike>();
 
         foreach (Spike spike in spikes)
-            spike.Warning();
+            spike.Activate();
     }
 }
