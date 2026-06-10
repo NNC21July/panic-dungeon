@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,7 +16,7 @@ public class InputTest : MonoBehaviour
             DamageTarget();
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
-            SpikeActivate();
+            ActivateAllSpikes();
     }
 
     private void DamageTarget()
@@ -27,10 +28,10 @@ public class InputTest : MonoBehaviour
 
         damageTarget.TakeDamage(damage);
 
-        Debug.Log(damageTarget.GetCurrentHealth());
+        Debug.Log(damageTarget.CurrentHealth);
     }
 
-    private void SpikeActivate()
+    private void ActivateAllSpikes()
     {
         Spike[] spikes = FindObjectsByType<Spike>();
 
@@ -38,3 +39,4 @@ public class InputTest : MonoBehaviour
             spike.Activate();
     }
 }
+#endif

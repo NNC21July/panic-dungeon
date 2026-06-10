@@ -108,7 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spike
   warningDuration: 3
   warningFlashDuration: 1
-  damage: 25
+  damageAmount: 25
   moveDuration: 2
   retractDelay: 1
   warningFlashColor: {r: 1, g: 0, b: 0, a: 0}
@@ -121,7 +121,7 @@ PolygonCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 609061898390174137}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}

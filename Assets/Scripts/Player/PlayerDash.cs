@@ -8,34 +8,27 @@ using UnityEngine.InputSystem;
 
 public class PlayerDash : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     private Rigidbody2D rb;
     private PlayerMovement playerMovement;
     private Health health;
 
-    public float dashSpeed = 14f, dashDuration = 0.15f, dashCooldown = 1f;
+    [SerializeField] private float dashSpeed = 14f, dashDuration = 0.15f, dashCooldown = 1f;
 
-    public ParticleSystem dustEffect;
+    [SerializeField] private ParticleSystem dustEffect;
 
     private bool isDashing = false, canDash = true;
     private Vector2 dashDirection;
     private float dashTimer = 0f, cooldownTimer = 0f;
 
-    void Awake()
+    private void Awake()
     {
-        // manually disable all maps and enable only the Movement action map
-        var inputActions = GetComponent<PlayerInput>().actions;
-        foreach (var map in inputActions.actionMaps)
-            map.Disable();
-        inputActions.FindActionMap("Movement").Enable();
-
         rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponent<PlayerMovement>();
         health = GetComponent<Health>();
         health.OnDeath += HandleDeath;
     }
 
-    void Update()
+    private void Update()
     {
         if (isDashing)
         {
@@ -56,7 +49,7 @@ public class PlayerDash : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         if (isDashing)
             rb.linearVelocity = dashDirection * dashSpeed;
@@ -64,7 +57,7 @@ public class PlayerDash : MonoBehaviour
 
     public void Dash(InputAction.CallbackContext context)
     {
-        if (!context.performed || !canDash || isDashing || health.IsDead())
+        if (!context.performed || !canDash || isDashing || health.IsDead)
             return;
 
         dashDirection = playerMovement.GetLastMoveDirection();
@@ -72,8 +65,11 @@ public class PlayerDash : MonoBehaviour
         dashTimer = dashDuration;
 
         float angle = Mathf.Atan2(-dashDirection.y, -dashDirection.x) * Mathf.Rad2Deg;
-        dustEffect.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
-        dustEffect.Play();
+        if (dustEffect != null)
+        {
+            dustEffect.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+            dustEffect.Play();
+        }
     }
 
     public bool IsDashing()
@@ -90,6 +86,7 @@ public class PlayerDash : MonoBehaviour
 
     private void OnDestroy()
     {
-        health.OnDeath -= HandleDeath;
+        if (health != null)
+            health.OnDeath -= HandleDeath;
     }
 }

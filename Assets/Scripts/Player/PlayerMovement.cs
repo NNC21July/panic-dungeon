@@ -3,38 +3,29 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerInput))]
-[RequireComponent(typeof(PlayerDash))]
 [RequireComponent(typeof(Health))]
 public class PlayerMovement : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-
     private Rigidbody2D rb;
     private PlayerDash playerDash;
     private Health health;
-    public float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed = 5f;
     private Vector2 moveInput, lastMoveDirection = new Vector2(1, 0);
 
-    void Awake()
+    private void Awake()
     {
-        // manually disable all maps and enable only the Movement action map
-        var inputActions = GetComponent<PlayerInput>().actions;
-        foreach (var map in inputActions.actionMaps)
-            map.Disable();
-        inputActions.FindActionMap("Movement").Enable();
-
         rb = GetComponent<Rigidbody2D>();
         playerDash = GetComponent<PlayerDash>();
         health = GetComponent<Health>();
         health.OnDeath += HandleDeath;
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        if (playerDash.IsDashing())
+        if (playerDash != null && playerDash.IsDashing())
             return;
 
-        rb.linearVelocity = new Vector2(moveInput.x, moveInput.y).normalized * moveSpeed;
+        rb.linearVelocity = moveInput.normalized * moveSpeed;
     }
 
     public void Move(InputAction.CallbackContext context)
@@ -57,6 +48,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnDestroy()
     {
-        health.OnDeath -= HandleDeath;
+        if (health != null)
+            health.OnDeath -= HandleDeath;
     }
 }

@@ -5,11 +5,11 @@ public enum DamageType
     Normal, Spike, Arrow, Poison, Zombie
 }
 
-public struct DamageInfo
+public readonly struct DamageInfo
 {
-    public float Amount;
-    public GameObject Source;
-    public DamageType Type;
+    public float Amount { get; }
+    public GameObject Source { get; }
+    public DamageType Type { get; }
 
     public DamageInfo(float amount, GameObject source, DamageType type)
     {

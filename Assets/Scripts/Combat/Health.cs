@@ -3,16 +3,19 @@ using UnityEngine;
 
 public class Health : MonoBehaviour, IDamageable
 {
-    public float maxHealth = 100f;
+    [SerializeField] private float maxHealth = 100f;
     private float currentHealth;
     private bool isDead;
 
+    public float CurrentHealth => currentHealth;
+    public float MaxHealth => maxHealth;
+    public bool IsDead => isDead;
+
     public event Action<DamageInfo> OnDamaged, OnDeath;
 
-
-    void Awake()
+    private void Awake()
     {
-        maxHealth = Mathf.Max(0f, maxHealth);
+        maxHealth = Mathf.Max(1f, maxHealth);
         currentHealth = maxHealth;
         isDead = false;
     }
@@ -42,15 +45,5 @@ public class Health : MonoBehaviour, IDamageable
             return;
         isDead = true;
         OnDeath?.Invoke(damageInfo);
-    }
-
-    public float GetCurrentHealth()
-    {
-        return currentHealth;
-    }
-
-    public bool IsDead()
-    {
-        return isDead;
     }
 }

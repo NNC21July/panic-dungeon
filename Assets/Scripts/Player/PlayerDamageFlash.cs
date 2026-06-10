@@ -10,8 +10,9 @@ public class PlayerDamageFlash : MonoBehaviour
     [SerializeField] private Color flashColor;
     [SerializeField] private float flashDuration;
     private Color originalColor;
+    private Coroutine flashCoroutine;
 
-    void Awake()
+    private void Awake()
     {
         health = GetComponent<Health>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -25,13 +26,20 @@ public class PlayerDamageFlash : MonoBehaviour
 
     private void OnDisable()
     {
+        if (flashCoroutine != null)
+        {
+            StopCoroutine(flashCoroutine);
+            flashCoroutine = null;
+        }
+        spriteRenderer.color = originalColor;
         health.OnDamaged -= HandleDamaged;
     }
 
     private void HandleDamaged(DamageInfo damageInfo)
     {
-        StopAllCoroutines();
-        StartCoroutine(Flash());
+        if (flashCoroutine != null)
+            StopCoroutine(flashCoroutine);
+        flashCoroutine = StartCoroutine(Flash());
     }
 
     IEnumerator Flash()
@@ -48,5 +56,6 @@ public class PlayerDamageFlash : MonoBehaviour
             yield return null;
         }
         spriteRenderer.color = originalColor;
+        flashCoroutine = null;
     }
 }
