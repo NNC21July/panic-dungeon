@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class InputTest : MonoBehaviour
 {
     [SerializeField] private Health damageTarget;
+    [SerializeField] private TrapController trapController;
     [SerializeField] private float debugDamage = 25f;
 
     private void Update()
@@ -16,7 +17,10 @@ public class InputTest : MonoBehaviour
             DamageTarget();
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
-            ActivateAllSpikes();
+            trapController.StartTraps();
+
+        if (Keyboard.current.qKey.wasPressedThisFrame)
+            trapController.StopTraps();
     }
 
     private void DamageTarget()
@@ -29,14 +33,6 @@ public class InputTest : MonoBehaviour
         damageTarget.TakeDamage(damage);
 
         Debug.Log(damageTarget.CurrentHealth);
-    }
-
-    private void ActivateAllSpikes()
-    {
-        Spike[] spikes = FindObjectsByType<Spike>();
-
-        foreach (Spike spike in spikes)
-            spike.Activate();
     }
 }
 #endif

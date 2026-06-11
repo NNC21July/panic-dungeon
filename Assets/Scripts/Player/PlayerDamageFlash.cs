@@ -42,7 +42,7 @@ public class PlayerDamageFlash : MonoBehaviour
         flashCoroutine = StartCoroutine(Flash());
     }
 
-    IEnumerator Flash()
+    private IEnumerator Flash()
     {
         float flashTimer = flashDuration;
         while (flashTimer > 0f)

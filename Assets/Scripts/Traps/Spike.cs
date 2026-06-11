@@ -15,18 +15,19 @@ public class Spike : MonoBehaviour
     [SerializeField] private Color warningFlashColor;
     private Color originalColor;
     private Coroutine warningCoroutine, moveCoroutine, activationCoroutine;
-    private bool isAttacking = false, isConfigured = false;
+    private bool isAttacking = false, isConfigured = false, isActivated = false;
+    public bool IsActivated => isActivated;
     private PolygonCollider2D spikeCollider;
     private Rigidbody2D rb;
     [SerializeField] private Vector2 originPos, targetPos;
-    private HashSet<EntityId> damagedTargetIDs;
+    private HashSet<IDamageable> damagedTargets;
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         spikeCollider = GetComponent<PolygonCollider2D>();
         rb = GetComponent<Rigidbody2D>();
-        damagedTargetIDs = new HashSet<EntityId>();
+        damagedTargets = new HashSet<IDamageable>();
         originalColor = spriteRenderer.color;
         SetDamageActive(false);
     }
@@ -38,15 +39,21 @@ public class Spike : MonoBehaviour
         isConfigured = true;
     }
 
-    public void Activate()
+    public bool TryActivate(float newWarningDuration)
     {
         if (!isConfigured)
             throw new InvalidOperationException("Spike must be configured before activation");
 
+        if (isActivated)
+            return false;
+
         if (activationCoroutine != null)
             StopCoroutine(activationCoroutine);
-        Idle();
+
+        warningDuration = Mathf.Max(0.01f, newWarningDuration);
+        isActivated = true;
         activationCoroutine = StartCoroutine(ActivationCycle());
+        return true;
     }
 
     private void Idle()
@@ -64,7 +71,7 @@ public class Spike : MonoBehaviour
         SetDamageActive(false);
         rb.MovePosition(originPos);
         spriteRenderer.color = originalColor;
-        damagedTargetIDs.Clear();
+        damagedTargets.Clear();
     }
 
     private void Warning()
@@ -76,7 +83,7 @@ public class Spike : MonoBehaviour
         warningCoroutine = StartCoroutine(WarningFlash());
     }
 
-    IEnumerator WarningFlash()
+    private IEnumerator WarningFlash()
     {
         float timer = 0f;
         while (timer < warningDuration)
@@ -121,15 +128,11 @@ public class Spike : MonoBehaviour
         if (damageable == null)
             return;
 
-        EntityId otherID = other.GetComponentInParent<EntityId>();
-        if (otherID == null)
+        if (damagedTargets.Contains(damageable))
             return;
-        if (damagedTargetIDs.Contains(otherID))
-            return;
-
 
         damageable.TakeDamage(new DamageInfo(damageAmount, gameObject, DamageType.Spike));
-        damagedTargetIDs.Add(otherID);
+        damagedTargets.Add(damageable);
     }
 
     private void Retract()
@@ -147,7 +150,7 @@ public class Spike : MonoBehaviour
         isAttacking = active;
     }
 
-    IEnumerator Move(Vector2 origin, Vector2 target, float duration)
+    private IEnumerator Move(Vector2 origin, Vector2 target, float duration)
     {
         float timer = 0f;
         while (timer < duration)
@@ -163,7 +166,7 @@ public class Spike : MonoBehaviour
         moveCoroutine = null;
     }
 
-    IEnumerator ActivationCycle()
+    private IEnumerator ActivationCycle()
     {
         Idle();
         Warning();
@@ -176,5 +179,6 @@ public class Spike : MonoBehaviour
         yield return new WaitUntil(() => moveCoroutine == null);
         Idle();
         activationCoroutine = null;
+        isActivated = false;
     }
 }
