@@ -5,9 +5,14 @@ using UnityEngine;
 public class RoomSetup : MonoBehaviour
 {
     [SerializeField] private Spike spikePrefab;
+    [SerializeField] private ArrowShooter arrowShooterPrefab;
     private List<Spike> topSpikes, bottomSpikes;
+    private List<ArrowShooter> leftArrowShooters, rightArrowShooters;
+    private float arrowShooterOffset = -1f;
     public IReadOnlyList<Spike> TopSpikes => topSpikes;
     public IReadOnlyList<Spike> BottomSpikes => bottomSpikes;
+    public IReadOnlyList<ArrowShooter> LeftArrowShooters => leftArrowShooters;
+    public IReadOnlyList<ArrowShooter> RightArrowShooters => rightArrowShooters;
     public int roomWidth = 14, roomHeight = 8;
 
     private void Awake()
@@ -16,6 +21,7 @@ public class RoomSetup : MonoBehaviour
         float topY = roomHeight / 2f + 2f / 3f, bottomY = -topY;
         topSpikes = SpawnSpikeRow("SpikeTop_", topY, 180f);
         bottomSpikes = SpawnSpikeRow("SpikeBottom_", bottomY, 0f);
+        SpawnAlternatingArrowShooters();
     }
 
     private List<Spike> SpawnSpikeRow(string name, float yPos, float rotAngle)
@@ -33,5 +39,31 @@ public class RoomSetup : MonoBehaviour
             row.Add(obj);
         }
         return row;
+    }
+
+    private void SpawnAlternatingArrowShooters()
+    {
+        if (arrowShooterPrefab == null)
+            throw new ArgumentNullException("Arrow shooter prefab must be assigned in inspector");
+
+        leftArrowShooters = new List<ArrowShooter>();
+        rightArrowShooters = new List<ArrowShooter>();
+
+        for (int i = 0; i < roomHeight; i++)
+        {
+            bool left = i % 2 == 0;
+
+            float xPos = (left ? -1 : 1) * (roomWidth / 2f + arrowShooterOffset);
+            float yPos = i - roomHeight / 2f + 0.5f;
+            Vector2 direction = left ? Vector2.right : Vector2.left;
+
+            ArrowShooter shooter = Instantiate(arrowShooterPrefab, new Vector2(xPos, yPos), Quaternion.identity);
+            shooter.Configure(direction);
+
+            if (left)
+                leftArrowShooters.Add(shooter);
+            else
+                rightArrowShooters.Add(shooter);
+        }
     }
 }

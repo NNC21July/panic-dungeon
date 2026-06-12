@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(PolygonCollider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class Spike : MonoBehaviour
+public class Spike : MonoBehaviour, ITrap
 {
     private static readonly WaitForFixedUpdate FixedUpdateWait = new WaitForFixedUpdate();
     private SpriteRenderer spriteRenderer;
@@ -15,8 +15,8 @@ public class Spike : MonoBehaviour
     [SerializeField] private Color warningFlashColor;
     private Color originalColor;
     private Coroutine warningCoroutine, moveCoroutine, activationCoroutine;
-    private bool isAttacking = false, isConfigured = false, isActivated = false;
-    public bool IsActivated => isActivated;
+    private bool isAttacking = false, isConfigured = false, isActive = false;
+    public bool IsActive => isActive;
     private PolygonCollider2D spikeCollider;
     private Rigidbody2D rb;
     [SerializeField] private Vector2 originPos, targetPos;
@@ -39,19 +39,19 @@ public class Spike : MonoBehaviour
         isConfigured = true;
     }
 
-    public bool TryActivate(float newWarningDuration)
+    public bool Activate(float newWarningDuration)
     {
         if (!isConfigured)
             throw new InvalidOperationException("Spike must be configured before activation");
 
-        if (isActivated)
+        if (isActive)
             return false;
 
         if (activationCoroutine != null)
             StopCoroutine(activationCoroutine);
 
         warningDuration = Mathf.Max(0.01f, newWarningDuration);
-        isActivated = true;
+        isActive = true;
         activationCoroutine = StartCoroutine(ActivationCycle());
         return true;
     }
@@ -179,6 +179,6 @@ public class Spike : MonoBehaviour
         yield return new WaitUntil(() => moveCoroutine == null);
         Idle();
         activationCoroutine = null;
-        isActivated = false;
+        isActive = false;
     }
 }

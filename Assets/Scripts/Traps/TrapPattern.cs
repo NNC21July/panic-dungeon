@@ -2,27 +2,27 @@ using System.Collections.Generic;
 
 public class TrapPattern
 {
-    private readonly IReadOnlyList<Spike> spikes;
+    private readonly IReadOnlyList<ITrap> traps;
 
-    public TrapPattern(IReadOnlyList<Spike> spikes)
+    public TrapPattern(IReadOnlyList<ITrap> traps)
     {
-        this.spikes = spikes;
+        this.traps = traps;
     }
 
     public bool IsActive
     {
         get
         {
-            foreach (Spike spike in spikes)
-                if (spike.IsActivated)
+            foreach (ITrap trap in traps)
+                if (trap.IsActive)
                     return true;
             return false;
         }
     }
 
-    public void TryActivate(float warningDuration)
+    public void Activate(float warningDuration)
     {
-        foreach (Spike spike in spikes)
-            spike.TryActivate(warningDuration);
+        foreach (ITrap trap in traps)
+            trap.Activate(warningDuration);
     }
 }

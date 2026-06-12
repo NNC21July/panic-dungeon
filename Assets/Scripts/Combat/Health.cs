@@ -20,15 +20,16 @@ public class Health : MonoBehaviour, IDamageable
         isDead = false;
     }
 
-    public void TakeDamage(DamageInfo damageInfo)
+    public bool TakeDamage(DamageInfo damageInfo)
     {
         if (isDead || damageInfo.Amount <= 0f)
-            return;
+            return false;
         currentHealth = Mathf.Max(currentHealth - damageInfo.Amount, 0f);
         OnDamaged?.Invoke(damageInfo);
 
         if (currentHealth <= 0f)
             Die(damageInfo);
+        return true;
     }
 
     public void Heal(float amount)

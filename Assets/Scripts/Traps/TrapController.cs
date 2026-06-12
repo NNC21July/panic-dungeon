@@ -86,7 +86,7 @@ public class TrapController : MonoBehaviour
             if (selectedPattern == null)
                 yield break;
 
-            selectedPattern.TryActivate(difficultyScaler.CurWarningDuration);
+            selectedPattern.Activate(difficultyScaler.CurWarningDuration);
 
             yield return new WaitUntil(() => !selectedPattern.IsActive);
             yield return new WaitForSeconds(difficultyScaler.CurSpikeInterval);
