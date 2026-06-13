@@ -106,7 +106,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArrowShooter
   arrowPrefab: {fileID: 7110287058057001547, guid: 33c93ca49ac38794dac6dda9cb86ebe1, type: 3}
-  fireDirection: {x: 1, y: 0}
+  poisonArrowPrefab: {fileID: 8133907235440390880, guid: 40a5e4d490187ba4eb5f99815976de18, type: 3}
+  poisonArrowProb: 0.2
   warningDuration: 1.5
   warningFlashDuration: 0.75
   warningFlashColor: {r: 1, g: 0, b: 0, a: 0}

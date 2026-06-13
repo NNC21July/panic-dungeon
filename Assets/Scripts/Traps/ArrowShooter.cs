@@ -6,6 +6,8 @@ using UnityEngine;
 public class ArrowShooter : MonoBehaviour, ITrap
 {
     [SerializeField] private Arrow arrowPrefab;
+    [SerializeField] private PoisonArrow poisonArrowPrefab;
+    [SerializeField, Range(0f, 1f)] private float poisonArrowChance = 0.2f;
     [SerializeField, Min(0.01f)] private float warningDuration = 0.6f, warningFlashDuration = 0.5f;
     [SerializeField] private Color warningFlashColor;
     [SerializeField] private SpriteRenderer warningLine;
@@ -41,10 +43,13 @@ public class ArrowShooter : MonoBehaviour, ITrap
     public bool Activate(float newWarningDuration)
     {
         if (arrowPrefab == null)
-            throw new ArgumentNullException("Arrow prefab must be assigned in the inspector");
+            throw new ArgumentNullException(nameof(arrowPrefab));
+
+        if (poisonArrowPrefab == null)
+            throw new ArgumentNullException(nameof(poisonArrowPrefab));
 
         if (fireDirection == Vector2.zero)
-            throw new ArgumentException("Arrow shooter direction cannot be zero");
+            throw new ArgumentException(nameof(fireDirection));
 
         if (isActive)
             return false;
@@ -68,9 +73,16 @@ public class ArrowShooter : MonoBehaviour, ITrap
 
     private void Fire()
     {
-        Arrow arrowInstance = Instantiate(arrowPrefab, transform.position, Quaternion.identity);
+        Arrow arrowInstance = Instantiate(SelectArrow(), transform.position, Quaternion.identity);
 
-        arrowInstance.Initialize(fireDirection);
+        arrowInstance.Initialize(fireDirection, gameObject);
+    }
+
+    private Arrow SelectArrow()
+    {
+        if (UnityEngine.Random.value < poisonArrowChance)
+            return poisonArrowPrefab;
+        return arrowPrefab;
     }
 
     private IEnumerator WarningFlash()

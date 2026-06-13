@@ -9,6 +9,8 @@ public class Arrow : MonoBehaviour
     private Vector2 travelDirection;
     private float remLifetime;
     private bool isInit = false, hasHit = false;
+    private GameObject shooter;
+    protected GameObject Shooter => shooter;
 
     private void Awake()
     {
@@ -36,14 +38,17 @@ public class Arrow : MonoBehaviour
         rb.MovePosition(rb.position + travelDirection * speed * Time.fixedDeltaTime);
     }
 
-    public void Initialize(Vector2 direction)
+    public void Initialize(Vector2 direction, GameObject shooter)
     {
         if (direction == Vector2.zero)
             throw new ArgumentException("Arrow direction cannot be zero");
+        if (shooter == null)
+            throw new ArgumentNullException("Shooter game object cannot be null");
         travelDirection = direction.normalized;
         remLifetime = lifetime;
         float angle = Mathf.Atan2(travelDirection.y, travelDirection.x) * Mathf.Rad2Deg;
         rb.SetRotation(angle);
+        this.shooter = shooter;
         isInit = true;
     }
 
@@ -63,11 +68,16 @@ public class Arrow : MonoBehaviour
         if (damageable == null)
             return;
 
-        bool damaged = damageable.TakeDamage(new DamageInfo(damageAmount, gameObject, DamageType.Arrow));
+        bool damaged = damageable.TakeDamage(new DamageInfo(damageAmount, shooter, DamageType.Arrow));
         if (damaged)
         {
+            OnSuccessfulHit(other);
             hasHit = true;
             Destroy(gameObject);
         }
+    }
+
+    protected virtual void OnSuccessfulHit(Collider2D other)
+    {
     }
 }

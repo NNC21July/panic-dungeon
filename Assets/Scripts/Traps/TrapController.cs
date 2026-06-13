@@ -9,7 +9,7 @@ public class TrapController : MonoBehaviour
     private bool roundActive = false;
     private Coroutine trapCoroutine, diffScaleCoroutine;
     private DifficultyScaler difficultyScaler;
-    private TrapPattern topSpikes, bottomSpikes;
+    private TrapPattern topSpikes, bottomSpikes, leftArrows, rightArrows;
     private List<TrapPattern> patterns;
     private int prevPatternIdx = -1;
 
@@ -28,7 +28,9 @@ public class TrapController : MonoBehaviour
     {
         topSpikes = new TrapPattern(roomSetup.TopSpikes);
         bottomSpikes = new TrapPattern(roomSetup.BottomSpikes);
-        patterns = new List<TrapPattern> { topSpikes, bottomSpikes };
+        leftArrows = new TrapPattern(roomSetup.LeftArrowShooters);
+        rightArrows = new TrapPattern(roomSetup.RightArrowShooters);
+        patterns = new List<TrapPattern> { topSpikes, bottomSpikes, leftArrows, rightArrows };
     }
 
     public void StartTraps()

@@ -4,10 +4,8 @@ using UnityEngine.InputSystem;
 
 public class InputTest : MonoBehaviour
 {
-    [SerializeField] private RoomSetup roomSetup;
     [SerializeField] private Health damageTarget;
     [SerializeField] private TrapController trapController;
-    // [SerializeField] private ArrowShooter arrowShooter;
     [SerializeField] private float debugDamage = 25f;
 
     private void Update()
@@ -23,9 +21,6 @@ public class InputTest : MonoBehaviour
 
         if (Keyboard.current.qKey.wasPressedThisFrame)
             trapController.StopTraps();
-
-        if (Keyboard.current.rKey.wasPressedThisFrame)
-            roomSetup.RightArrowShooters[1].Activate(0.6f);
     }
 
     private void DamageTarget()
