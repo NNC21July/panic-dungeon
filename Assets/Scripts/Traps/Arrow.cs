@@ -77,7 +77,5 @@ public class Arrow : MonoBehaviour
         }
     }
 
-    protected virtual void OnSuccessfulHit(Collider2D other)
-    {
-    }
+    protected virtual void OnSuccessfulHit(Collider2D other) { }
 }

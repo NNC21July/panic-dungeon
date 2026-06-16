@@ -40,6 +40,12 @@ public class Health : MonoBehaviour, IDamageable
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
     }
 
+    public void ResetHealth()
+    {
+        isDead = false;
+        currentHealth = maxHealth;
+    }
+
     private void Die(DamageInfo damageInfo)
     {
         if (isDead)

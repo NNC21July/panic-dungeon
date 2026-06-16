@@ -30,7 +30,12 @@ public class StatusEffectController : MonoBehaviour
         activeEffects[effectType] = StartCoroutine(TickEffect(effect));
     }
 
-    public void StopAllEffects(DamageInfo damageInfo)
+    private void StopAllEffects(DamageInfo damageInfo)
+    {
+        StopAllEffects();
+    }
+
+    public void StopAllEffects()
     {
         StopAllCoroutines();
         activeEffects.Clear();

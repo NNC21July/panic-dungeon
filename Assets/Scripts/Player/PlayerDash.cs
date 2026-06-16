@@ -84,6 +84,16 @@ public class PlayerDash : MonoBehaviour
         enabled = false;
     }
 
+    public void ResetDash()
+    {
+        canDash = true;
+        isDashing = false;
+        dashTimer = 0f;
+        cooldownTimer = 0f;
+        rb.linearVelocity = Vector2.zero;
+        enabled = true;
+    }
+
     private void OnDestroy()
     {
         if (health != null)

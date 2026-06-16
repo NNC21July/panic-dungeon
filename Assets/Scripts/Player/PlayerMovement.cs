@@ -46,6 +46,13 @@ public class PlayerMovement : MonoBehaviour
         enabled = false;
     }
 
+    public void ResetMovement()
+    {
+        rb.linearVelocity = Vector2.zero;
+        enabled = true;
+        moveInput = new Vector2(0, 0);
+    }
+
     private void OnDestroy()
     {
         if (health != null)

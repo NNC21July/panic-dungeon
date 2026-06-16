@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 66808811368973026}
   - component: {fileID: 3389776890447986661}
   - component: {fileID: 2191763142315943645}
+  - component: {fileID: 3430335798607547810}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -293,6 +294,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c011ec1ba42e7f54db11cc9b3dbbcfb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatusEffectController
+--- !u!114 &3430335798607547810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2617ec20724d51419394cdecc00bba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerReset
 --- !u!1001 &5507572685594135125
 PrefabInstance:
   m_ObjectHideFlags: 0

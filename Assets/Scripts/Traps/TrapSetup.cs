@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RoomSetup : MonoBehaviour
+public class TrapSetup : MonoBehaviour
 {
     [SerializeField] private Spike spikePrefab;
     [SerializeField] private ArrowShooter arrowShooterPrefab;

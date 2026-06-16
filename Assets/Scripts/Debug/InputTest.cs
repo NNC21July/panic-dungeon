@@ -5,7 +5,8 @@ using UnityEngine.InputSystem;
 public class InputTest : MonoBehaviour
 {
     [SerializeField] private Health damageTarget;
-    [SerializeField] private TrapController trapController;
+    [SerializeField] private RoundManager roundManager;
+    [SerializeField] private PlayerReset playerReset;
     [SerializeField] private float debugDamage = 25f;
 
     private void Update()
@@ -17,10 +18,10 @@ public class InputTest : MonoBehaviour
             DamageTarget();
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
-            trapController.StartTraps();
+            roundManager.Begin();
 
-        if (Keyboard.current.qKey.wasPressedThisFrame)
-            trapController.StopTraps();
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+            playerReset.ResetAt(new Vector2(0, 0));
     }
 
     private void DamageTarget()

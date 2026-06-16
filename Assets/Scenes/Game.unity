@@ -1295,11 +1295,60 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 496a16cf771e3d14ab17c3b0e99542d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputTest
-  roomSetup: {fileID: 1581613497}
   damageTarget: {fileID: 1842462764}
-  trapController: {fileID: 1581613496}
-  arrowShooter: {fileID: 7209610349157881659, guid: 2bfd94c6da2f93848b0ae60059dc2d8d, type: 3}
+  roundManager: {fileID: 1320489636}
+  playerReset: {fileID: 1842462775}
   debugDamage: 25
+--- !u!1 &1320489635
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1320489637}
+  - component: {fileID: 1320489636}
+  m_Layer: 0
+  m_Name: RoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1320489636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1320489635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95d5c3a7c7a4cf742a8cfcfada54c010, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoundManager
+  trapController: {fileID: 1581613496}
+  playerHealth: {fileID: 1842462764}
+  playerReset: {fileID: 1842462775}
+  countdownDuration: 3
+  roundDuration: 10
+  playerSpawn: {fileID: 1966546291}
+--- !u!4 &1320489637
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1320489635}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.45584, y: 0.27273, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1491672497
 GameObject:
   m_ObjectHideFlags: 0
@@ -2714,7 +2763,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25e6b7e0102a5454a9b9d3adb4ab63e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrapController
-  roomSetup: {fileID: 1581613497}
+  trapSetup: {fileID: 1581613497}
   initSpikeInterval: 3
   initWarningDuration: 3
   minSpikeInterval: 0.5
@@ -2749,6 +2798,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d328ccf8ecafeb147bf3ed331aec0beb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
+--- !u!114 &1842462775 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3430335798607547810, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
+  m_PrefabInstance: {fileID: 3040553813749101448}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2617ec20724d51419394cdecc00bba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerReset
 --- !u!1 &1966546289
 GameObject:
   m_ObjectHideFlags: 0
@@ -2834,7 +2894,7 @@ Transform:
   m_GameObject: {fileID: 1966546289}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.7, y: 0.45, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2923,3 +2983,4 @@ SceneRoots:
   - {fileID: 611259661}
   - {fileID: 1581613495}
   - {fileID: 1209328740}
+  - {fileID: 1320489637}

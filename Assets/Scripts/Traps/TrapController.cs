@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TrapController : MonoBehaviour
 {
-    [SerializeField] private RoomSetup roomSetup;
+    [SerializeField] private TrapSetup trapSetup;
     [SerializeField, Min(0.01f)] private float initSpikeInterval, initWarningDuration, minSpikeInterval, minWarningDuration, spikeIntervalReduction, warningDurationReduction, diffScaleInterval;
     private bool roundActive = false;
     private Coroutine trapCoroutine, diffScaleCoroutine;
@@ -26,10 +26,10 @@ public class TrapController : MonoBehaviour
 
     private void Start()
     {
-        topSpikes = new TrapPattern(roomSetup.TopSpikes);
-        bottomSpikes = new TrapPattern(roomSetup.BottomSpikes);
-        leftArrows = new TrapPattern(roomSetup.LeftArrowShooters);
-        rightArrows = new TrapPattern(roomSetup.RightArrowShooters);
+        topSpikes = new TrapPattern(trapSetup.TopSpikes);
+        bottomSpikes = new TrapPattern(trapSetup.BottomSpikes);
+        leftArrows = new TrapPattern(trapSetup.LeftArrowShooters);
+        rightArrows = new TrapPattern(trapSetup.RightArrowShooters);
         patterns = new List<TrapPattern> { topSpikes, bottomSpikes, leftArrows, rightArrows };
     }
 
