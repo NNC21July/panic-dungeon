@@ -9,6 +9,11 @@ public class InputTest : MonoBehaviour
     [SerializeField] private PlayerReset playerReset;
     [SerializeField] private float debugDamage = 25f;
 
+    private void Awake()
+    {
+        SerializedFieldValidator.Validate(this);
+    }
+
     private void Update()
     {
         if (Keyboard.current == null)
@@ -33,7 +38,7 @@ public class InputTest : MonoBehaviour
 
         damageTarget.TakeDamage(damage);
 
-        Debug.Log(damageTarget.CurrentHealth);
+        Debug.Log(damageTarget.CurHealth);
     }
 }
 #endif

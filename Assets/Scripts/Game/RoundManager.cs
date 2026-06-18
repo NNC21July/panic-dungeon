@@ -23,6 +23,7 @@ public class RoundManager : MonoBehaviour
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
         playerHealth.OnDeath += End;
     }
 

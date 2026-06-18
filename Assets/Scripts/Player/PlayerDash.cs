@@ -22,6 +22,8 @@ public class PlayerDash : MonoBehaviour
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
+
         rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponent<PlayerMovement>();
         health = GetComponent<Health>();
@@ -65,11 +67,8 @@ public class PlayerDash : MonoBehaviour
         dashTimer = dashDuration;
 
         float angle = Mathf.Atan2(-dashDirection.y, -dashDirection.x) * Mathf.Rad2Deg;
-        if (dustEffect != null)
-        {
-            dustEffect.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
-            dustEffect.Play();
-        }
+        dustEffect.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+        dustEffect.Play();
     }
 
     public bool IsDashing()
@@ -96,7 +95,6 @@ public class PlayerDash : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (health != null)
-            health.OnDeath -= HandleDeath;
+        health.OnDeath -= HandleDeath;
     }
 }

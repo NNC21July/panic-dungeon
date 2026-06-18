@@ -15,6 +15,7 @@ public class TrapController : MonoBehaviour
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
         difficultyScaler = new DifficultyScaler(
                                 initSpikeInterval,
                                 initWarningDuration,

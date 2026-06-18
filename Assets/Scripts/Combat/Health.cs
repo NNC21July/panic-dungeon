@@ -4,10 +4,11 @@ using UnityEngine;
 public class Health : MonoBehaviour, IDamageable
 {
     [SerializeField] private float maxHealth = 100f;
-    private float currentHealth;
+    private float curHealth;
     private bool isDead, damageEnabled;
-    public float CurrentHealth => currentHealth;
+    public float CurHealth => curHealth;
     public float MaxHealth => maxHealth;
+    public float CurHealthPercent => curHealth / maxHealth;
     public bool IsDead => isDead;
 
     public event Action<DamageInfo> OnDamaged, OnDeath;
@@ -15,7 +16,7 @@ public class Health : MonoBehaviour, IDamageable
     private void Awake()
     {
         maxHealth = Mathf.Max(1f, maxHealth);
-        currentHealth = maxHealth;
+        curHealth = maxHealth;
         isDead = false;
         damageEnabled = true;
     }
@@ -24,10 +25,10 @@ public class Health : MonoBehaviour, IDamageable
     {
         if (isDead || damageInfo.Amount <= 0f || !damageEnabled)
             return false;
-        currentHealth = Mathf.Max(currentHealth - damageInfo.Amount, 0f);
+        curHealth = Mathf.Max(curHealth - damageInfo.Amount, 0f);
         OnDamaged?.Invoke(damageInfo);
 
-        if (currentHealth <= 0f)
+        if (curHealth <= 0f)
             Die(damageInfo);
         return true;
     }
@@ -37,13 +38,13 @@ public class Health : MonoBehaviour, IDamageable
         if (isDead || amount <= 0f)
             return;
 
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        curHealth = Mathf.Min(curHealth + amount, maxHealth);
     }
 
     public void ResetHealth()
     {
         isDead = false;
-        currentHealth = maxHealth;
+        curHealth = maxHealth;
     }
 
     public void SetDamageEnabled(bool enabled)

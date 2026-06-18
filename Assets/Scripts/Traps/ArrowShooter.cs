@@ -21,12 +21,10 @@ public class ArrowShooter : MonoBehaviour, ITrap
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
+
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalColor = spriteRenderer.color;
-
-        if (warningLine == null)
-            throw new ArgumentNullException("Warning line must be assigned in inspector");
-
         warningLineOriginalColor = warningLine.color;
         warningLine.enabled = false;
     }
@@ -42,12 +40,6 @@ public class ArrowShooter : MonoBehaviour, ITrap
 
     public bool Activate(float newWarningDuration)
     {
-        if (arrowPrefab == null)
-            throw new ArgumentNullException(nameof(arrowPrefab));
-
-        if (poisonArrowPrefab == null)
-            throw new ArgumentNullException(nameof(poisonArrowPrefab));
-
         if (fireDirection == Vector2.zero)
             throw new ArgumentException(nameof(fireDirection));
 

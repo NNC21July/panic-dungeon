@@ -9,14 +9,7 @@ public class RoundUI : MonoBehaviour
 
     private void Awake()
     {
-        if (roundManager == null)
-            throw new ArgumentNullException(nameof(roundManager));
-        if (countdown == null)
-            throw new ArgumentNullException(nameof(countdown));
-        if (timer == null)
-            throw new ArgumentNullException(nameof(timer));
-        if (result == null)
-            throw new ArgumentNullException(nameof(result));
+        SerializedFieldValidator.Validate(this);
     }
 
     private void Update()

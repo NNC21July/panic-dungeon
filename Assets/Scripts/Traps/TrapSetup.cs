@@ -17,6 +17,7 @@ public class TrapSetup : MonoBehaviour
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
         // placing spikes along top and bottom
         float topY = roomHeight / 2f + 2f / 3f, bottomY = -topY;
         topSpikes = SpawnSpikeRow("SpikeTop_", topY, 180f);
@@ -26,9 +27,6 @@ public class TrapSetup : MonoBehaviour
 
     private List<Spike> SpawnSpikeRow(string name, float yPos, float rotAngle)
     {
-        if (spikePrefab == null)
-            throw new ArgumentNullException("Spike prefab must be assigned in the inspector");
-
         List<Spike> row = new List<Spike>();
         for (int i = 0; i < roomWidth; i++)
         {
@@ -43,9 +41,6 @@ public class TrapSetup : MonoBehaviour
 
     private void SpawnAlternatingArrowShooters()
     {
-        if (arrowShooterPrefab == null)
-            throw new ArgumentNullException("Arrow shooter prefab must be assigned in inspector");
-
         leftArrowShooters = new List<ArrowShooter>();
         rightArrowShooters = new List<ArrowShooter>();
 
