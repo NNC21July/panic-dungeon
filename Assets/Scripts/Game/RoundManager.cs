@@ -47,6 +47,7 @@ public class RoundManager : MonoBehaviour
         playerReset.ResetAt(playerSpawn.position);
         curState = RoundState.Countdown;
         countdownTimer = countdownDuration;
+        playerHealth.SetDamageEnabled(false);
     }
 
     private void Play()
@@ -54,24 +55,27 @@ public class RoundManager : MonoBehaviour
         curState = RoundState.Playing;
         roundTimer = roundDuration;
         trapController.StartTraps();
+        playerHealth.SetDamageEnabled(true);
     }
 
     private void End(DamageInfo damageInfo) // end by player death
     {
-        if (curState != RoundState.Playing)
-            return;
-        curState = RoundState.RoundOver;
-        trapController.StopTraps();
-        Debug.Log("Player dead");
+        EndRound("Player dead");
     }
 
     private void End() // end by round timer finish
+    {
+        EndRound("Player won");
+    }
+
+    private void EndRound(string message)
     {
         if (curState != RoundState.Playing)
             return;
         curState = RoundState.RoundOver;
         trapController.StopTraps();
-        Debug.Log("Player won");
+        playerHealth.SetDamageEnabled(false);
+        Debug.Log(message);
     }
 
     private void OnDestroy()

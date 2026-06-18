@@ -108,6 +108,7 @@ public class ArrowShooter : MonoBehaviour, ITrap
         spriteRenderer.color = originalColor;
         warningLine.color = warningLineOriginalColor;
         warningCoroutine = null;
+        warningLine.enabled = false;
     }
 
     private IEnumerator ActivationCycle()

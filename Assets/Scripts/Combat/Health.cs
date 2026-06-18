@@ -5,8 +5,7 @@ public class Health : MonoBehaviour, IDamageable
 {
     [SerializeField] private float maxHealth = 100f;
     private float currentHealth;
-    private bool isDead;
-
+    private bool isDead, damageEnabled;
     public float CurrentHealth => currentHealth;
     public float MaxHealth => maxHealth;
     public bool IsDead => isDead;
@@ -18,11 +17,12 @@ public class Health : MonoBehaviour, IDamageable
         maxHealth = Mathf.Max(1f, maxHealth);
         currentHealth = maxHealth;
         isDead = false;
+        damageEnabled = true;
     }
 
     public bool TakeDamage(DamageInfo damageInfo)
     {
-        if (isDead || damageInfo.Amount <= 0f)
+        if (isDead || damageInfo.Amount <= 0f || !damageEnabled)
             return false;
         currentHealth = Mathf.Max(currentHealth - damageInfo.Amount, 0f);
         OnDamaged?.Invoke(damageInfo);
@@ -44,6 +44,11 @@ public class Health : MonoBehaviour, IDamageable
     {
         isDead = false;
         currentHealth = maxHealth;
+    }
+
+    public void SetDamageEnabled(bool enabled)
+    {
+        damageEnabled = enabled;
     }
 
     private void Die(DamageInfo damageInfo)
