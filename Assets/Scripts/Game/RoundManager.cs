@@ -15,6 +15,11 @@ public class RoundManager : MonoBehaviour
     [SerializeField] private Transform playerSpawn;
     private RoundState curState;
     private float countdownTimer, roundTimer;
+    private string roundResult = "";
+    public RoundState CurState => curState;
+    public float CountdownTimer => countdownTimer;
+    public float RoundTimer => roundTimer;
+    public string RoundResult => roundResult;
 
     private void Awake()
     {
@@ -25,8 +30,6 @@ public class RoundManager : MonoBehaviour
     {
         if (curState == RoundState.Countdown)
         {
-            if (countdownTimer - Time.deltaTime < (int)countdownTimer && countdownTimer >= (int)countdownTimer)
-                Debug.Log((int)countdownTimer); // prints countdown in whole number
             countdownTimer -= Time.deltaTime;
 
             if (countdownTimer <= 0f)
@@ -48,6 +51,7 @@ public class RoundManager : MonoBehaviour
         curState = RoundState.Countdown;
         countdownTimer = countdownDuration;
         playerHealth.SetDamageEnabled(false);
+        roundResult = "";
     }
 
     private void Play()
@@ -60,22 +64,23 @@ public class RoundManager : MonoBehaviour
 
     private void End(DamageInfo damageInfo) // end by player death
     {
-        EndRound("Player dead");
+        roundResult = "Player dead";
+        EndRound();
     }
 
     private void End() // end by round timer finish
     {
-        EndRound("Player won");
+        roundResult = "Player won";
+        EndRound();
     }
 
-    private void EndRound(string message)
+    private void EndRound()
     {
         if (curState != RoundState.Playing)
             return;
         curState = RoundState.RoundOver;
         trapController.StopTraps();
         playerHealth.SetDamageEnabled(false);
-        Debug.Log(message);
     }
 
     private void OnDestroy()
