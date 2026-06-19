@@ -1831,8 +1831,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278254335
+  m_fontColor: {r: 1, g: 0.97981787, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3691,8 +3691,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoomSetup
   spikePrefab: {fileID: 2753618772539717533, guid: cde598dbeef7ec64d8b661602c3eaac2, type: 3}
   arrowShooterPrefab: {fileID: 7209610349157881659, guid: 2bfd94c6da2f93848b0ae60059dc2d8d, type: 3}
+  obstaclePrefab: {fileID: 6876958178202619608, guid: 42b940da8cce26446877a43eb0038437, type: 3}
   roomWidth: 14
   roomHeight: 8
+  minObstacleCount: 6
+  maxObstacleCount: 9
 --- !u!114 &1842462764 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3389776890447986661, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
@@ -3823,7 +3826,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1969046487
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4068,15 +4071,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5292887536989782713, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 5292887536989782713, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 5292887536989782713, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 5292887536989782713, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
       propertyPath: m_LocalPosition.x

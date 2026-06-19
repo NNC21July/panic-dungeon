@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,23 +5,30 @@ public class TrapSetup : MonoBehaviour
 {
     [SerializeField] private Spike spikePrefab;
     [SerializeField] private ArrowShooter arrowShooterPrefab;
+    [SerializeField] private GameObject obstaclePrefab;
+    [SerializeField] private int roomWidth = 14, roomHeight = 8, minObstacleCount = 4, maxObstacleCount = 7;
     private List<Spike> topSpikes, bottomSpikes;
     private List<ArrowShooter> leftArrowShooters, rightArrowShooters;
     private float arrowShooterOffset = -1f;
+    private int obstacleCount;
+    private List<Vector2> validObstaclePos;
     public IReadOnlyList<Spike> TopSpikes => topSpikes;
     public IReadOnlyList<Spike> BottomSpikes => bottomSpikes;
     public IReadOnlyList<ArrowShooter> LeftArrowShooters => leftArrowShooters;
     public IReadOnlyList<ArrowShooter> RightArrowShooters => rightArrowShooters;
-    public int roomWidth = 14, roomHeight = 8;
 
     private void Awake()
     {
         SerializedFieldValidator.Validate(this);
+
         // placing spikes along top and bottom
         float topY = roomHeight / 2f + 2f / 3f, bottomY = -topY;
         topSpikes = SpawnSpikeRow("SpikeTop_", topY, 180f);
         bottomSpikes = SpawnSpikeRow("SpikeBottom_", bottomY, 0f);
+
         SpawnAlternatingArrowShooters();
+
+        SpawnObstacles();
     }
 
     private List<Spike> SpawnSpikeRow(string name, float yPos, float rotAngle)
@@ -60,5 +66,29 @@ public class TrapSetup : MonoBehaviour
             else
                 rightArrowShooters.Add(shooter);
         }
+    }
+
+    private void SpawnObstacles()
+    {
+        validObstaclePos = new List<Vector2>();
+        for (int i = 0; i < roomWidth / 2f - 2; i++)
+        {
+            for (int j = 0; j < roomHeight / 2f - 2; j++)
+            {
+                float x = i + 0.5f, y = j + 0.5f;
+                validObstaclePos.Add(new Vector2(x, y));
+                validObstaclePos.Add(new Vector2(-x, y));
+                validObstaclePos.Add(new Vector2(x, -y));
+                validObstaclePos.Add(new Vector2(-x, -y));
+            }
+        }
+        obstacleCount = Random.Range(minObstacleCount, maxObstacleCount + 1);
+        for (int i = 0; i < validObstaclePos.Count; i++)
+        {
+            int idx = Random.Range(i, validObstaclePos.Count);
+            (validObstaclePos[i], validObstaclePos[idx]) = (validObstaclePos[idx], validObstaclePos[i]);
+        } // shuffle valid positions
+        for (int i = 0; i < obstacleCount; i++)
+            Instantiate(obstaclePrefab, validObstaclePos[i], Quaternion.identity);
     }
 }

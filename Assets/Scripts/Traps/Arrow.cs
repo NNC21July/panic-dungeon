@@ -57,7 +57,7 @@ public class Arrow : MonoBehaviour
         if (hasHit)
             return;
 
-        if (other.gameObject.layer == LayerMask.NameToLayer("Wall"))
+        if (other.gameObject.layer == LayerMask.NameToLayer("Wall") || other.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
         {
             hasHit = true;
             Destroy(gameObject);

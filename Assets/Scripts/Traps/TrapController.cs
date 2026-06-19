@@ -9,8 +9,10 @@ public class TrapController : MonoBehaviour
     private bool roundActive = false;
     private Coroutine trapCoroutine, diffScaleCoroutine;
     private DifficultyScaler difficultyScaler;
-    private TrapPattern topSpikes, bottomSpikes, leftArrows, rightArrows;
-    private List<TrapPattern> patterns;
+    private SpikePattern topSpikes, bottomSpikes;
+    private TrapPattern leftArrows, rightArrows;
+    private ITrapPattern curPattern;
+    private List<ITrapPattern> patterns;
     private int prevPatternIdx = -1;
 
     private void Awake()
@@ -27,17 +29,20 @@ public class TrapController : MonoBehaviour
 
     private void Start()
     {
-        topSpikes = new TrapPattern(trapSetup.TopSpikes);
-        bottomSpikes = new TrapPattern(trapSetup.BottomSpikes);
+        topSpikes = new SpikePattern(trapSetup.TopSpikes);
+        bottomSpikes = new SpikePattern(trapSetup.BottomSpikes);
         leftArrows = new TrapPattern(trapSetup.LeftArrowShooters);
         rightArrows = new TrapPattern(trapSetup.RightArrowShooters);
-        patterns = new List<TrapPattern> { topSpikes, bottomSpikes, leftArrows, rightArrows };
+        patterns = new List<ITrapPattern> { topSpikes, bottomSpikes, leftArrows, rightArrows };
     }
 
     public void StartTraps()
     {
         if (roundActive)
             return;
+
+        topSpikes.Reset();
+        bottomSpikes.Reset();
 
         roundActive = true;
         difficultyScaler.Reset();
@@ -52,6 +57,8 @@ public class TrapController : MonoBehaviour
 
     public void StopTraps()
     {
+        curPattern?.Cancel();
+        curPattern = null;
         roundActive = false;
         if (trapCoroutine != null)
         {
@@ -65,7 +72,7 @@ public class TrapController : MonoBehaviour
         }
     }
 
-    private TrapPattern SelectRandomPattern()
+    private ITrapPattern SelectRandomPattern()
     {
         if (patterns.Count == 0)
             return null;
@@ -85,13 +92,10 @@ public class TrapController : MonoBehaviour
     {
         while (roundActive)
         {
-            TrapPattern selectedPattern = SelectRandomPattern();
-            if (selectedPattern == null)
-                yield break;
+            curPattern = SelectRandomPattern();
+            yield return curPattern.Run(difficultyScaler.CurWarningDuration);
+            curPattern = null;
 
-            selectedPattern.Activate(difficultyScaler.CurWarningDuration);
-
-            yield return new WaitUntil(() => !selectedPattern.IsActive);
             yield return new WaitForSeconds(difficultyScaler.CurSpikeInterval);
         }
         trapCoroutine = null;
