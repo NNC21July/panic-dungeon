@@ -8,6 +8,7 @@ public class StatusEffectController : MonoBehaviour
 {
     private Health health;
     private Dictionary<Type, Coroutine> activeEffects;
+    public event Action<Type> EffectStarted, EffectEnded;
 
     private void Awake()
     {
@@ -28,6 +29,7 @@ public class StatusEffectController : MonoBehaviour
         if (activeEffects.ContainsKey(effectType))
             StopCoroutine(activeEffects[effectType]);
         activeEffects[effectType] = StartCoroutine(TickEffect(effect));
+        EffectStarted?.Invoke(effectType);
     }
 
     private void StopAllEffects(DamageInfo damageInfo)
@@ -38,12 +40,19 @@ public class StatusEffectController : MonoBehaviour
     public void StopAllEffects()
     {
         StopAllCoroutines();
+        foreach (Type effect in activeEffects.Keys)
+            EffectEnded?.Invoke(effect);
         activeEffects.Clear();
     }
 
     private void OnDestroy()
     {
         health.OnDeath -= StopAllEffects;
+    }
+
+    public bool IsEffectActive(Type effectType)
+    {
+        return activeEffects.ContainsKey(effectType);
     }
 
     private IEnumerator TickEffect(StatusEffect effect)
@@ -55,6 +64,8 @@ public class StatusEffectController : MonoBehaviour
             effect.ApplyTick(health);
             timer -= effect.TickInterval;
         }
-        activeEffects.Remove(effect.GetType());
+        Type effectType = effect.GetType();
+        activeEffects.Remove(effectType);
+        EffectEnded?.Invoke(effectType);
     }
 }
