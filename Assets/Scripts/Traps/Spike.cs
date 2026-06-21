@@ -194,6 +194,7 @@ public class Spike : MonoBehaviour, ITrap
         spriteRenderer.color = originalColor;
         warningCoroutine = null;
     }
+
     private IEnumerator RetractWithWave()
     {
         if (isBlocked)
@@ -232,6 +233,7 @@ public class Spike : MonoBehaviour, ITrap
         }
         rb.MovePosition(target);
         moveCoroutine = null;
+        SetDamageActive(false);
     }
 
 }

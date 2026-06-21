@@ -7,14 +7,13 @@ using UnityEngine;
 public class StatusEffectController : MonoBehaviour
 {
     private Health health;
-    private Dictionary<Type, Coroutine> activeEffects;
+    private Dictionary<Type, Coroutine> activeEffects = new Dictionary<Type, Coroutine>();
     public event Action<Type> EffectStarted, EffectEnded;
 
     private void Awake()
     {
         health = GetComponent<Health>();
         health.OnDeath += StopAllEffects;
-        activeEffects = new Dictionary<Type, Coroutine>();
     }
 
     public void Apply(StatusEffect effect)

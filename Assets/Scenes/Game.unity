@@ -3559,7 +3559,7 @@ MonoBehaviour:
   statusEffectController: {fileID: 1842462776}
   poisonStatusTxt: {fileID: 1918644607}
   flashColorDuration: 1
-  flashColor: {r: 0.07271269, g: 0.8113208, b: 0.33377236, a: 1}
+  flashColor: {r: 0.082013145, g: 0.9150943, b: 0.37447768, a: 1}
 --- !u!1 &1562650353
 GameObject:
   m_ObjectHideFlags: 0
