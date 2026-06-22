@@ -179,7 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67c9d8081ea8e0543898ca1d20a6d730, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoisonArrow
-  speed: 10
+  speed: 20
   damageAmount: 20
   lifetime: 3
   duration: 5

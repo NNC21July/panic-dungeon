@@ -116,15 +116,7 @@ public class Spike : MonoBehaviour, ITrap
         {
             if (Mathf.Abs(other.transform.position.x - originPos.x) > laneTolerance) // check if obstacle is same lane with spike
                 return;
-            if (moveCoroutine != null)
-            {
-                StopCoroutine(moveCoroutine);
-                moveCoroutine = null;
-            }
-            SetDamageActive(false);
-            isBlocked = true;
-            blockedAt = rb.position;
-            blockedPathProgress = Mathf.Clamp01(Vector2.Distance(originPos, blockedAt) / Vector2.Distance(originPos, targetPos));
+            StopInPlace();
             return;
         }
 
@@ -137,6 +129,7 @@ public class Spike : MonoBehaviour, ITrap
 
         damageable.TakeDamage(new DamageInfo(damageAmount, gameObject, DamageType.Spike));
         damagedTargets.Add(damageable);
+        StopInPlace();
     }
 
     public void BeginRetractWithWave()
@@ -172,7 +165,9 @@ public class Spike : MonoBehaviour, ITrap
             retractCoroutine = null;
         }
         SetDamageActive(false);
-        spriteRenderer.color = originalColor;
+        isBlocked = true;
+        blockedAt = rb.position;
+        blockedPathProgress = Mathf.Clamp01(Vector2.Distance(originPos, blockedAt) / Vector2.Distance(originPos, targetPos));
     }
 
     private IEnumerator WarningFlash()

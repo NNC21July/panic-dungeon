@@ -6,10 +6,10 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Health))]
 public class PlayerMovement : MonoBehaviour
 {
+    [SerializeField] private float moveSpeed = 5f;
     private Rigidbody2D rb;
     private PlayerDash playerDash;
     private Health health;
-    [SerializeField] private float moveSpeed = 5f;
     private Vector2 moveInput, lastMoveDirection = new Vector2(1, 0);
 
     private void Awake()

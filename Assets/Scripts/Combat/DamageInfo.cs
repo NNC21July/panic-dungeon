@@ -2,7 +2,7 @@ using UnityEngine;
 
 public enum DamageType
 {
-    Normal, Spike, Arrow, Poison, Zombie
+    Normal, Spike, Arrow, Poison, Zombie, Melee
 }
 
 public readonly struct DamageInfo
