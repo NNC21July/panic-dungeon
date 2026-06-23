@@ -7,15 +7,20 @@ public class TrapSetup : MonoBehaviour
     [SerializeField] private ArrowShooter arrowShooterPrefab;
     [SerializeField] private GameObject obstaclePrefab;
     [SerializeField] private int roomWidth = 14, roomHeight = 8, minObstacleCount = 4, maxObstacleCount = 7;
+    public int RoomWidth => roomWidth;
+    public int RoomHeight => roomHeight;
     private List<Spike> topSpikes, bottomSpikes;
     private List<ArrowShooter> leftArrowShooters, rightArrowShooters;
     private float arrowShooterOffset = -1f;
     private int obstacleCount;
     private List<Vector2> validObstaclePos;
+    private HashSet<Vector2> obstaclePosOccupied;
     public IReadOnlyList<Spike> TopSpikes => topSpikes;
     public IReadOnlyList<Spike> BottomSpikes => bottomSpikes;
     public IReadOnlyList<ArrowShooter> LeftArrowShooters => leftArrowShooters;
     public IReadOnlyList<ArrowShooter> RightArrowShooters => rightArrowShooters;
+    public HashSet<Vector2> ObstaclePosOccupied => obstaclePosOccupied;
+
 
     private void Awake()
     {
@@ -71,6 +76,8 @@ public class TrapSetup : MonoBehaviour
     private void SpawnObstacles()
     {
         validObstaclePos = new List<Vector2>();
+        obstaclePosOccupied = new HashSet<Vector2>();
+
         for (int i = 0; i < roomWidth / 2f - 2; i++)
         {
             for (int j = 0; j < roomHeight / 2f - 2; j++)
@@ -82,13 +89,16 @@ public class TrapSetup : MonoBehaviour
                 validObstaclePos.Add(new Vector2(-x, -y));
             }
         }
-        obstacleCount = Random.Range(minObstacleCount, maxObstacleCount + 1);
+        obstacleCount = Mathf.Min(Random.Range(minObstacleCount, maxObstacleCount + 1), validObstaclePos.Count);
         for (int i = 0; i < validObstaclePos.Count; i++)
         {
             int idx = Random.Range(i, validObstaclePos.Count);
             (validObstaclePos[i], validObstaclePos[idx]) = (validObstaclePos[idx], validObstaclePos[i]);
         } // shuffle valid positions
         for (int i = 0; i < obstacleCount; i++)
+        {
             Instantiate(obstaclePrefab, validObstaclePos[i], Quaternion.identity);
+            obstaclePosOccupied.Add(validObstaclePos[i]);
+        }
     }
 }

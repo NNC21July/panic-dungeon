@@ -6,6 +6,7 @@ public class TrapController : MonoBehaviour
 {
     [SerializeField] private TrapSetup trapSetup;
     [SerializeField, Min(0.01f)] private float initSpikeInterval, initWarningDuration, minSpikeInterval, minWarningDuration, spikeIntervalReduction, warningDurationReduction, diffScaleInterval;
+    [SerializeField] private EnemySpawner enemySpawner;
     private bool roundActive = false;
     private Coroutine trapCoroutine, diffScaleCoroutine;
     private DifficultyScaler difficultyScaler;
@@ -53,6 +54,8 @@ public class TrapController : MonoBehaviour
         if (diffScaleCoroutine != null)
             StopCoroutine(diffScaleCoroutine);
         diffScaleCoroutine = StartCoroutine(DiffScale());
+
+        enemySpawner.StartSpawning();
     }
 
     public void StopTraps()
@@ -70,6 +73,7 @@ public class TrapController : MonoBehaviour
             StopCoroutine(diffScaleCoroutine);
             diffScaleCoroutine = null;
         }
+        enemySpawner.StopSpawning();
     }
 
     private ITrapPattern SelectRandomPattern()

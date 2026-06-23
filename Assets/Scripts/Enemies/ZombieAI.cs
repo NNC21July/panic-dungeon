@@ -8,6 +8,8 @@ public class ZombieAI : MonoBehaviour
     private Rigidbody2D rb;
     private Transform target;
     private Health health, targetHealth;
+    private float attackCooldownTimer;
+    private bool canAttack = true;
 
     private void Awake()
     {
@@ -29,12 +31,43 @@ public class ZombieAI : MonoBehaviour
             target = null;
             targetHealth = null;
         }
+        if (!canAttack)
+        {
+            attackCooldownTimer -= Time.deltaTime;
+            if (attackCooldownTimer <= 0f)
+                canAttack = true;
+        }
     }
 
     private void FixedUpdate()
     {
-        if (target != null && !targetHealth.IsDead && ((Vector2)target.position - rb.position).sqrMagnitude > attackRange * attackRange)
-            rb.MovePosition(Vector2.MoveTowards(rb.position, target.position, moveSpeed * Time.fixedDeltaTime));
+        if (target != null && !targetHealth.IsDead)
+        {
+            float sqrDist = ((Vector2)target.position - rb.position).sqrMagnitude;
+            if (sqrDist > attackRange * attackRange)
+                rb.MovePosition(Vector2.MoveTowards(rb.position, target.position, moveSpeed * Time.fixedDeltaTime));
+            else if (canAttack)
+            {
+                rb.linearVelocity = Vector2.zero;
+                Attack();
+            }
+        }
+    }
+
+    private void Attack()
+    {
+        canAttack = false;
+        attackCooldownTimer = attackCooldown;
+        if (targetHealth != null && !targetHealth.IsDead)
+        {
+            targetHealth.TakeDamage(new DamageInfo(attackDamage, gameObject, DamageType.Zombie));
+            if (targetHealth.IsDead)
+            {
+                target = null;
+                targetHealth = null;
+                rb.linearVelocity = Vector2.zero;
+            }
+        }
     }
 
     private void HandleDeath(DamageInfo damageInfo)
