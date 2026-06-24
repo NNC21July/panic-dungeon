@@ -11,7 +11,6 @@ public class TrapSetup : MonoBehaviour
     public int RoomHeight => roomHeight;
     private List<Spike> topSpikes, bottomSpikes;
     private List<ArrowShooter> leftArrowShooters, rightArrowShooters;
-    private float arrowShooterOffset = -1f;
     private int obstacleCount;
     private List<Vector2> validObstaclePos;
     private HashSet<Vector2> obstaclePosOccupied;
@@ -59,7 +58,7 @@ public class TrapSetup : MonoBehaviour
         {
             bool left = i % 2 == 0;
 
-            float xPos = (left ? -1 : 1) * (roomWidth / 2f + arrowShooterOffset);
+            float xPos = (left ? -1 : 1) * (roomWidth / 2f + 0.5f);
             float yPos = i - roomHeight / 2f + 0.5f;
             Vector2 direction = left ? Vector2.right : Vector2.left;
 
