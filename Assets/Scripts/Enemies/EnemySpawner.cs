@@ -6,11 +6,12 @@ public class EnemySpawner : MonoBehaviour
 {
     [SerializeField] private ZombieAI zombiePrefab;
     [SerializeField] private TrapSetup trapSetup;
-    [SerializeField] private float spawnDelay = 10f, spawnInterval = 8f;
+    [SerializeField] private float spawnDelay = 10f;
     [SerializeField] private int maxEnemiesAlive = 4;
     private bool spawning = false;
     private Coroutine spawnCoroutine;
     private List<ZombieAI> activeEnemies;
+    private DifficultyScaler difficultyScaler;
 
     private void Awake()
     {
@@ -18,10 +19,12 @@ public class EnemySpawner : MonoBehaviour
         activeEnemies = new List<ZombieAI>();
     }
 
-    public void StartSpawning()
+    public void StartSpawning(DifficultyScaler difficultyScaler)
     {
         if (spawning)
             return;
+
+        this.difficultyScaler = difficultyScaler;
 
         spawning = true;
         activeEnemies.RemoveAll(enemy => enemy == null || !enemy.gameObject.activeSelf);
@@ -69,7 +72,7 @@ public class EnemySpawner : MonoBehaviour
             if (activeEnemies.Count < maxEnemiesAlive)
                 activeEnemies.Add(Instantiate(zombiePrefab, GetSpawnPos(), Quaternion.identity));
 
-            yield return new WaitForSeconds(spawnInterval);
+            yield return new WaitForSeconds(difficultyScaler.CurEnemySpawnInterval);
         }
         spawnCoroutine = null;
     }

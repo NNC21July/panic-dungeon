@@ -5,7 +5,7 @@ using UnityEngine;
 public class TrapController : MonoBehaviour
 {
     [SerializeField] private TrapSetup trapSetup;
-    [SerializeField, Min(0.01f)] private float initSpikeInterval, initWarningDuration, minSpikeInterval, minWarningDuration, spikeIntervalReduction, warningDurationReduction, diffScaleInterval;
+    [SerializeField, Min(0.01f)] private float initSpikeInterval, initWarningDuration, minSpikeInterval, minWarningDuration, spikeIntervalReduction, warningDurationReduction, diffScaleInterval, initEnemySpawnInterval, minEnemySpawnInterval, enemySpawnIntervalReduction;
     [SerializeField] private EnemySpawner enemySpawner;
     private bool roundActive = false;
     private Coroutine trapCoroutine, diffScaleCoroutine;
@@ -25,7 +25,7 @@ public class TrapController : MonoBehaviour
                                 minSpikeInterval,
                                 minWarningDuration,
                                 spikeIntervalReduction,
-                                warningDurationReduction);
+                                warningDurationReduction, initEnemySpawnInterval, minEnemySpawnInterval, enemySpawnIntervalReduction);
     }
 
     private void Start()
@@ -55,7 +55,7 @@ public class TrapController : MonoBehaviour
             StopCoroutine(diffScaleCoroutine);
         diffScaleCoroutine = StartCoroutine(DiffScale());
 
-        enemySpawner.StartSpawning();
+        enemySpawner.StartSpawning(difficultyScaler);
     }
 
     public void StopTraps()

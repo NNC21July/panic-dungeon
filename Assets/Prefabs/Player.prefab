@@ -14,12 +14,12 @@ GameObject:
   - component: {fileID: 7889853023326318243}
   - component: {fileID: 2567398682644843154}
   - component: {fileID: 6135655485102824214}
-  - component: {fileID: 9217663500870923240}
   - component: {fileID: 66808811368973026}
   - component: {fileID: 3389776890447986661}
   - component: {fileID: 2191763142315943645}
   - component: {fileID: 3430335798607547810}
   - component: {fileID: 3504763636399915632}
+  - component: {fileID: -3141393018627299544}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -195,20 +195,6 @@ MonoBehaviour:
   dashDuration: 0.15
   dashCooldown: 1
   dustEffect: {fileID: 6035401514808129135}
---- !u!114 &9217663500870923240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4898517791944016510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 740b3bee68a68f74495a73ef7f224cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerDamageFlash
-  flashColor: {r: 1, g: 0, b: 0, a: 0}
-  flashDuration: 0.5
 --- !u!114 &66808811368973026
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -341,6 +327,20 @@ MonoBehaviour:
   swingAngle: 120
   swingDuration: 0.2
   attackCooldown: 0.45
+--- !u!114 &-3141393018627299544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 740b3bee68a68f74495a73ef7f224cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageFlash
+  flashColor: {r: 1, g: 0, b: 0, a: 0}
+  flashDuration: 0.5
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0

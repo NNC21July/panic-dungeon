@@ -3,7 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Health))]
 [RequireComponent(typeof(SpriteRenderer))]
-public class PlayerDamageFlash : MonoBehaviour
+public class DamageFlash : MonoBehaviour
 {
     private Health health;
     private SpriteRenderer spriteRenderer;

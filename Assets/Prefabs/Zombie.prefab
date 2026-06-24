@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 121298249716298153}
   - component: {fileID: 6440318328896699177}
   - component: {fileID: 3173654992330719351}
+  - component: {fileID: -2140187071481375636}
   m_Layer: 12
   m_Name: Zombie
   m_TagString: Untagged
@@ -183,7 +184,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2855fe2f177b8542a77a3b2efc4c6ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieAI
-  moveSpeed: 5
+  moveSpeed: 3
   attackRange: 0.85
   attackDamage: 15
   attackCooldown: 1
+--- !u!114 &-2140187071481375636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2594914287615825624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 740b3bee68a68f74495a73ef7f224cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageFlash
+  flashColor: {r: 1, g: 0, b: 0, a: 0}
+  flashDuration: 0.5
