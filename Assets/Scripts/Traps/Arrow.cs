@@ -12,7 +12,7 @@ public class Arrow : MonoBehaviour
     private GameObject shooter;
     protected GameObject Shooter => shooter;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
     }

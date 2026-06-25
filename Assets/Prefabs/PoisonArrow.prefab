@@ -140,6 +140,7 @@ MonoBehaviour:
   duration: 5
   tickInterval: 1
   tickDamage: 4
+  poisonSplash: {fileID: 5673423209690850590, guid: d2781ad881a7ccf43af25818b634bd8d, type: 3}
 --- !u!60 &8606333399085925694
 PolygonCollider2D:
   m_ObjectHideFlags: 0
