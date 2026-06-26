@@ -137,6 +137,7 @@ MonoBehaviour:
   speed: 20
   damageAmount: 20
   lifetime: 3
+  hitSfx: {fileID: 8300000, guid: f3f96a39bc526c649876b72ee632b607, type: 3}
 --- !u!60 &7775503837529056330
 PolygonCollider2D:
   m_ObjectHideFlags: 0

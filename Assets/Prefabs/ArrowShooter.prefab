@@ -109,10 +109,12 @@ MonoBehaviour:
   poisonArrowPrefab: {fileID: 8133907235440390880, guid: 40a5e4d490187ba4eb5f99815976de18, type: 3}
   poisonArrowChance: 0.2
   warningDuration: 1.5
-  warningFlashDuration: 0.75
+  warningFlashDuration: 1
   warningFlashColor: {r: 1, g: 0, b: 0, a: 0}
   warningLine: {fileID: 9157084454565346206}
   warningLineColor: 0.25
+  warningSfx: {fileID: 8300000, guid: 952536754de5f6b469f897be0ed37f0e, type: 3}
+  fireSfx: {fileID: 8300000, guid: 2f6cc9b0b90e6a34dac50f77e08451db, type: 3}
 --- !u!1 &5646928810163002053
 GameObject:
   m_ObjectHideFlags: 0

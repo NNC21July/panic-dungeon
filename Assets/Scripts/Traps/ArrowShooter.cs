@@ -12,12 +12,13 @@ public class ArrowShooter : MonoBehaviour, ITrap
     [SerializeField] private Color warningFlashColor;
     [SerializeField] private SpriteRenderer warningLine;
     [SerializeField, Range(0f, 1f)] private float warningLineColor;
+    [SerializeField] private AudioClip fireSfx;
     private SpriteRenderer spriteRenderer;
     private Color originalColor, warningLineOriginalColor;
     private Vector2 fireDirection;
     private bool isActive = false;
-    public bool IsActive => isActive;
     private Coroutine warningCoroutine, activationCoroutine;
+    public bool IsActive => isActive;
 
     private void Awake()
     {
@@ -68,6 +69,9 @@ public class ArrowShooter : MonoBehaviour, ITrap
         Arrow arrowInstance = Instantiate(SelectArrow(), transform.position, Quaternion.identity);
 
         arrowInstance.Initialize(fireDirection, gameObject);
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySfx(fireSfx, 0.15f);
     }
 
     private Arrow SelectArrow()

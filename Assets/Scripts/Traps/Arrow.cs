@@ -5,6 +5,7 @@ using UnityEngine;
 public class Arrow : MonoBehaviour
 {
     [SerializeField, Min(0.01f)] private float speed = 10f, damageAmount = 20f, lifetime = 3f;
+    [SerializeField] private AudioClip hitSfx;
     private Rigidbody2D rb;
     private Vector2 travelDirection;
     private float remLifetime;
@@ -14,6 +15,7 @@ public class Arrow : MonoBehaviour
 
     protected virtual void Awake()
     {
+        SerializedFieldValidator.Validate(this);
         rb = GetComponent<Rigidbody2D>();
     }
 
@@ -60,6 +62,8 @@ public class Arrow : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer("Wall") || other.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
         {
             hasHit = true;
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySfx(hitSfx, 0.15f);
             Destroy(gameObject);
             return;
         }
@@ -73,6 +77,8 @@ public class Arrow : MonoBehaviour
         {
             OnSuccessfulHit(other);
             hasHit = true;
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySfx(hitSfx, 0.15f);
             Destroy(gameObject);
         }
     }

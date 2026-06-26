@@ -5,12 +5,17 @@ using UnityEngine;
 public class SpikePattern : ITrapPattern
 {
     private IReadOnlyList<Spike> spikes;
+    private readonly AudioClip warningSfx;
+    private readonly float warningFlashDuration, retractDelay;
     private bool isActive;
     public bool IsActive => isActive;
 
-    public SpikePattern(IReadOnlyList<Spike> spikes)
+    public SpikePattern(IReadOnlyList<Spike> spikes, AudioClip warningSfx, float warningFlashDuration, float retractDelay)
     {
         this.spikes = spikes;
+        this.warningSfx = warningSfx;
+        this.warningFlashDuration = warningFlashDuration;
+        this.retractDelay = retractDelay;
     }
 
     public IEnumerator Run(float warningDuration)
@@ -23,16 +28,15 @@ public class SpikePattern : ITrapPattern
             isActive = false;
             yield break;
         }
-
         isActive = true;
         foreach (Spike spike in spikes)
             spike.ForceIdle();
         foreach (Spike spike in spikes)
-            spike.BeginWarning(warningDuration);
-        yield return new WaitForSeconds(warningDuration);
+            spike.BeginWarning(warningDuration, warningFlashDuration);
+        yield return WarningBeepCycle(warningDuration);
         foreach (Spike spike in spikes)
             spike.BeginAttack();
-        yield return new WaitForSeconds(spikes[0].MoveDuration + spikes[0].RetractDelay);
+        yield return new WaitForSeconds(spikes[0].MoveDuration + retractDelay);
         foreach (Spike spike in spikes)
             spike.BeginRetractWithWave();
         yield return new WaitForSeconds(spikes[0].MoveDuration);
@@ -53,5 +57,27 @@ public class SpikePattern : ITrapPattern
         foreach (Spike spike in spikes)
             spike.ForceIdle();
         isActive = false;
+    }
+
+    private IEnumerator WarningBeepCycle(float warningDuration)
+    {
+        float timer = 0f;
+        bool hasBeepedThisFlash = false;
+        while (timer < warningDuration)
+        {
+            timer += Time.deltaTime;
+            float t = Mathf.PingPong(timer / (warningFlashDuration / 2f), 1f);
+
+            if (t >= 0.95f && !hasBeepedThisFlash)
+            {
+                if (AudioManager.Instance != null)
+                    AudioManager.Instance.PlaySfx(warningSfx, 0.15f);
+                hasBeepedThisFlash = true;
+            }
+            if (t < 0.5f)
+                hasBeepedThisFlash = false;
+
+            yield return null;
+        }
     }
 }

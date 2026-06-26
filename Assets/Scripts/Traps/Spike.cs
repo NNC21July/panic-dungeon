@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,29 +5,29 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(PolygonCollider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class Spike : MonoBehaviour, ITrap
+public class Spike : MonoBehaviour
 {
     private static readonly WaitForFixedUpdate FixedUpdateWait = new WaitForFixedUpdate();
-    [SerializeField, Min(0.01f)] private float warningDuration = 2f, warningFlashDuration = 0.25f, moveDuration = 5f;
-    [SerializeField, Min(0f)] private float damageAmount = 25f, retractDelay = 2f;
+    [SerializeField, Min(0.01f)] private float moveDuration = 5f;
+    [SerializeField, Min(0f)] private float damageAmount = 25f;
     [SerializeField] private Color warningFlashColor;
     [SerializeField] private ParticleSystem impactEffect;
+    [SerializeField] private AudioClip impactSfx;
     private Vector2 originPos, targetPos, blockedAt = new Vector2(0, 0);
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
     private Coroutine warningCoroutine, moveCoroutine, retractCoroutine;
-    private bool isAttacking = false, isConfigured = false, isBlocked = false;
+    private bool isAttacking = false, isBlocked = false;
     private PolygonCollider2D spikeCollider;
     private Rigidbody2D rb;
     private HashSet<IDamageable> damagedTargets;
     private float blockedPathProgress;
     private const float laneTolerance = 0.01f;
-    public bool IsActive => warningCoroutine != null || moveCoroutine != null || retractCoroutine != null;
     public float MoveDuration => moveDuration;
-    public float RetractDelay => retractDelay;
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
         spriteRenderer = GetComponent<SpriteRenderer>();
         spikeCollider = GetComponent<PolygonCollider2D>();
         rb = GetComponent<Rigidbody2D>();
@@ -41,19 +40,6 @@ public class Spike : MonoBehaviour, ITrap
     {
         originPos = origin;
         targetPos = target;
-        isConfigured = true;
-    }
-
-    public bool Activate(float newWarningDuration)
-    {
-        if (!isConfigured)
-            throw new InvalidOperationException("Spike must be configured before activation");
-
-        if (IsActive)
-            return false;
-
-        BeginWarning(newWarningDuration);
-        return true;
     }
 
     public void ForceIdle()
@@ -82,14 +68,15 @@ public class Spike : MonoBehaviour, ITrap
         blockedAt = originPos;
     }
 
-    public void BeginWarning(float newWarningDuration)
+    public void BeginWarning(float newWarningDuration, float newWarningFlashDuration)
     {
-        warningDuration = Mathf.Max(0.01f, newWarningDuration);
+        newWarningDuration = Mathf.Max(0.01f, newWarningDuration);
+        newWarningFlashDuration = Mathf.Max(0.01f, newWarningFlashDuration);
         SetDamageActive(false);
 
         if (warningCoroutine != null)
             StopCoroutine(warningCoroutine);
-        warningCoroutine = StartCoroutine(WarningFlash());
+        warningCoroutine = StartCoroutine(WarningFlash(newWarningDuration, newWarningFlashDuration));
     }
 
     public void BeginAttack()
@@ -176,9 +163,11 @@ public class Spike : MonoBehaviour, ITrap
     {
         impactEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         impactEffect.Play();
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySfx(impactSfx, 0.15f);
     }
 
-    private IEnumerator WarningFlash()
+    private IEnumerator WarningFlash(float warningDuration, float warningFlashDuration)
     {
         float timer = 0f;
         while (timer < warningDuration)

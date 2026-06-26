@@ -108,13 +108,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 543f785ab72294249b42c0445ae231bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spike
-  warningDuration: 3
-  warningFlashDuration: 1
   moveDuration: 2
   damageAmount: 25
-  retractDelay: 1
   warningFlashColor: {r: 1, g: 0, b: 0, a: 0}
   impactEffect: {fileID: 5938633706130191656}
+  impactSfx: {fileID: 8300000, guid: 406b63ad854b3d74f97c090e8d995884, type: 3}
 --- !u!60 &6507163448059211190
 PolygonCollider2D:
   m_ObjectHideFlags: 0
