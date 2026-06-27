@@ -13,9 +13,9 @@ public static class WarningBeepRoutine
             timer += Time.deltaTime;
             float t = Mathf.PingPong(timer / (flashDuration / 2f), 1f);
 
-            if (t >= 0.95f && !beeped)
+            if (t >= 0.5f && !beeped)
             {
-                AudioManager.Instance?.PlaySfx(clip, 0.15f);
+                AudioManager.Instance?.PlayTrapSfx(clip, 0.15f);
                 beeped = true;
             }
 

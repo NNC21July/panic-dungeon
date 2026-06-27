@@ -165,8 +165,7 @@ public class Spike : MonoBehaviour
     {
         impactEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         impactEffect.Play();
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlaySfx(impactSfx, 0.15f);
+        AudioManager.Instance?.PlayTrapSfx(impactSfx, 0.15f);
         CameraShake.Instance?.AddShake();
     }
 

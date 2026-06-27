@@ -69,8 +69,7 @@ public class ArrowShooter : MonoBehaviour
 
         arrowInstance.Initialize(fireDirection, gameObject);
 
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlaySfx(fireSfx, 0.15f);
+        AudioManager.Instance?.PlayTrapSfx(fireSfx, 0.15f);
     }
 
     private Arrow SelectArrow()

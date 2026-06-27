@@ -62,8 +62,7 @@ public class Arrow : MonoBehaviour
         if (other.gameObject.layer == GameLayers.Wall || other.gameObject.layer == GameLayers.Obstacle)
         {
             hasHit = true;
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlaySfx(hitSfx, 0.15f);
+            AudioManager.Instance?.PlayTrapSfx(hitSfx, 0.15f);
             Destroy(gameObject);
             return;
         }
@@ -77,8 +76,7 @@ public class Arrow : MonoBehaviour
         {
             OnSuccessfulHit(other);
             hasHit = true;
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlaySfx(hitSfx, 0.15f);
+            AudioManager.Instance?.PlayTrapSfx(hitSfx, 0.15f);
             Destroy(gameObject);
         }
     }

@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 3430335798607547810}
   - component: {fileID: 3504763636399915632}
   - component: {fileID: -3141393018627299544}
+  - component: {fileID: 3081663107275854773}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -322,6 +323,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e6b3147b2151714c91840850483a6e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
+  worldCamera: {fileID: 0}
   swordPivot: {fileID: 4601009103805240474}
   sword: {fileID: 7131183108736040963}
   swingAngle: 120
@@ -341,6 +343,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DamageFlash
   flashColor: {r: 1, g: 0, b: 0, a: 0}
   flashDuration: 0.5
+--- !u!114 &3081663107275854773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16589615d20b6e447bbaf17fcec530c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDamageFeedback
+  shakeDuration: 0.25
+  shakeStrength: 0.1
+  damagedVolume: 0.5
+  damagedSfx: {fileID: 8300000, guid: ebb4a02c8fc7f384588cf7e56d89a451, type: 3}
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0
