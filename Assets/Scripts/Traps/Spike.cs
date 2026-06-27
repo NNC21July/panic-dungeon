@@ -167,6 +167,7 @@ public class Spike : MonoBehaviour
         impactEffect.Play();
         if (AudioManager.Instance != null)
             AudioManager.Instance.PlaySfx(impactSfx, 0.15f);
+        CameraShake.Instance?.AddShake();
     }
 
     private IEnumerator WarningFlash(float warningDuration, float warningFlashDuration)

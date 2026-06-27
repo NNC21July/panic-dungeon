@@ -184,8 +184,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2855fe2f177b8542a77a3b2efc4c6ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieAI
-  moveSpeed: 3
-  attackRange: 0.85
+  moveSpeed: 2
+  attackRange: 0.8
   attackDamage: 15
   attackCooldown: 1
 --- !u!114 &-2140187071481375636
