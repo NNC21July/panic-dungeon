@@ -12,6 +12,7 @@ public class Health : MonoBehaviour, IDamageable
     public bool IsDead => isDead;
 
     public event Action<DamageInfo> OnDamaged, OnDeath;
+    public event Action OnHealthChanged;
 
     private void Awake()
     {
@@ -27,7 +28,7 @@ public class Health : MonoBehaviour, IDamageable
             return false;
         curHealth = Mathf.Max(curHealth - damageInfo.Amount, 0f);
         OnDamaged?.Invoke(damageInfo);
-
+        OnHealthChanged?.Invoke();
         if (curHealth <= 0f)
             Die(damageInfo);
         return true;
@@ -39,12 +40,14 @@ public class Health : MonoBehaviour, IDamageable
             return;
 
         curHealth = Mathf.Min(curHealth + amount, maxHealth);
+        OnHealthChanged?.Invoke();
     }
 
     public void ResetHealth()
     {
         isDead = false;
         curHealth = maxHealth;
+        OnHealthChanged?.Invoke();
     }
 
     public void SetDamageEnabled(bool enabled)

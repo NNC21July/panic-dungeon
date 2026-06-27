@@ -23,7 +23,7 @@ public class TrapController : MonoBehaviour
     private Coroutine trapCoroutine, diffScaleCoroutine;
     private DifficultyScaler difficultyScaler;
     private SpikePattern topSpikes, bottomSpikes;
-    private TrapPattern leftArrows, rightArrows;
+    private ArrowPattern leftArrows, rightArrows;
     private ITrapPattern curPattern;
     private List<ITrapPattern> patterns;
     private int prevPatternIdx = -1;
@@ -44,8 +44,8 @@ public class TrapController : MonoBehaviour
     {
         topSpikes = new SpikePattern(trapSetup.TopSpikes, warningSfx, warningFlashDuration, spikeRetractDelay);
         bottomSpikes = new SpikePattern(trapSetup.BottomSpikes, warningSfx, warningFlashDuration, spikeRetractDelay);
-        leftArrows = new TrapPattern(trapSetup.LeftArrowShooters, warningSfx, warningFlashDuration);
-        rightArrows = new TrapPattern(trapSetup.RightArrowShooters, warningSfx, warningFlashDuration);
+        leftArrows = new ArrowPattern(trapSetup.LeftArrowShooters, warningSfx, warningFlashDuration);
+        rightArrows = new ArrowPattern(trapSetup.RightArrowShooters, warningSfx, warningFlashDuration);
         patterns = new List<ITrapPattern> { topSpikes, bottomSpikes, leftArrows, rightArrows };
     }
 

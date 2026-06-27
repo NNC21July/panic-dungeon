@@ -4396,10 +4396,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 66808811368973026, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
     - target: {fileID: 3504763636399915632, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
       propertyPath: swingAngle
       value: 120
       objectReference: {fileID: 0}
+    - target: {fileID: 3504763636399915632, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
+      propertyPath: worldCamera
+      value: 
+      objectReference: {fileID: 519420031}
     - target: {fileID: 4898517791944016510, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
       propertyPath: m_Name
       value: Player_1

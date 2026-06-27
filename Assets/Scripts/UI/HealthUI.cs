@@ -14,7 +14,18 @@ public class HealthUI : MonoBehaviour
         SerializedFieldValidator.Validate(this);
     }
 
-    private void Update()
+    private void OnEnable()
+    {
+        playerHealth.OnHealthChanged += UpdateUI;
+        UpdateUI();
+    }
+
+    private void OnDisable()
+    {
+        playerHealth.OnHealthChanged -= UpdateUI;
+    }
+
+    private void UpdateUI()
     {
         healthSlider.value = playerHealth.CurHealthPercent;
         healthText.text = $"{Mathf.CeilToInt(playerHealth.CurHealth)} / {Mathf.CeilToInt(playerHealth.MaxHealth)}";

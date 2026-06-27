@@ -4,6 +4,7 @@ using System.Collections;
 
 public class PlayerCombat : MonoBehaviour
 {
+    [SerializeField] private Camera worldCamera;
     [SerializeField] private Transform swordPivot;
     [SerializeField] private Sword sword;
     [SerializeField] private float swingAngle = 120f, swingDuration = 0.15f, attackCooldown = 0.45f;
@@ -17,6 +18,8 @@ public class PlayerCombat : MonoBehaviour
 
         health = GetComponent<Health>();
         health.OnDeath += HandleDeath;
+
+        sword.Initialize(gameObject);
     }
 
     public void Attack(InputAction.CallbackContext callbackContext)
@@ -27,7 +30,7 @@ public class PlayerCombat : MonoBehaviour
         isAttacking = true;
         canAttack = false;
 
-        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        Vector2 mousePos = worldCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         Vector2 attackDir = (mousePos - (Vector2)transform.position).normalized;
         if (swingCoroutine != null)
             StopCoroutine(swingCoroutine);

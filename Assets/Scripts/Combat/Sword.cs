@@ -15,12 +15,14 @@ public class Sword : MonoBehaviour
         swordCollider = GetComponent<BoxCollider2D>();
         swordCollider.enabled = false;
         hitTargets = new HashSet<IDamageable>();
-
-        PlayerMovement playerMovement = GetComponentInParent<PlayerMovement>();
-        if (playerMovement == null)
-            throw new NullReferenceException(nameof(playerMovement));
-        owner = playerMovement.gameObject;
         gameObject.SetActive(false);
+    }
+
+    public void Initialize(GameObject owner)
+    {
+        if (owner == null)
+            throw new ArgumentNullException(nameof(owner));
+        this.owner = owner;
     }
 
     public void BeginSwing()

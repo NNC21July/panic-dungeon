@@ -9,12 +9,28 @@ public static class SerializedFieldValidator
         if (target == null)
             throw new ArgumentNullException(nameof(target));
 
-        FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        Type type = target.GetType();
 
-        foreach (FieldInfo field in fields)
+        while (type != null && type != typeof(MonoBehaviour))
         {
-            if (field.IsDefined(typeof(SerializeField), false) && !field.FieldType.IsValueType && field.GetValue(target) == null)
-                throw new InvalidOperationException($"{target.GetType().Name} is missing serialized field reference: {field.Name}");
+            FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+
+            foreach (FieldInfo field in fields)
+            {
+                object value = field.GetValue(target);
+                bool isMissing =
+                    value == null ||
+                    value is UnityEngine.Object unityObject && unityObject == null;
+                if (field.IsDefined(typeof(SerializeField), false) &&
+                    !field.FieldType.IsValueType &&
+                    isMissing)
+                {
+                    throw new InvalidOperationException(
+                        $"{target.GetType().Name} is missing serialized field reference: {field.Name}"
+                    );
+                }
+            }
+            type = type.BaseType;
         }
     }
 }

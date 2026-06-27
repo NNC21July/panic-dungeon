@@ -3,12 +3,11 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class ArrowShooter : MonoBehaviour, ITrap
+public class ArrowShooter : MonoBehaviour
 {
     [SerializeField] private Arrow arrowPrefab;
     [SerializeField] private PoisonArrow poisonArrowPrefab;
     [SerializeField, Range(0f, 1f)] private float poisonArrowChance = 0.2f;
-    [SerializeField, Min(0.01f)] private float warningDuration = 0.6f, warningFlashDuration = 0.5f;
     [SerializeField] private Color warningFlashColor;
     [SerializeField] private SpriteRenderer warningLine;
     [SerializeField, Range(0f, 1f)] private float warningLineColor;
@@ -18,6 +17,7 @@ public class ArrowShooter : MonoBehaviour, ITrap
     private Vector2 fireDirection;
     private bool isActive = false;
     private Coroutine warningCoroutine, activationCoroutine;
+    private float warningDuration, warningFlashDuration;
     public bool IsActive => isActive;
 
     private void Awake()
@@ -39,7 +39,7 @@ public class ArrowShooter : MonoBehaviour, ITrap
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
-    public bool Activate(float newWarningDuration)
+    public bool Activate(float newWarningDuration, float newWarningFlashDuration)
     {
         if (fireDirection == Vector2.zero)
             throw new ArgumentException(nameof(fireDirection));
@@ -48,10 +48,9 @@ public class ArrowShooter : MonoBehaviour, ITrap
             return false;
 
         warningDuration = Mathf.Max(0.01f, newWarningDuration);
+        warningFlashDuration = Mathf.Max(0.01f, newWarningFlashDuration);
 
         isActive = true;
-        if (activationCoroutine != null)
-            StopCoroutine(activationCoroutine);
         activationCoroutine = StartCoroutine(ActivationCycle());
         return true;
     }

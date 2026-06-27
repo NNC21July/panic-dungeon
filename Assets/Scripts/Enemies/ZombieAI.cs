@@ -72,7 +72,7 @@ public class ZombieAI : MonoBehaviour
 
     private void HandleDeath(DamageInfo damageInfo)
     {
-        gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 
     private void OnDestroy()
@@ -89,7 +89,7 @@ public class ZombieAI : MonoBehaviour
         foreach (Transform t in allObjects)
         {
             GameObject obj = t.gameObject;
-            if (obj.layer == LayerMask.NameToLayer("Player"))
+            if (obj.layer == GameLayers.Player)
             {
                 Health targetHealth = obj.GetComponent<Health>();
                 if (targetHealth != null && !targetHealth.IsDead)

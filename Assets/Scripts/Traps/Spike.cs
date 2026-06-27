@@ -100,11 +100,11 @@ public class Spike : MonoBehaviour
         if (!isAttacking || isBlocked)
             return;
 
-        if (other.gameObject.layer == LayerMask.NameToLayer("Obstacle")) // stops when hitting an obstacle
+        if (other.gameObject.layer == GameLayers.Obstacle) // stops when hitting an obstacle
         {
             if (Mathf.Abs(other.transform.position.x - originPos.x) > laneTolerance) // check if obstacle is same lane with spike
                 return;
-            StopInPlace();
+            StopInPlace(true);
             return;
         }
 
@@ -115,9 +115,10 @@ public class Spike : MonoBehaviour
         if (damagedTargets.Contains(damageable))
             return;
 
-        damageable.TakeDamage(new DamageInfo(damageAmount, gameObject, DamageType.Spike));
+        if (!damageable.TakeDamage(new DamageInfo(damageAmount, gameObject, DamageType.Spike)))
+            return;
         damagedTargets.Add(damageable);
-        StopInPlace();
+        StopInPlace(true);
     }
 
     public void BeginRetractWithWave()
@@ -135,7 +136,7 @@ public class Spike : MonoBehaviour
         isAttacking = active;
     }
 
-    public void StopInPlace()
+    public void StopInPlace(bool playImpactEffect)
     {
         if (warningCoroutine != null)
         {
@@ -156,7 +157,8 @@ public class Spike : MonoBehaviour
         isBlocked = true;
         blockedAt = rb.position;
         blockedPathProgress = Mathf.Clamp01(Vector2.Distance(originPos, blockedAt) / Vector2.Distance(originPos, targetPos));
-        PlayImpactEffect();
+        if (playImpactEffect)
+            PlayImpactEffect();
     }
 
     private void PlayImpactEffect()

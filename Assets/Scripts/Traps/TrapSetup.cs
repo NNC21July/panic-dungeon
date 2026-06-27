@@ -18,8 +18,6 @@ public class TrapSetup : MonoBehaviour
     public IReadOnlyList<Spike> BottomSpikes => bottomSpikes;
     public IReadOnlyList<ArrowShooter> LeftArrowShooters => leftArrowShooters;
     public IReadOnlyList<ArrowShooter> RightArrowShooters => rightArrowShooters;
-    public HashSet<Vector2> ObstaclePosOccupied => obstaclePosOccupied;
-
 
     private void Awake()
     {
@@ -99,5 +97,10 @@ public class TrapSetup : MonoBehaviour
             Instantiate(obstaclePrefab, validObstaclePos[i], Quaternion.identity);
             obstaclePosOccupied.Add(validObstaclePos[i]);
         }
+    }
+
+    public bool IsObstacleAt(Vector2 position)
+    {
+        return obstaclePosOccupied.Contains(position);
     }
 }

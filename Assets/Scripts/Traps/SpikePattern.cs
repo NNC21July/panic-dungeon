@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SpikePattern : ITrapPattern
 {
-    private IReadOnlyList<Spike> spikes;
+    private readonly IReadOnlyList<Spike> spikes;
     private readonly AudioClip warningSfx;
     private readonly float warningFlashDuration, retractDelay;
     private bool isActive;
@@ -33,7 +33,7 @@ public class SpikePattern : ITrapPattern
             spike.ForceIdle();
         foreach (Spike spike in spikes)
             spike.BeginWarning(warningDuration, warningFlashDuration);
-        yield return WarningBeepCycle(warningDuration);
+        yield return WarningBeepRoutine.Play(warningDuration, warningFlashDuration, warningSfx);
         foreach (Spike spike in spikes)
             spike.BeginAttack();
         yield return new WaitForSeconds(spikes[0].MoveDuration + retractDelay);
@@ -48,7 +48,7 @@ public class SpikePattern : ITrapPattern
     public void Cancel()
     {
         foreach (Spike spike in spikes)
-            spike.StopInPlace();
+            spike.StopInPlace(false);
         isActive = false;
     }
 
@@ -57,27 +57,5 @@ public class SpikePattern : ITrapPattern
         foreach (Spike spike in spikes)
             spike.ForceIdle();
         isActive = false;
-    }
-
-    private IEnumerator WarningBeepCycle(float warningDuration)
-    {
-        float timer = 0f;
-        bool hasBeepedThisFlash = false;
-        while (timer < warningDuration)
-        {
-            timer += Time.deltaTime;
-            float t = Mathf.PingPong(timer / (warningFlashDuration / 2f), 1f);
-
-            if (t >= 0.95f && !hasBeepedThisFlash)
-            {
-                if (AudioManager.Instance != null)
-                    AudioManager.Instance.PlaySfx(warningSfx, 0.15f);
-                hasBeepedThisFlash = true;
-            }
-            if (t < 0.5f)
-                hasBeepedThisFlash = false;
-
-            yield return null;
-        }
     }
 }

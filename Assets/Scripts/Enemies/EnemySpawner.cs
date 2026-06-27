@@ -51,14 +51,15 @@ public class EnemySpawner : MonoBehaviour
 
     private Vector2 GetSpawnPos()
     {
-        float roomWidth = trapSetup.RoomWidth, roomHeight = trapSetup.RoomHeight;
         Vector2 spawnPos;
         do
         {
-            float xPos = -roomWidth / 2f + Random.Range(0, roomWidth) + 0.5f;
-            float yPos = -roomHeight / 2f + Random.Range(0, roomHeight) + 0.5f;
+            int xTile = Random.Range(0, trapSetup.RoomWidth),
+                yTile = Random.Range(0, trapSetup.RoomHeight);
+            float xPos = -trapSetup.RoomWidth / 2f + xTile + 0.5f,
+                  yPos = -trapSetup.RoomHeight / 2f + yTile + 0.5f;
             spawnPos = new Vector2(xPos, yPos);
-        } while (trapSetup.ObstaclePosOccupied.Contains(spawnPos));
+        } while (trapSetup.IsObstacleAt(spawnPos));
         return spawnPos;
     }
 

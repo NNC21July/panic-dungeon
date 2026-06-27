@@ -19,16 +19,18 @@ public class StatusEffectController : MonoBehaviour
     public void Apply(StatusEffect effect)
     {
         if (effect == null)
-            throw new ArgumentNullException("Status effect null");
+            throw new ArgumentNullException(nameof(effect));
 
         if (health.IsDead)
             return;
 
         Type effectType = effect.GetType();
-        if (activeEffects.ContainsKey(effectType))
+        bool wasAlreadyActive = activeEffects.ContainsKey(effectType);
+        if (wasAlreadyActive)
             StopCoroutine(activeEffects[effectType]);
         activeEffects[effectType] = StartCoroutine(TickEffect(effect));
-        EffectStarted?.Invoke(effectType);
+        if (!wasAlreadyActive)
+            EffectStarted?.Invoke(effectType);
     }
 
     private void StopAllEffects(DamageInfo damageInfo)
@@ -38,9 +40,11 @@ public class StatusEffectController : MonoBehaviour
 
     public void StopAllEffects()
     {
-        StopAllCoroutines();
-        foreach (Type effect in activeEffects.Keys)
-            EffectEnded?.Invoke(effect);
+        foreach (KeyValuePair<Type, Coroutine> effect in activeEffects)
+        {
+            StopCoroutine(effect.Value);
+            EffectEnded?.Invoke(effect.Key);
+        }
         activeEffects.Clear();
     }
 

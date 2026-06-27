@@ -59,7 +59,7 @@ public class Arrow : MonoBehaviour
         if (hasHit)
             return;
 
-        if (other.gameObject.layer == LayerMask.NameToLayer("Wall") || other.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
+        if (other.gameObject.layer == GameLayers.Wall || other.gameObject.layer == GameLayers.Obstacle)
         {
             hasHit = true;
             if (AudioManager.Instance != null)
