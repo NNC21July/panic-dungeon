@@ -25,7 +25,7 @@ public class RoundUI : MonoBehaviour
                 break;
             case RoundState.Countdown:
                 countdown.gameObject.SetActive(true);
-                countdown.text = Mathf.CeilToInt(roundManager.CountdownTimer).ToString();
+                countdown.text = roundManager.CountdownNum.ToString();
                 break;
             case RoundState.Playing:
                 timer.gameObject.SetActive(true);
