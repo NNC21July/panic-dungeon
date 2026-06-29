@@ -88,6 +88,12 @@ public class TrapController : MonoBehaviour
         enemySpawner.StopSpawning();
     }
 
+    public void ResetTraps()
+    {
+        topSpikes.Reset();
+        bottomSpikes.Reset();
+    }
+
     private ITrapPattern SelectRandomPattern()
     {
         if (patterns.Count == 0)

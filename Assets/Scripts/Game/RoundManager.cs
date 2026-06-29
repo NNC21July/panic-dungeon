@@ -60,6 +60,8 @@ public class RoundManager : MonoBehaviour
     {
         if (curState != RoundState.Waiting && curState != RoundState.RoundOver)
             return;
+        if (curState == RoundState.RoundOver) // if restarting
+            trapController.ResetTraps();
         playerReset.ResetAt(playerSpawn.position);
         curState = RoundState.Countdown;
         countdownTimer = countdownDuration;
