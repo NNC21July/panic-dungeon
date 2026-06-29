@@ -28,6 +28,11 @@ public class RoundManager : MonoBehaviour
         playerHealth.OnDeath += End;
     }
 
+    private void Start()
+    {
+        Begin();
+    }
+
     private void Update()
     {
         if (curState == RoundState.Countdown)
