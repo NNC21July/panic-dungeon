@@ -167,6 +167,8 @@ MonoBehaviour:
   trapSetup: {fileID: 1581613497}
   spawnDelay: 10
   maxEnemiesAlive: 4
+  player: {fileID: 1928801689}
+  minSpawnDist: 3
 --- !u!1 &298813627
 GameObject:
   m_ObjectHideFlags: 0
@@ -4942,6 +4944,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1918644605}
   m_CullTransparentMesh: 1
+--- !u!4 &1928801689 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5292887536989782713, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
+  m_PrefabInstance: {fileID: 3040553813749101448}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1957587685
 GameObject:
   m_ObjectHideFlags: 0
@@ -5473,11 +5480,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5292887536989782713, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.65
+      value: -3.399
       objectReference: {fileID: 0}
     - target: {fileID: 5292887536989782713, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.6
+      value: -1.488
       objectReference: {fileID: 0}
     - target: {fileID: 5292887536989782713, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
       propertyPath: m_LocalPosition.z

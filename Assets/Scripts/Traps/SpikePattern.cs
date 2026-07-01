@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SpikePattern : ITrapPattern
 {
+    private static readonly WaitForFixedUpdate FixedUpdateWait = new WaitForFixedUpdate();
     private readonly IReadOnlyList<Spike> spikes;
     private readonly AudioClip warningSfx;
     private readonly float warningFlashDuration, retractDelay;
@@ -34,12 +35,27 @@ public class SpikePattern : ITrapPattern
         foreach (Spike spike in spikes)
             spike.BeginWarning(warningDuration, warningFlashDuration);
         yield return WarningBeepRoutine.Play(warningDuration, warningFlashDuration, warningSfx);
+
         foreach (Spike spike in spikes)
             spike.BeginAttack();
         yield return new WaitForSeconds(spikes[0].MoveDuration + retractDelay);
+
         foreach (Spike spike in spikes)
-            spike.BeginRetractWithWave();
-        yield return new WaitForSeconds(spikes[0].MoveDuration);
+            spike.PrepareRetract();
+        float retractDuration = spikes[0].MoveDuration;
+        float retractTimer = 0f;
+        while (retractTimer < retractDuration)
+        {
+            yield return FixedUpdateWait;
+            retractTimer += Time.fixedDeltaTime;
+            float t = Mathf.Clamp01(retractTimer / retractDuration);
+
+            foreach (Spike spike in spikes)
+                spike.ApplyRetractProgress(t);
+        }
+        foreach (Spike spike in spikes)
+            spike.ApplyRetractProgress(1f);
+
         foreach (Spike spike in spikes)
             spike.ForceIdle();
         isActive = false;

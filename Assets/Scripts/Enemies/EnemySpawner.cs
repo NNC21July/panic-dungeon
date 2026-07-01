@@ -8,6 +8,8 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private TrapSetup trapSetup;
     [SerializeField] private float spawnDelay = 10f;
     [SerializeField] private int maxEnemiesAlive = 4;
+    [SerializeField] private Transform player;
+    [SerializeField, Min(0f)] private float minSpawnDist = 3f;
     private bool spawning = false;
     private Coroutine spawnCoroutine;
     private List<ZombieAI> activeEnemies;
@@ -54,12 +56,8 @@ public class EnemySpawner : MonoBehaviour
         Vector2 spawnPos;
         do
         {
-            int xTile = Random.Range(0, trapSetup.RoomWidth),
-                yTile = Random.Range(0, trapSetup.RoomHeight);
-            float xPos = -trapSetup.RoomWidth / 2f + xTile + 0.5f,
-                  yPos = -trapSetup.RoomHeight / 2f + yTile + 0.5f;
-            spawnPos = new Vector2(xPos, yPos);
-        } while (trapSetup.IsObstacleAt(spawnPos));
+            spawnPos = trapSetup.OpenFloorPos[Random.Range(0, trapSetup.OpenFloorPos.Count)];
+        } while (((Vector2)player.position - spawnPos).sqrMagnitude < minSpawnDist * minSpawnDist); // too near player
         return spawnPos;
     }
 

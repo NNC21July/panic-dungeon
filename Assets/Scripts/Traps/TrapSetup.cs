@@ -12,25 +12,46 @@ public class TrapSetup : MonoBehaviour
     private List<Spike> topSpikes, bottomSpikes;
     private List<ArrowShooter> leftArrowShooters, rightArrowShooters;
     private int obstacleCount;
-    private List<Vector2> validObstaclePos;
+    private List<Vector2> floorPos, openFloorPos;
     private HashSet<Vector2> obstaclePosOccupied;
     public IReadOnlyList<Spike> TopSpikes => topSpikes;
     public IReadOnlyList<Spike> BottomSpikes => bottomSpikes;
     public IReadOnlyList<ArrowShooter> LeftArrowShooters => leftArrowShooters;
     public IReadOnlyList<ArrowShooter> RightArrowShooters => rightArrowShooters;
+    public IReadOnlyList<Vector2> FloorPos => floorPos;
+    public IReadOnlyList<Vector2> OpenFloorPos => openFloorPos;
 
     private void Awake()
     {
         SerializedFieldValidator.Validate(this);
 
+        BuildFloorPos();
+        SpawnSpikeRows();
+        SpawnAlternatingArrowShooters();
+        SpawnObstacles();
+        BuildOpenFloorPos();
+    }
+
+    private void BuildFloorPos()
+    {
+        floorPos = new List<Vector2>();
+        for (int xTile = 0; xTile < roomWidth; xTile++)
+        {
+            for (int yTile = 0; yTile < roomHeight; yTile++)
+            {
+                float x = -roomWidth / 2f + xTile + 0.5f,
+                      y = -roomHeight / 2f + yTile + 0.5f;
+                floorPos.Add(new Vector2(x, y));
+            }
+        }
+    }
+
+    private void SpawnSpikeRows()
+    {
         // placing spikes along top and bottom
         float topY = roomHeight / 2f + 2f / 3f, bottomY = -topY;
         topSpikes = SpawnSpikeRow("SpikeTop_", topY, 180f);
         bottomSpikes = SpawnSpikeRow("SpikeBottom_", bottomY, 0f);
-
-        SpawnAlternatingArrowShooters();
-
-        SpawnObstacles();
     }
 
     private List<Spike> SpawnSpikeRow(string name, float yPos, float rotAngle)
@@ -72,21 +93,20 @@ public class TrapSetup : MonoBehaviour
 
     private void SpawnObstacles()
     {
-        validObstaclePos = new List<Vector2>();
+        List<Vector2> validObstaclePos = new List<Vector2>();
         obstaclePosOccupied = new HashSet<Vector2>();
 
-        for (int i = 0; i < roomWidth / 2f - 2; i++)
+        float maxObstacleX = roomWidth / 2f - 2f;
+        float maxObstacleY = roomHeight / 2f - 2f;
+
+        foreach (Vector2 pos in floorPos)
         {
-            for (int j = 0; j < roomHeight / 2f - 2; j++)
-            {
-                float x = i + 0.5f, y = j + 0.5f;
-                validObstaclePos.Add(new Vector2(x, y));
-                validObstaclePos.Add(new Vector2(-x, y));
-                validObstaclePos.Add(new Vector2(x, -y));
-                validObstaclePos.Add(new Vector2(-x, -y));
-            }
+            if (Mathf.Abs(pos.x) < maxObstacleX && Mathf.Abs(pos.y) < maxObstacleY) // away from edges
+                validObstaclePos.Add(pos);
         }
+
         obstacleCount = Mathf.Min(Random.Range(minObstacleCount, maxObstacleCount + 1), validObstaclePos.Count);
+
         for (int i = 0; i < validObstaclePos.Count; i++)
         {
             int idx = Random.Range(i, validObstaclePos.Count);
@@ -96,6 +116,16 @@ public class TrapSetup : MonoBehaviour
         {
             Instantiate(obstaclePrefab, validObstaclePos[i], Quaternion.identity);
             obstaclePosOccupied.Add(validObstaclePos[i]);
+        }
+    }
+
+    private void BuildOpenFloorPos()
+    {
+        openFloorPos = new List<Vector2>();
+        foreach (Vector2 pos in floorPos)
+        {
+            if (!obstaclePosOccupied.Contains(pos))
+                openFloorPos.Add(pos);
         }
     }
 

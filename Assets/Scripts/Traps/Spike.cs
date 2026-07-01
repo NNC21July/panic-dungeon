@@ -13,10 +13,11 @@ public class Spike : MonoBehaviour
     [SerializeField] private Color warningFlashColor;
     [SerializeField] private ParticleSystem impactEffect;
     [SerializeField] private AudioClip impactSfx;
+    [SerializeField] private Collider2D solidTipCollider;
     private Vector2 originPos, targetPos, blockedAt = new Vector2(0, 0);
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
-    private Coroutine warningCoroutine, moveCoroutine, retractCoroutine;
+    private Coroutine warningCoroutine, moveCoroutine;
     private bool isAttacking = false, isBlocked = false;
     private PolygonCollider2D spikeCollider;
     private Rigidbody2D rb;
@@ -34,6 +35,7 @@ public class Spike : MonoBehaviour
         damagedTargets = new HashSet<IDamageable>();
         originalColor = spriteRenderer.color;
         SetDamageActive(false);
+        solidTipCollider.enabled = false;
     }
 
     public void ConfigurePos(Vector2 origin, Vector2 target)
@@ -54,11 +56,6 @@ public class Spike : MonoBehaviour
             StopCoroutine(moveCoroutine);
             moveCoroutine = null;
         }
-        if (retractCoroutine != null)
-        {
-            StopCoroutine(retractCoroutine);
-            retractCoroutine = null;
-        }
         SetDamageActive(false);
         rb.MovePosition(originPos);
         spriteRenderer.color = originalColor;
@@ -66,6 +63,7 @@ public class Spike : MonoBehaviour
         isBlocked = false;
         blockedPathProgress = 0f;
         blockedAt = originPos;
+        solidTipCollider.enabled = false;
     }
 
     public void BeginWarning(float newWarningDuration, float newWarningFlashDuration)
@@ -93,6 +91,7 @@ public class Spike : MonoBehaviour
         if (moveCoroutine != null)
             StopCoroutine(moveCoroutine);
         moveCoroutine = StartCoroutine(Move(originPos, targetPos, moveDuration, true));
+        solidTipCollider.enabled = true;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -121,13 +120,26 @@ public class Spike : MonoBehaviour
         StopInPlace(true);
     }
 
-    public void BeginRetractWithWave()
+    public void PrepareRetract()
     {
         SetDamageActive(false);
+        if (moveCoroutine != null)
+        {
+            StopCoroutine(moveCoroutine);
+            moveCoroutine = null;
+        }
+    }
 
-        if (retractCoroutine != null)
-            StopCoroutine(retractCoroutine);
-        retractCoroutine = StartCoroutine(RetractWithWave());
+    public void ApplyRetractProgress(float retractProgress)
+    {
+        retractProgress = Mathf.Clamp01(retractProgress);
+        float wavePathProgress = 1f - retractProgress;
+        if (isBlocked && wavePathProgress > blockedPathProgress)
+        {
+            rb.MovePosition(blockedAt);
+            return;
+        }
+        rb.MovePosition(Vector2.Lerp(originPos, targetPos, wavePathProgress));
     }
 
     private void SetDamageActive(bool active)
@@ -147,11 +159,6 @@ public class Spike : MonoBehaviour
         {
             StopCoroutine(moveCoroutine);
             moveCoroutine = null;
-        }
-        if (retractCoroutine != null)
-        {
-            StopCoroutine(retractCoroutine);
-            retractCoroutine = null;
         }
         SetDamageActive(false);
         isBlocked = true;
@@ -188,30 +195,6 @@ public class Spike : MonoBehaviour
         spriteRenderer.color = originalColor;
         warningCoroutine = null;
     }
-
-    private IEnumerator RetractWithWave()
-    {
-        if (isBlocked)
-        {
-            float waitTime = moveDuration * (1f - blockedPathProgress),
-                retractTime = moveDuration - waitTime;
-
-            yield return new WaitForSeconds(waitTime);
-
-            if (moveCoroutine != null)
-                StopCoroutine(moveCoroutine);
-            moveCoroutine = StartCoroutine(Move(blockedAt, originPos, retractTime, false));
-        }
-        else
-        {
-            if (moveCoroutine != null)
-                StopCoroutine(moveCoroutine);
-            moveCoroutine = StartCoroutine(Move(targetPos, originPos, moveDuration, false));
-        }
-        yield return new WaitUntil(() => moveCoroutine == null);
-        retractCoroutine = null;
-    }
-
 
     private IEnumerator Move(Vector2 origin, Vector2 target, float duration, bool playImpactEffect)
     {
