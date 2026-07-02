@@ -7,6 +7,7 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private Camera worldCamera;
     [SerializeField] private Transform swordPivot;
     [SerializeField] private Sword sword;
+    [SerializeField] private AnimationCurve swingCurve;
     [SerializeField] private float swingAngle = 120f, swingDuration = 0.15f, attackCooldown = 0.45f;
     private Health health;
     private bool isAttacking = false, canAttack = true;
@@ -71,9 +72,10 @@ public class PlayerCombat : MonoBehaviour
         while (timer >= 0f)
         {
             timer -= Time.deltaTime;
-            float t = Mathf.Clamp01(1f - timer / swingDuration);
+            float t = Mathf.Clamp01(1f - timer / swingDuration),
+                  swingProgress = Mathf.Clamp01(swingCurve.Evaluate(t));
 
-            swordPivot.rotation = Quaternion.Euler(0f, 0f, Mathf.Lerp(startAngle, endAngle, t));
+            swordPivot.rotation = Quaternion.Euler(0f, 0f, Mathf.Lerp(startAngle, endAngle, swingProgress));
 
             yield return null;
         }

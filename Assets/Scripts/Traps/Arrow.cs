@@ -59,13 +59,18 @@ public class Arrow : MonoBehaviour
         if (hasHit)
             return;
 
-        if (other.gameObject.layer == GameLayers.Wall || other.gameObject.layer == GameLayers.Obstacle)
+        int otherLayer = other.gameObject.layer;
+
+        if (otherLayer == GameLayers.Wall || otherLayer == GameLayers.Obstacle)
         {
             hasHit = true;
             AudioManager.Instance?.PlayTrapSfx(hitSfx, 0.15f);
             Destroy(gameObject);
             return;
         }
+
+        if (otherLayer != GameLayers.Player && otherLayer != GameLayers.Enemy)
+            return;
 
         IDamageable damageable = other.GetComponentInParent<IDamageable>();
         if (damageable == null)

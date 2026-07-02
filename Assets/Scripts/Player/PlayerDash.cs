@@ -8,14 +8,13 @@ using UnityEngine.InputSystem;
 
 public class PlayerDash : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private PlayerMovement playerMovement;
-    private Health health;
-
     [SerializeField] private float dashSpeed = 14f, dashDuration = 0.15f, dashCooldown = 1f;
 
     [SerializeField] private ParticleSystem dustEffect;
-
+    [SerializeField] private AnimationCurve dashSpeedCurve;
+    private Rigidbody2D rb;
+    private PlayerMovement playerMovement;
+    private Health health;
     private bool isDashing = false, canDash = true;
     private Vector2 dashDirection;
     private float dashTimer = 0f, cooldownTimer = 0f;
@@ -39,7 +38,6 @@ public class PlayerDash : MonoBehaviour
             {
                 isDashing = false;
                 canDash = false;
-                rb.linearVelocity = Vector2.zero;
                 cooldownTimer = dashCooldown;
             }
         }
@@ -53,8 +51,12 @@ public class PlayerDash : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (isDashing)
-            rb.linearVelocity = dashDirection * dashSpeed;
+        if (!isDashing)
+            return;
+
+        float t = 1f - Mathf.Clamp01(dashTimer / dashDuration);
+        float speedMultiplier = Mathf.Max(0f, dashSpeedCurve.Evaluate(t));
+        rb.linearVelocity = dashDirection * dashSpeed * speedMultiplier;
     }
 
     public void Dash(InputAction.CallbackContext context)

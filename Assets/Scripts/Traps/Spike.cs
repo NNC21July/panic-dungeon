@@ -99,13 +99,18 @@ public class Spike : MonoBehaviour
         if (!isAttacking || isBlocked)
             return;
 
-        if (other.gameObject.layer == GameLayers.Obstacle) // stops when hitting an obstacle
+        int otherLayer = other.gameObject.layer;
+
+        if (otherLayer == GameLayers.Obstacle) // stops when hitting an obstacle
         {
             if (Mathf.Abs(other.transform.position.x - originPos.x) > laneTolerance) // check if obstacle is same lane with spike
                 return;
             StopInPlace(true);
             return;
         }
+
+        if (otherLayer != GameLayers.Player && otherLayer != GameLayers.Enemy)
+            return;
 
         IDamageable damageable = other.GetComponentInParent<IDamageable>();
         if (damageable == null)

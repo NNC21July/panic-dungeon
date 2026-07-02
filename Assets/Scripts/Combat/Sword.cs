@@ -3,19 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class Sword : MonoBehaviour
 {
     [SerializeField] private float damage = 35f;
+    [SerializeField] private TrailRenderer swingTrail;
+    private SpriteRenderer spriteRenderer;
     private BoxCollider2D swordCollider;
     private GameObject owner;
     private HashSet<IDamageable> hitTargets;
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
+
         swordCollider = GetComponent<BoxCollider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         swordCollider.enabled = false;
+        spriteRenderer.enabled = false;
+        swingTrail.emitting = false;
+        swingTrail.Clear();
         hitTargets = new HashSet<IDamageable>();
-        gameObject.SetActive(false);
     }
 
     public void Initialize(GameObject owner)
@@ -27,15 +35,19 @@ public class Sword : MonoBehaviour
 
     public void BeginSwing()
     {
-        gameObject.SetActive(true);
-        hitTargets.Clear();
+        spriteRenderer.enabled = true;
         swordCollider.enabled = true;
+        swingTrail.Clear();
+        swingTrail.emitting = true;
+
+        hitTargets.Clear();
     }
 
     public void EndSwing()
     {
         swordCollider.enabled = false;
-        gameObject.SetActive(false);
+        spriteRenderer.enabled = false;
+        swingTrail.emitting = false;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
