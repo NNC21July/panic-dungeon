@@ -3,66 +3,65 @@ using UnityEngine;
 
 public class TrapSetup : MonoBehaviour
 {
+    [SerializeField] private RoomGenerator roomGen;
     [SerializeField] private Spike spikePrefab;
     [SerializeField] private ArrowShooter arrowShooterPrefab;
-    [SerializeField] private GameObject obstaclePrefab;
-    [SerializeField] private int roomWidth = 14, roomHeight = 8, minObstacleCount = 4, maxObstacleCount = 7;
-    public int RoomWidth => roomWidth;
-    public int RoomHeight => roomHeight;
     private List<Spike> topSpikes, bottomSpikes;
     private List<ArrowShooter> leftArrowShooters, rightArrowShooters;
-    private int obstacleCount;
-    private List<Vector2> floorPos, openFloorPos;
-    private HashSet<Vector2> obstaclePosOccupied;
+    public int RoomWidth => roomGen.Config.RoomWidth;
+    public int RoomHeight => roomGen.Config.RoomHeight;
+    public IReadOnlyList<Vector2> FloorPos => roomGen.FloorPos;
+    public IReadOnlyList<Vector2> OpenFloorPos => roomGen.OpenFloorPos;
     public IReadOnlyList<Spike> TopSpikes => topSpikes;
     public IReadOnlyList<Spike> BottomSpikes => bottomSpikes;
     public IReadOnlyList<ArrowShooter> LeftArrowShooters => leftArrowShooters;
     public IReadOnlyList<ArrowShooter> RightArrowShooters => rightArrowShooters;
-    public IReadOnlyList<Vector2> FloorPos => floorPos;
-    public IReadOnlyList<Vector2> OpenFloorPos => openFloorPos;
 
     private void Awake()
     {
         SerializedFieldValidator.Validate(this);
-
-        BuildFloorPos();
-        SpawnSpikeRows();
-        SpawnAlternatingArrowShooters();
-        SpawnObstacles();
-        BuildOpenFloorPos();
     }
 
-    private void BuildFloorPos()
+    public void SpawnTraps()
     {
-        floorPos = new List<Vector2>();
-        for (int xTile = 0; xTile < roomWidth; xTile++)
-        {
-            for (int yTile = 0; yTile < roomHeight; yTile++)
-            {
-                float x = -roomWidth / 2f + xTile + 0.5f,
-                      y = -roomHeight / 2f + yTile + 0.5f;
-                floorPos.Add(new Vector2(x, y));
-            }
-        }
+        SpawnSpikeRows();
+        SpawnAlternatingArrowShooters();
     }
 
     private void SpawnSpikeRows()
     {
         // placing spikes along top and bottom
-        float topY = roomHeight / 2f + 2f / 3f, bottomY = -topY;
-        topSpikes = SpawnSpikeRow("SpikeTop_", topY, 180f);
-        bottomSpikes = SpawnSpikeRow("SpikeBottom_", bottomY, 0f);
+        topSpikes = SpawnSpikeRow("SpikeTop_", true);
+        bottomSpikes = SpawnSpikeRow("SpikeBottom_", false);
     }
 
-    private List<Spike> SpawnSpikeRow(string name, float yPos, float rotAngle)
+    private List<Spike> SpawnSpikeRow(string name, bool isTop)
     {
+        RoomConfig cf = roomGen.Config;
         List<Spike> row = new List<Spike>();
-        for (int i = 0; i < roomWidth; i++)
+
+        float roomWidth = roomGen.FloorTopRight.x - roomGen.FloorBotLeft.x, roomHeight = roomGen.FloorTopRight.y - roomGen.FloorBotLeft.y;
+        int spikeCount = Mathf.CeilToInt(roomWidth / cf.SpikeWidth);
+        float spikeWidth = roomWidth / spikeCount,
+              rotAngle = isTop ? 180f : 0f;
+        for (int i = 0; i < spikeCount; i++)
         {
-            Vector2 pos = new Vector2(i - roomWidth / 2f + 0.5f, yPos);
-            Spike obj = Instantiate(spikePrefab, pos, Quaternion.Euler(0f, 0f, rotAngle), gameObject.transform);
+            float xPos = roomGen.FloorBotLeft.x + spikeWidth * (i + 0.5f);
+
+            Spike obj = Instantiate(spikePrefab, Vector2.zero, Quaternion.Euler(0f, 0f, rotAngle), transform);
             obj.name = name + i;
-            obj.ConfigurePos(pos, pos + (Vector2)(Quaternion.Euler(0f, 0f, rotAngle) * Vector3.up) * roomHeight);
+            obj.transform.localScale *= spikeWidth;
+            obj.ConfigureBodyLength(roomHeight);
+
+            Vector2 originTipPos = new(xPos, isTop ? roomGen.FloorTopRight.y : roomGen.FloorBotLeft.y);
+            Vector2 targetTipPos = new(xPos, isTop ? roomGen.FloorBotLeft.y : roomGen.FloorTopRight.y);
+            Vector2 tipOffset = obj.TipPos - (Vector2)obj.transform.position;
+            Vector2 originPos = originTipPos - tipOffset;
+            Vector2 targetPos = targetTipPos - tipOffset;
+
+            obj.transform.position = originPos;
+            obj.ConfigurePos(originPos, targetPos);
+
             row.Add(obj);
         }
         return row;
@@ -70,67 +69,32 @@ public class TrapSetup : MonoBehaviour
 
     private void SpawnAlternatingArrowShooters()
     {
+        RoomConfig cf = roomGen.Config;
+
         leftArrowShooters = new List<ArrowShooter>();
         rightArrowShooters = new List<ArrowShooter>();
 
-        for (int i = 0; i < roomHeight; i++)
+        int shooterCount = Mathf.CeilToInt(cf.RoomWorldHeight / cf.ArrowShooterSpacing);
+        float spacing = cf.RoomWorldHeight / shooterCount,
+              bottomEdge = roomGen.FloorBotLeft.y,
+              roomWidth = roomGen.FloorTopRight.x - roomGen.FloorBotLeft.x,
+              shooterHalfWidth = arrowShooterPrefab.GetComponent<SpriteRenderer>().sprite.bounds.extents.x * Mathf.Abs(arrowShooterPrefab.transform.localScale.x);
+
+        for (int i = 0; i < shooterCount; i++)
         {
             bool left = i % 2 == 0;
 
-            float xPos = (left ? -1 : 1) * (roomWidth / 2f + 0.5f);
-            float yPos = i - roomHeight / 2f + 0.5f;
+            float xPos = left ? roomGen.FloorBotLeft.x - shooterHalfWidth : roomGen.FloorTopRight.x + shooterHalfWidth;
+            float yPos = bottomEdge + spacing * (i + 0.5f);
             Vector2 direction = left ? Vector2.right : Vector2.left;
 
-            ArrowShooter shooter = Instantiate(arrowShooterPrefab, new Vector2(xPos, yPos), Quaternion.identity);
-            shooter.Configure(direction);
+            ArrowShooter shooter = Instantiate(arrowShooterPrefab, new Vector2(xPos, yPos), Quaternion.identity, transform);
+            shooter.Configure(direction, roomWidth, shooterHalfWidth);
 
             if (left)
                 leftArrowShooters.Add(shooter);
             else
                 rightArrowShooters.Add(shooter);
         }
-    }
-
-    private void SpawnObstacles()
-    {
-        List<Vector2> validObstaclePos = new List<Vector2>();
-        obstaclePosOccupied = new HashSet<Vector2>();
-
-        float maxObstacleX = roomWidth / 2f - 2f;
-        float maxObstacleY = roomHeight / 2f - 2f;
-
-        foreach (Vector2 pos in floorPos)
-        {
-            if (Mathf.Abs(pos.x) < maxObstacleX && Mathf.Abs(pos.y) < maxObstacleY) // away from edges
-                validObstaclePos.Add(pos);
-        }
-
-        obstacleCount = Mathf.Min(Random.Range(minObstacleCount, maxObstacleCount + 1), validObstaclePos.Count);
-
-        for (int i = 0; i < validObstaclePos.Count; i++)
-        {
-            int idx = Random.Range(i, validObstaclePos.Count);
-            (validObstaclePos[i], validObstaclePos[idx]) = (validObstaclePos[idx], validObstaclePos[i]);
-        } // shuffle valid positions
-        for (int i = 0; i < obstacleCount; i++)
-        {
-            Instantiate(obstaclePrefab, validObstaclePos[i], Quaternion.identity);
-            obstaclePosOccupied.Add(validObstaclePos[i]);
-        }
-    }
-
-    private void BuildOpenFloorPos()
-    {
-        openFloorPos = new List<Vector2>();
-        foreach (Vector2 pos in floorPos)
-        {
-            if (!obstaclePosOccupied.Contains(pos))
-                openFloorPos.Add(pos);
-        }
-    }
-
-    public bool IsObstacleAt(Vector2 position)
-    {
-        return obstaclePosOccupied.Contains(position);
     }
 }

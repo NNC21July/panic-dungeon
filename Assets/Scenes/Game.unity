@@ -2469,6 +2469,52 @@ MonoBehaviour:
   roundManager: {fileID: 1320489636}
   playerReset: {fileID: 1842462775}
   debugDamage: 25
+--- !u!1 &1212292211
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1212292212}
+  - component: {fileID: 1212292213}
+  m_Layer: 0
+  m_Name: GameSetup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1212292212
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1212292211}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.33516, y: -1.66497, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1212292213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1212292211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74b56d747cda38d47b7cbfcd444c2376, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameSetup
+  roomGen: {fileID: 1581613498}
+  trapSetup: {fileID: 1581613497}
 --- !u!1 &1320489635
 GameObject:
   m_ObjectHideFlags: 0
@@ -4255,6 +4301,7 @@ GameObject:
   - component: {fileID: 1581613495}
   - component: {fileID: 1581613497}
   - component: {fileID: 1581613496}
+  - component: {fileID: 1581613498}
   m_Layer: 0
   m_Name: Room
   m_TagString: Untagged
@@ -4317,13 +4364,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f83ee81b62c56fb4cb3b09aeffcc114b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomSetup
+  roomGen: {fileID: 1581613498}
   spikePrefab: {fileID: 2753618772539717533, guid: cde598dbeef7ec64d8b661602c3eaac2, type: 3}
   arrowShooterPrefab: {fileID: 7209610349157881659, guid: 2bfd94c6da2f93848b0ae60059dc2d8d, type: 3}
+--- !u!114 &1581613498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581613494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30ee37bdc603fb2488155f9359cff48a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomGenerator
+  roomConfig: {fileID: 11400000, guid: 110aee735beb0c946afb8ca9671b3538, type: 2}
+  floorTilemap: {fileID: 1513843380}
+  wallTilemap: {fileID: 947267148}
+  floorTile: {fileID: 11400000, guid: da22d1f08c23df24bb9131db4d58ba23, type: 2}
+  wallTile: {fileID: 11400000, guid: 51c6e1057866847439c260f8f3bbba93, type: 2}
+  roomGrid: {fileID: 611259660}
   obstaclePrefab: {fileID: 6876958178202619608, guid: 42b940da8cce26446877a43eb0038437, type: 3}
-  roomWidth: 14
-  roomHeight: 8
-  minObstacleCount: 6
-  maxObstacleCount: 9
+  roomCamera: {fileID: 519420031}
+  cameraPadding: 1
 --- !u!1 &1597825350
 GameObject:
   m_ObjectHideFlags: 0
@@ -5544,3 +5608,4 @@ SceneRoots:
   - {fileID: 107502593}
   - {fileID: 1209328740}
   - {fileID: 1597825351}
+  - {fileID: 1212292212}

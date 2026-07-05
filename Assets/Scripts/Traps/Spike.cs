@@ -14,6 +14,8 @@ public class Spike : MonoBehaviour
     [SerializeField] private ParticleSystem impactEffect;
     [SerializeField] private AudioClip impactSfx;
     [SerializeField] private Collider2D solidTipCollider;
+    [SerializeField] private Transform tipPoint;
+    [SerializeField] private SpriteRenderer pillarBody;
     private Vector2 originPos, targetPos, blockedAt = new Vector2(0, 0);
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
@@ -25,6 +27,7 @@ public class Spike : MonoBehaviour
     private float blockedPathProgress;
     private const float laneTolerance = 0.01f;
     public float MoveDuration => moveDuration;
+    public Vector2 TipPos => tipPoint.position;
 
     private void Awake()
     {
@@ -42,6 +45,21 @@ public class Spike : MonoBehaviour
     {
         originPos = origin;
         targetPos = target;
+    }
+
+    public void ConfigureBodyLength(float worldLength)
+    {
+        float parentScaleY = Mathf.Abs(transform.lossyScale.y),
+              localLength = worldLength / parentScaleY,
+              originalSpriteHeight = pillarBody.sprite.bounds.size.y;
+        Vector3 bodyScale = pillarBody.transform.localScale;
+        bodyScale.y = localLength / originalSpriteHeight;
+        pillarBody.transform.localScale = bodyScale;
+
+        float spikeBaseY = spriteRenderer.sprite.bounds.min.y;
+        Vector3 bodyPos = pillarBody.transform.localPosition;
+        bodyPos.y = spikeBaseY - localLength / 2f;
+        pillarBody.transform.localPosition = bodyPos;
     }
 
     public void ForceIdle()

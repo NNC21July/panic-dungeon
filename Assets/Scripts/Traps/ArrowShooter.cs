@@ -30,13 +30,25 @@ public class ArrowShooter : MonoBehaviour
         warningLine.enabled = false;
     }
 
-    public void Configure(Vector2 direction)
+    public void Configure(Vector2 direction, float worldWarningLineLength, float shooterHalfWidth)
     {
         if (direction == Vector2.zero)
             throw new ArgumentException("Arrow shooter direction cannot be zero");
         fireDirection = direction.normalized;
         float angle = Mathf.Atan2(fireDirection.y, fireDirection.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+        float parentScaleX = Mathf.Abs(transform.lossyScale.x),
+              localLineLength = worldWarningLineLength / parentScaleX,
+              originalSpriteWidth = warningLine.sprite.bounds.size.x;
+        Vector3 lineScale = warningLine.transform.localScale;
+        lineScale.x = localLineLength / originalSpriteWidth;
+        warningLine.transform.localScale = lineScale;
+
+        float localShooterHalfWidth = shooterHalfWidth / parentScaleX;
+        Vector3 warningLinePos = warningLine.transform.localPosition;
+        warningLinePos.x = localShooterHalfWidth + localLineLength / 2f;
+        warningLine.transform.localPosition = warningLinePos;
     }
 
     public bool Activate(float newWarningDuration, float newWarningFlashDuration)
