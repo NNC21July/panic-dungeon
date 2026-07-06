@@ -164,9 +164,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   zombiePrefab: {fileID: 3173654992330719351, guid: cc122a6cc96e7ad4b99001ba2bd3d568, type: 3}
-  trapSetup: {fileID: 1581613497}
+  roomGen: {fileID: 1581613498}
   spawnDelay: 10
-  maxEnemiesAlive: 4
+  maxEnemiesAlive: 10
   player: {fileID: 1928801689}
   minSpawnDist: 3
 --- !u!1 &298813627
@@ -2515,6 +2515,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameSetup
   roomGen: {fileID: 1581613498}
   trapSetup: {fileID: 1581613497}
+  playerSpawn: {fileID: 1966546291}
 --- !u!1 &1320489635
 GameObject:
   m_ObjectHideFlags: 0
@@ -4345,8 +4346,8 @@ MonoBehaviour:
   warningDurationReduction: 0.1
   warningFlashDuration: 1
   spikeRetractDelay: 2
-  initEnemySpawnInterval: 3
-  minEnemySpawnInterval: 1.5
+  initEnemySpawnInterval: 2
+  minEnemySpawnInterval: 1
   enemySpawnIntervalReduction: 0.1
   diffScaleInterval: 6
   enemySpawner: {fileID: 107502594}

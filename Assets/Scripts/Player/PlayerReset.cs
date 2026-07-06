@@ -29,7 +29,7 @@ public class PlayerReset : MonoBehaviour
     {
         effectController.StopAllEffects();
         health.ResetHealth();
-        rb.MovePosition(spawnPos);
+        rb.position = spawnPos;
         playerMovement.ResetMovement();
         playerDash.ResetDash();
         playerCombat.ResetCombat();

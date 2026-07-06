@@ -9,6 +9,7 @@ public class ArrowPattern : ITrapPattern
     private readonly float warningFlashDuration;
     private bool isActive;
     public bool IsActive => isActive;
+    public bool PreventsEnemySpawning => false;
 
     public ArrowPattern(IReadOnlyList<ArrowShooter> shooters, AudioClip warningSfx, float warningFlashDuration)
     {

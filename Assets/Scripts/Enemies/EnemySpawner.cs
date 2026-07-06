@@ -5,12 +5,12 @@ using UnityEngine;
 public class EnemySpawner : MonoBehaviour
 {
     [SerializeField] private ZombieAI zombiePrefab;
-    [SerializeField] private TrapSetup trapSetup;
+    [SerializeField] private RoomGenerator roomGen;
     [SerializeField] private float spawnDelay = 10f;
     [SerializeField] private int maxEnemiesAlive = 4;
     [SerializeField] private Transform player;
     [SerializeField, Min(0f)] private float minSpawnDist = 3f;
-    private bool spawning = false;
+    private bool spawning = false, spawnPaused;
     private Coroutine spawnCoroutine;
     private List<ZombieAI> activeEnemies;
     private DifficultyScaler difficultyScaler;
@@ -37,6 +37,7 @@ public class EnemySpawner : MonoBehaviour
 
     public void StopSpawning()
     {
+        SetSpawnPaused(false);
         spawning = false;
         if (spawnCoroutine != null)
         {
@@ -51,14 +52,30 @@ public class EnemySpawner : MonoBehaviour
         activeEnemies.Clear();
     }
 
-    private Vector2 GetSpawnPos()
+    public void SetSpawnPaused(bool paused)
     {
-        Vector2 spawnPos;
-        do
+        spawnPaused = paused;
+    }
+
+    private bool TryGetSpawnPos(out Vector2 spawnPos)
+    {
+        spawnPos = default;
+        if (roomGen.OpenFloorPos.Count == 0)
+            return false;
+        float minSpawnDistSqr = minSpawnDist * minSpawnDist;
+        int startIdx = Random.Range(0, roomGen.OpenFloorPos.Count);
+        for (int i = 0; i < roomGen.OpenFloorPos.Count; i++)
         {
-            spawnPos = trapSetup.OpenFloorPos[Random.Range(0, trapSetup.OpenFloorPos.Count)];
-        } while (((Vector2)player.position - spawnPos).sqrMagnitude < minSpawnDist * minSpawnDist); // too near player
-        return spawnPos;
+            int idx = (startIdx + i) % roomGen.OpenFloorPos.Count;
+            Vector2 candidate = roomGen.OpenFloorPos[idx];
+            float distSqr = ((Vector2)player.position - candidate).sqrMagnitude;
+            if (distSqr >= minSpawnDistSqr)
+            {
+                spawnPos = candidate;
+                return true;
+            }
+        }
+        return false;
     }
 
     private IEnumerator Spawn()
@@ -68,8 +85,8 @@ public class EnemySpawner : MonoBehaviour
         {
             activeEnemies.RemoveAll(enemy => enemy == null || !enemy.gameObject.activeSelf);
 
-            if (activeEnemies.Count < maxEnemiesAlive)
-                activeEnemies.Add(Instantiate(zombiePrefab, GetSpawnPos(), Quaternion.identity));
+            if (activeEnemies.Count < maxEnemiesAlive && !spawnPaused && TryGetSpawnPos(out Vector2 spawnPos))
+                activeEnemies.Add(Instantiate(zombiePrefab, spawnPos, Quaternion.identity));
 
             yield return new WaitForSeconds(difficultyScaler.CurEnemySpawnInterval);
         }

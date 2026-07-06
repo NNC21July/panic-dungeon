@@ -31,6 +31,7 @@ public class RoomGenerator : MonoBehaviour
     public IReadOnlyCollection<Vector2> ObstaclePos => obstaclePos;
     public Vector2 FloorBotLeft { get; private set; }
     public Vector2 FloorTopRight { get; private set; }
+    public Vector2 FloorCentre { get; private set; }
 
     public void Generate()
     {
@@ -98,6 +99,7 @@ public class RoomGenerator : MonoBehaviour
     {
         FloorBotLeft = floorTilemap.CellToWorld(new Vector3Int(startX, startY, 0));
         FloorTopRight = floorTilemap.CellToWorld(new Vector3Int(endX + 1, endY + 1, 0));
+        FloorCentre = (FloorBotLeft + FloorTopRight) / 2f;
     }
 
     private void BuildFloorPos()
@@ -155,9 +157,32 @@ public class RoomGenerator : MonoBehaviour
 
     private void FrameCamera()
     {
-        float halfHeight = roomConfig.RoomWorldHeight * 0.5f + cameraPadding,
-        halfWidth = roomConfig.RoomWorldWidth * 0.5f + cameraPadding;
+        Vector3 camPos = roomCamera.transform.position;
+        camPos.x = FloorCentre.x; camPos.y = FloorCentre.y;
+        roomCamera.transform.position = camPos;
+
+        float halfWidth = (FloorTopRight.x - FloorBotLeft.x) / 2f + cameraPadding,
+        halfHeight = (FloorTopRight.y - FloorBotLeft.y) / 2f + cameraPadding;
 
         roomCamera.orthographicSize = Mathf.Max(halfHeight, halfWidth / roomCamera.aspect);
+    }
+
+    public Vector2 GetClosestOpenPos(Vector2 pos)
+    {
+        if (OpenFloorPos.Count == 0)
+            throw new System.InvalidOperationException("Open floor position empty!");
+
+        Vector2 closest = new();
+        float closestSqrDist = float.MaxValue;
+        foreach (Vector2 openPos in OpenFloorPos)
+        {
+            float sqrDist = (openPos - pos).sqrMagnitude;
+            if (sqrDist < closestSqrDist)
+            {
+                closest = openPos;
+                closestSqrDist = sqrDist;
+            }
+        }
+        return closest;
     }
 }

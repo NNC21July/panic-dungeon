@@ -10,6 +10,7 @@ public class SpikePattern : ITrapPattern
     private readonly float warningFlashDuration, retractDelay;
     private bool isActive;
     public bool IsActive => isActive;
+    public bool PreventsEnemySpawning => true;
 
     public SpikePattern(IReadOnlyList<Spike> spikes, AudioClip warningSfx, float warningFlashDuration, float retractDelay)
     {

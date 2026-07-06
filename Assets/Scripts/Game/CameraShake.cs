@@ -17,6 +17,10 @@ public class CameraShake : MonoBehaviour
             return;
         }
         Instance = this;
+    }
+
+    private void Start()
+    {
         camOriginalPos = transform.localPosition;
     }
 
@@ -46,6 +50,9 @@ public class CameraShake : MonoBehaviour
     {
         if (!isActiveAndEnabled || duration <= 0f || strength <= 0f)
             return;
+
+        if (shakeCoroutine == null)
+            camOriginalPos = transform.localPosition;
 
         if (shakeFadeDuration > 0f)
             curStrength *= Mathf.Clamp01(remShakeTime / shakeFadeDuration);

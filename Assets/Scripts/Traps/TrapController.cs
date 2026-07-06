@@ -115,8 +115,10 @@ public class TrapController : MonoBehaviour
         while (roundActive)
         {
             curPattern = SelectRandomPattern();
+            enemySpawner.SetSpawnPaused(curPattern.PreventsEnemySpawning);
             yield return curPattern.Run(difficultyScaler.CurWarningDuration);
             curPattern = null;
+            enemySpawner.SetSpawnPaused(false);
 
             yield return new WaitForSeconds(difficultyScaler.CurSpikeInterval);
         }
