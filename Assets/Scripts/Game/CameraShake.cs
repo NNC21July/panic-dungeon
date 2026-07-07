@@ -1,12 +1,12 @@
-using System.Collections;
+using Unity.Cinemachine;
 using UnityEngine;
 
+[RequireComponent(typeof(CinemachineImpulseSource))]
 public class CameraShake : MonoBehaviour
 {
-    [SerializeField, Min(0f)] private float defaultDuration = 0.12f, defaultStrength = 0.02f, maxStrength = 0.2f;
-    private Vector3 camOriginalPos;
-    private float remShakeTime, curStrength, shakeFadeDuration;
-    private Coroutine shakeCoroutine;
+    [SerializeField, Min(0f)] private float defaultStrength = 0.02f, maxStrength = 0.2f;
+    private float pendingStrength;
+    private CinemachineImpulseSource impulseSource;
     public static CameraShake Instance { get; private set; }
 
     private void Awake()
@@ -17,22 +17,21 @@ public class CameraShake : MonoBehaviour
             return;
         }
         Instance = this;
+        impulseSource = GetComponent<CinemachineImpulseSource>();
     }
 
-    private void Start()
+    private void LateUpdate()
     {
-        camOriginalPos = transform.localPosition;
-    }
-
-    private void OnDisable()
-    {
-        if (Instance != this)
+        if (pendingStrength == 0f)
             return;
 
-        if (shakeCoroutine != null)
-            StopCoroutine(shakeCoroutine);
+        Vector2 dir = Random.insideUnitCircle.normalized;
+        if (dir == Vector2.zero)
+            dir = Vector2.up;
 
-        Restore();
+        Vector3 velocity = (Vector3)dir * pendingStrength;
+        impulseSource.GenerateImpulse(velocity);
+        pendingStrength = 0f;
     }
 
     private void OnDestroy()
@@ -43,48 +42,13 @@ public class CameraShake : MonoBehaviour
 
     public void AddShake()
     {
-        AddShake(defaultDuration, defaultStrength);
+        AddShake(defaultStrength);
     }
 
-    public void AddShake(float duration, float strength)
+    public void AddShake(float strength)
     {
-        if (!isActiveAndEnabled || duration <= 0f || strength <= 0f)
+        if (!isActiveAndEnabled || strength <= 0f)
             return;
-
-        if (shakeCoroutine == null)
-            camOriginalPos = transform.localPosition;
-
-        if (shakeFadeDuration > 0f)
-            curStrength *= Mathf.Clamp01(remShakeTime / shakeFadeDuration);
-
-        remShakeTime = Mathf.Max(remShakeTime, duration);
-        shakeFadeDuration = remShakeTime;
-        curStrength = Mathf.Min(curStrength + strength, maxStrength);
-
-        if (shakeCoroutine == null)
-            shakeCoroutine = StartCoroutine(ShakeRoutine());
-    }
-
-    private void Restore()
-    {
-        transform.localPosition = camOriginalPos;
-        remShakeTime = 0f;
-        shakeFadeDuration = 0f;
-        curStrength = 0f;
-        shakeCoroutine = null;
-    }
-
-    private IEnumerator ShakeRoutine()
-    {
-        while (remShakeTime > 0f)
-        {
-            float fade = Mathf.Clamp01(remShakeTime / shakeFadeDuration), fadedStrength = curStrength * fade;
-            Vector2 offset = Random.insideUnitCircle * fadedStrength;
-            transform.localPosition = camOriginalPos + new Vector3(offset.x, offset.y, 0f);
-
-            remShakeTime -= Time.unscaledDeltaTime;
-            yield return null;
-        }
-        Restore();
+        pendingStrength = Mathf.Min(pendingStrength + strength, maxStrength);
     }
 }

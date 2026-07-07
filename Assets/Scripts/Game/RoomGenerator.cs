@@ -17,9 +17,6 @@ public class RoomGenerator : MonoBehaviour
     [Header("Obstacles")]
     [SerializeField] private GameObject obstaclePrefab;
 
-    [Header("Camera")]
-    [SerializeField] private Camera roomCamera;
-    [SerializeField, Min(0f)] private float cameraPadding = 1f;
     private int startX, startY, endX, endY;
     private readonly List<Vector2> floorPos = new();
     private readonly List<Vector2> openFloorPos = new();
@@ -32,6 +29,8 @@ public class RoomGenerator : MonoBehaviour
     public Vector2 FloorBotLeft { get; private set; }
     public Vector2 FloorTopRight { get; private set; }
     public Vector2 FloorCentre { get; private set; }
+    public Vector2 OuterBotLeft { get; private set; }
+    public Vector2 OuterTopRight { get; private set; }
 
     public void Generate()
     {
@@ -45,7 +44,6 @@ public class RoomGenerator : MonoBehaviour
         BuildFloorPos();
         SpawnObstacles();
         BuildOpenFloorPos();
-        FrameCamera();
     }
 
     private void CalculateBounds()
@@ -100,6 +98,8 @@ public class RoomGenerator : MonoBehaviour
         FloorBotLeft = floorTilemap.CellToWorld(new Vector3Int(startX, startY, 0));
         FloorTopRight = floorTilemap.CellToWorld(new Vector3Int(endX + 1, endY + 1, 0));
         FloorCentre = (FloorBotLeft + FloorTopRight) / 2f;
+        OuterBotLeft = floorTilemap.CellToWorld(new Vector3Int(startX - 1, startY - 1, 0));
+        OuterTopRight = floorTilemap.CellToWorld(new Vector3Int(endX + 2, endY + 2, 0));
     }
 
     private void BuildFloorPos()
@@ -153,18 +153,6 @@ public class RoomGenerator : MonoBehaviour
             if (!obstaclePos.Contains(pos))
                 openFloorPos.Add(pos);
         }
-    }
-
-    private void FrameCamera()
-    {
-        Vector3 camPos = roomCamera.transform.position;
-        camPos.x = FloorCentre.x; camPos.y = FloorCentre.y;
-        roomCamera.transform.position = camPos;
-
-        float halfWidth = (FloorTopRight.x - FloorBotLeft.x) / 2f + cameraPadding,
-        halfHeight = (FloorTopRight.y - FloorBotLeft.y) / 2f + cameraPadding;
-
-        roomCamera.orthographicSize = Mathf.Max(halfHeight, halfWidth / roomCamera.aspect);
     }
 
     public Vector2 GetClosestOpenPos(Vector2 pos)
