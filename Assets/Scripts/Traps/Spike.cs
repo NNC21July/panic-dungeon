@@ -9,7 +9,7 @@ public class Spike : MonoBehaviour
 {
     private static readonly WaitForFixedUpdate FixedUpdateWait = new WaitForFixedUpdate();
     [SerializeField, Min(0.01f)] private float moveDuration = 5f;
-    [SerializeField, Min(0f)] private float damageAmount = 25f;
+    [SerializeField, Min(0f)] private float damageAmount = 25f, laneTolerance = 0f;
     [SerializeField] private Color warningFlashColor;
     [SerializeField] private ParticleSystem impactEffect;
     [SerializeField] private AudioClip impactSfx;
@@ -25,7 +25,6 @@ public class Spike : MonoBehaviour
     private Rigidbody2D rb;
     private HashSet<IDamageable> damagedTargets;
     private float blockedPathProgress;
-    private const float laneTolerance = 0.01f;
     public float MoveDuration => moveDuration;
     public Vector2 TipPos => tipPoint.position;
 
@@ -121,9 +120,8 @@ public class Spike : MonoBehaviour
 
         if (otherLayer == GameLayers.Obstacle) // stops when hitting an obstacle
         {
-            if (Mathf.Abs(other.transform.position.x - originPos.x) > laneTolerance) // check if obstacle is same lane with spike
-                return;
-            StopInPlace(true);
+            if (solidTipCollider.bounds.max.x >= other.bounds.min.x - laneTolerance && solidTipCollider.bounds.min.x <= other.bounds.max.x + laneTolerance) // check if spike and obstacle overlaps horizontally
+                StopInPlace(true);
             return;
         }
 

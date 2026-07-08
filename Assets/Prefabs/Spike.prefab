@@ -112,6 +112,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spike
   moveDuration: 2
   damageAmount: 25
+  laneTolerance: 0.01
   warningFlashColor: {r: 1, g: 0, b: 0, a: 0}
   impactEffect: {fileID: 5938633706130191656}
   impactSfx: {fileID: 8300000, guid: 406b63ad854b3d74f97c090e8d995884, type: 3}

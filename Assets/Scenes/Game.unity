@@ -2732,7 +2732,7 @@ MonoBehaviour:
   roomGen: {fileID: 1581613498}
   trapSetup: {fileID: 1581613497}
   playerSpawn: {fileID: 1966546291}
-  camConfineSetup: {fileID: 492969068}
+  camConfinerSetup: {fileID: 492969068}
 --- !u!1 &1320489635
 GameObject:
   m_ObjectHideFlags: 0

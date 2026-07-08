@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoomConfig
   roomWidth: 14
   roomHeight: 8
-  tileSize: 2
+  tileSize: 1.5
   edgePadding: 2
   spikeWidth: 2
   arrowShooterSpacing: 1

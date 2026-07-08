@@ -115,21 +115,42 @@ public class RoomGenerator : MonoBehaviour
     private void SpawnObstacles()
     {
         List<Vector2> spawnSpots = new();
+        List<Rect> occupiedAreas = new();
 
         foreach (Vector2 pos in floorPos)
             if (CanPlaceObstacle(pos))
                 spawnSpots.Add(pos);
 
-        int obstacleCount = Mathf.Min(Random.Range(roomConfig.MinObstacleCount, roomConfig.MaxObstacleCount + 1), spawnSpots.Count);
+        int obstacleCount = Mathf.Min(Random.Range(roomConfig.MinObstacleCount, roomConfig.MaxObstacleCount + 1), spawnSpots.Count), spawnedCount = 0;
         spawnSpots = spawnSpots.OrderBy(_ => Random.value).ToList();
-        for (int i = 0; i < obstacleCount; i++)
+        for (int i = 0; i < spawnSpots.Count && spawnedCount < obstacleCount; i++)
         {
-            Vector2 spawnPos = spawnSpots[i];
+            Vector2 spawnPos = spawnSpots[i], size = roomConfig.ObstacleSize;
+            Rect candidateArea = new Rect(spawnPos - size / 2f, size);
+            float shrink = 0.01f;
+            candidateArea.xMin += shrink;
+            candidateArea.xMax -= shrink;
+            candidateArea.yMin += shrink;
+            candidateArea.yMax -= shrink;
+
+            bool overlaps = false;
+            foreach (Rect occupied in occupiedAreas)
+            {
+                if (candidateArea.Overlaps(occupied))
+                {
+                    overlaps = true;
+                    break;
+                }
+            }
+            if (overlaps)
+                continue;
+
             GameObject obstacle = Instantiate(obstaclePrefab, spawnPos, Quaternion.identity, transform);
-            Vector2 size = roomConfig.ObstacleSize;
             obstacle.transform.localScale = new Vector3(size.x, size.y, 1f);
             spawnedObstacles.Add(obstacle);
             obstaclePos.Add(spawnPos);
+            occupiedAreas.Add(candidateArea);
+            spawnedCount++;
         }
     }
 
