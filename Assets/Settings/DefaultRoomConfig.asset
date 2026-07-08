@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoomConfig
   roomWidth: 14
   roomHeight: 8
-  tileSize: 1.5
+  tileSize: 1.79
   edgePadding: 2
   spikeWidth: 2
   arrowShooterSpacing: 1
-  obstacleSize: {x: 2, y: 2}
-  minObstacleCount: 6
-  maxObstacleCount: 9
+  obstacleSize: {x: 3, y: 2}
+  minObstacleCount: 15
+  maxObstacleCount: 15

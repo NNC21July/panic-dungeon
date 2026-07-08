@@ -9,8 +9,10 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float spawnDelay = 10f;
     [SerializeField] private int maxEnemiesAlive = 4;
     [SerializeField] private Transform player;
-    [SerializeField, Min(0f)] private float minSpawnDist = 3f;
+    [SerializeField, Min(0f)] private float minSpawnDist = 3f, spawnPadding = 0.1f;
+    [SerializeField] private LayerMask blockedSpawnLayers;
     private bool spawning = false, spawnPaused;
+    private float zombieSpawnCheckRadius;
     private Coroutine spawnCoroutine;
     private List<ZombieAI> activeEnemies;
     private DifficultyScaler difficultyScaler;
@@ -19,6 +21,13 @@ public class EnemySpawner : MonoBehaviour
     {
         SerializedFieldValidator.Validate(this);
         activeEnemies = new List<ZombieAI>();
+
+        CircleCollider2D zombieCollider = zombiePrefab.GetComponent<CircleCollider2D>();
+        if (zombieCollider == null)
+            throw new System.InvalidOperationException("Zombie prefab needs a CircleCollider2D for spawn clearance checks.");
+        Vector3 scale = zombieCollider.transform.localScale;
+        float maxScale = Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y));
+        zombieSpawnCheckRadius = zombieCollider.radius * maxScale + spawnPadding;
     }
 
     public void StartSpawning(DifficultyScaler difficultyScaler)
@@ -69,7 +78,7 @@ public class EnemySpawner : MonoBehaviour
             int idx = (startIdx + i) % roomGen.OpenFloorPos.Count;
             Vector2 candidate = roomGen.OpenFloorPos[idx];
             float distSqr = ((Vector2)player.position - candidate).sqrMagnitude;
-            if (distSqr >= minSpawnDistSqr)
+            if (distSqr >= minSpawnDistSqr && SpawnSpaceChecker.IsCircleAreaClear(candidate, zombieSpawnCheckRadius, blockedSpawnLayers))
             {
                 spawnPos = candidate;
                 return true;

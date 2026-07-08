@@ -9,7 +9,7 @@ public class Spike : MonoBehaviour
 {
     private static readonly WaitForFixedUpdate FixedUpdateWait = new WaitForFixedUpdate();
     [SerializeField, Min(0.01f)] private float moveDuration = 5f;
-    [SerializeField, Min(0f)] private float damageAmount = 25f, laneTolerance = 0f;
+    [SerializeField, Min(0f)] private float damageAmount = 25f, minLaneOverlap = 0f;
     [SerializeField] private Color warningFlashColor;
     [SerializeField] private ParticleSystem impactEffect;
     [SerializeField] private AudioClip impactSfx;
@@ -120,7 +120,7 @@ public class Spike : MonoBehaviour
 
         if (otherLayer == GameLayers.Obstacle) // stops when hitting an obstacle
         {
-            if (solidTipCollider.bounds.max.x >= other.bounds.min.x - laneTolerance && solidTipCollider.bounds.min.x <= other.bounds.max.x + laneTolerance) // check if spike and obstacle overlaps horizontally
+            if (solidTipCollider.bounds.max.x >= other.bounds.min.x + minLaneOverlap && solidTipCollider.bounds.min.x <= other.bounds.max.x - minLaneOverlap) // check if spike and obstacle overlaps horizontally
                 StopInPlace(true);
             return;
         }

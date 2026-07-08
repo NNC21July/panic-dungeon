@@ -21,16 +21,23 @@ public class RoomGenerator : MonoBehaviour
     private readonly List<Vector2> floorPos = new();
     private readonly List<Vector2> openFloorPos = new();
     private readonly List<GameObject> spawnedObstacles = new();
-    private readonly HashSet<Vector2> obstaclePos = new();
     public RoomConfig Config => roomConfig;
     public IReadOnlyList<Vector2> FloorPos => floorPos;
     public IReadOnlyList<Vector2> OpenFloorPos => openFloorPos;
-    public IReadOnlyCollection<Vector2> ObstaclePos => obstaclePos;
     public Vector2 FloorBotLeft { get; private set; }
     public Vector2 FloorTopRight { get; private set; }
     public Vector2 FloorCentre { get; private set; }
     public Vector2 OuterBotLeft { get; private set; }
     public Vector2 OuterTopRight { get; private set; }
+
+    [SerializeField] private GameObject openFloorDebugPrefab;
+    [SerializeField] private bool showOpenFloorDebug;
+    private readonly List<GameObject> openFloorDebugMarkers = new();
+
+    private void Awake()
+    {
+        SerializedFieldValidator.Validate(this);
+    }
 
     public void Generate()
     {
@@ -61,7 +68,6 @@ public class RoomGenerator : MonoBehaviour
 
         floorPos.Clear();
         openFloorPos.Clear();
-        obstaclePos.Clear();
 
         foreach (GameObject obstacle in spawnedObstacles)
         {
@@ -69,6 +75,13 @@ public class RoomGenerator : MonoBehaviour
                 Destroy(obstacle);
         }
         spawnedObstacles.Clear();
+
+        foreach (GameObject marker in openFloorDebugMarkers)
+        {
+            if (marker != null)
+                Destroy(marker);
+        }
+        openFloorDebugMarkers.Clear();
     }
 
     private void BuildFloorAndWalls()
@@ -148,7 +161,6 @@ public class RoomGenerator : MonoBehaviour
             GameObject obstacle = Instantiate(obstaclePrefab, spawnPos, Quaternion.identity, transform);
             obstacle.transform.localScale = new Vector3(size.x, size.y, 1f);
             spawnedObstacles.Add(obstacle);
-            obstaclePos.Add(spawnPos);
             occupiedAreas.Add(candidateArea);
             spawnedCount++;
         }
@@ -169,10 +181,39 @@ public class RoomGenerator : MonoBehaviour
     {
         openFloorPos.Clear();
 
+        List<Bounds> obstacleBounds = new();
+        foreach (GameObject obstacle in spawnedObstacles)
+            obstacleBounds.Add(obstacle.GetComponent<Collider2D>().bounds);
+
         foreach (Vector2 pos in floorPos)
         {
-            if (!obstaclePos.Contains(pos))
+            bool isBlocked = false;
+            foreach (Bounds bounds in obstacleBounds)
+            {
+                if (bounds.Contains(new Vector3(pos.x, pos.y, 0)))
+                {
+                    isBlocked = true;
+                    break;
+                }
+            }
+            if (!isBlocked)
                 openFloorPos.Add(pos);
+        }
+
+        if (showOpenFloorDebug)
+        {
+            foreach (GameObject marker in openFloorDebugMarkers)
+            {
+                if (marker != null)
+                    Destroy(marker);
+            }
+            openFloorDebugMarkers.Clear();
+            foreach (Vector2 pos in openFloorPos)
+            {
+                GameObject markers = Instantiate(openFloorDebugPrefab, pos, Quaternion.identity, transform);
+                markers.GetComponent<SpriteRenderer>().sortingOrder = 100;
+                openFloorDebugMarkers.Add(markers);
+            }
         }
     }
 

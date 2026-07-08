@@ -269,6 +269,9 @@ MonoBehaviour:
   maxEnemiesAlive: 10
   player: {fileID: 1928801689}
   minSpawnDist: 3
+  blockedSpawnLayers:
+    serializedVersion: 2
+    m_Bits: 576
 --- !u!1 &298813627
 GameObject:
   m_ObjectHideFlags: 0
@@ -595,6 +598,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraConfineSetup
   roomGen: {fileID: 1581613498}
   cameraConfiner: {fileID: 1863448661}
+--- !u!1 &500692968 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4898517791944016510, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
+  m_PrefabInstance: {fileID: 3040553813749101448}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -2733,6 +2741,10 @@ MonoBehaviour:
   trapSetup: {fileID: 1581613497}
   playerSpawn: {fileID: 1966546291}
   camConfinerSetup: {fileID: 492969068}
+  player: {fileID: 500692968}
+  blockedSpawnLayers:
+    serializedVersion: 2
+    m_Bits: 576
 --- !u!1 &1320489635
 GameObject:
   m_ObjectHideFlags: 0
@@ -4604,6 +4616,8 @@ MonoBehaviour:
   wallTile: {fileID: 11400000, guid: 51c6e1057866847439c260f8f3bbba93, type: 2}
   roomGrid: {fileID: 611259660}
   obstaclePrefab: {fileID: 6876958178202619608, guid: 42b940da8cce26446877a43eb0038437, type: 3}
+  openFloorDebugPrefab: {fileID: 6032694073199607087, guid: 2c046790e71143346ba6c4f2dffba528, type: 3}
+  showOpenFloorDebug: 1
 --- !u!1 &1597825350
 GameObject:
   m_ObjectHideFlags: 0
@@ -5059,7 +5073,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3389776890447986661, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
   m_PrefabInstance: {fileID: 3040553813749101448}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 500692968}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d328ccf8ecafeb147bf3ed331aec0beb, type: 3}
@@ -5070,7 +5084,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3430335798607547810, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
   m_PrefabInstance: {fileID: 3040553813749101448}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 500692968}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2617ec20724d51419394cdecc00bba3, type: 3}
@@ -5081,7 +5095,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2191763142315943645, guid: 221f658bf9ae5aa429f6e5824bcde998, type: 3}
   m_PrefabInstance: {fileID: 3040553813749101448}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 500692968}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c011ec1ba42e7f54db11cc9b3dbbcfb8, type: 3}
