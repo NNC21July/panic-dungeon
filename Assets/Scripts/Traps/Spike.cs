@@ -27,6 +27,7 @@ public class Spike : MonoBehaviour
     private float blockedPathProgress;
     public float MoveDuration => moveDuration;
     public Vector2 TipPos => tipPoint.position;
+    public Vector2 AttackDir => (targetPos - originPos).normalized;
 
     private void Awake()
     {

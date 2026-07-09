@@ -19,6 +19,7 @@ public class TrapController : MonoBehaviour
     [SerializeField] private EnemySpawner enemySpawner;
     [SerializeField] private AudioClip warningSfx;
     [SerializeField] private TrapSetup trapSetup;
+    [SerializeField] private HazardWarningUI hazardWarningUI;
     private bool roundActive = false;
     private Coroutine trapCoroutine, diffScaleCoroutine;
     private DifficultyScaler difficultyScaler;
@@ -42,10 +43,12 @@ public class TrapController : MonoBehaviour
 
     private void Start()
     {
-        topSpikes = new SpikePattern(trapSetup.TopSpikes, warningSfx, warningFlashDuration, spikeRetractDelay);
-        bottomSpikes = new SpikePattern(trapSetup.BottomSpikes, warningSfx, warningFlashDuration, spikeRetractDelay);
+        topSpikes = new SpikePattern(trapSetup.TopSpikes, warningSfx, warningFlashDuration, spikeRetractDelay, hazardWarningUI.ShowSpikeWarning, hazardWarningUI.HideSpikeWarning, true);
+        bottomSpikes = new SpikePattern(trapSetup.BottomSpikes, warningSfx, warningFlashDuration, spikeRetractDelay, hazardWarningUI.ShowSpikeWarning, hazardWarningUI.HideSpikeWarning, false);
+
         leftArrows = new ArrowPattern(trapSetup.LeftArrowShooters, warningSfx, warningFlashDuration);
         rightArrows = new ArrowPattern(trapSetup.RightArrowShooters, warningSfx, warningFlashDuration);
+
         patterns = new List<ITrapPattern> { topSpikes, bottomSpikes, leftArrows, rightArrows };
     }
 

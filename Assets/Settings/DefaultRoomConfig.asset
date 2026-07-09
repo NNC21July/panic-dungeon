@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b83ab8e89f6be384f84680a93e48e962, type: 3}
   m_Name: DefaultRoomConfig
   m_EditorClassIdentifier: Assembly-CSharp::RoomConfig
-  roomWidth: 14
-  roomHeight: 8
-  tileSize: 1.79
+  roomWidth: 30
+  roomHeight: 16
+  tileSize: 1
   edgePadding: 2
   spikeWidth: 2
   arrowShooterSpacing: 1
-  obstacleSize: {x: 3, y: 2}
-  minObstacleCount: 15
-  maxObstacleCount: 15
+  obstacleSize: {x: 2, y: 2}
+  minObstacleCount: 6
+  maxObstacleCount: 9
