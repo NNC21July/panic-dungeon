@@ -109,10 +109,14 @@ MonoBehaviour:
   arrowPrefab: {fileID: 7110287058057001547, guid: 33c93ca49ac38794dac6dda9cb86ebe1, type: 3}
   poisonArrowPrefab: {fileID: 8133907235440390880, guid: 40a5e4d490187ba4eb5f99815976de18, type: 3}
   poisonArrowChance: 0.2
-  warningFlashColor: {r: 1, g: 0, b: 0, a: 0}
+  warningFlashColor: {r: 1, g: 0, b: 0, a: 1}
   warningLine: {fileID: 9157084454565346206}
-  warningLineColor: 0.25
+  warningLineAlpha: 0.4
   fireSfx: {fileID: 8300000, guid: 2f6cc9b0b90e6a34dac50f77e08451db, type: 3}
+  chevronSprite: {fileID: 5338471990703137757, guid: 7f43555ac064bf04c98a400dccc8cf92, type: 3}
+  chevronSpacing: 4
+  chevronSpeed: 2
+  chevronColor: {r: 1, g: 1, b: 1, a: 0.5882353}
 --- !u!1 &3159433146652990197
 GameObject:
   m_ObjectHideFlags: 0
@@ -170,8 +174,8 @@ Transform:
   m_GameObject: {fileID: 5646928810163002053}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7, y: 0, z: 0}
-  m_LocalScale: {x: 15, y: 1, z: 1}
+  m_LocalPosition: {x: 9.8, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 0.47, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2643548089212394387}
@@ -225,8 +229,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0, b: 0, a: 0}
+  m_Sprite: {fileID: 3925503605050722388, guid: 3f7bfed20c6b1ee4db312930ce2520cd, type: 3}
+  m_Color: {r: 1, g: 0, b: 0, a: 0.39215687}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
