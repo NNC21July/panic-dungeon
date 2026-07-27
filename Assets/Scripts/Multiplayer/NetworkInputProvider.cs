@@ -19,14 +19,11 @@ public class NetworkInputProvider : MonoBehaviour
         moveAction.action.Enable();
     }
 
-    private void OnDisable()
-    {
-        if (moveAction != null)
-            moveAction.action.Disable();
-    }
-
     public void CollectInput(NetworkRunner runner, NetworkInput input)
     {
+        if (!moveAction.action.enabled)
+            moveAction.action.Enable();
+
         NetworkInputData inputData = new NetworkInputData
         {
             MoveDir = moveAction.action.ReadValue<Vector2>()

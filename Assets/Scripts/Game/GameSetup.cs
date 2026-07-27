@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GameSetup : MonoBehaviour
 {
@@ -9,13 +10,22 @@ public class GameSetup : MonoBehaviour
     [SerializeField] private GameObject player;
     [SerializeField] private LayerMask blockedSpawnLayers;
     [SerializeField, Min(0f)] private float spawnPadding = 0.1f;
+    [SerializeField] private bool useFixedRoomSeed, spawnTraps = true;
+    [SerializeField] private int roomSeed = 12345;
+    [SerializeField] private Transform[] additionalPlayerSpawns = System.Array.Empty<Transform>();
     private float playerSpawnCheckRadius;
 
     private void Awake()
     {
         SerializedFieldValidator.Validate(this);
 
+        UnityEngine.Random.State prevRandomState = UnityEngine.Random.state;
+        if (useFixedRoomSeed)
+            UnityEngine.Random.InitState(roomSeed);
         roomGen.Generate();
+        if (useFixedRoomSeed)
+            UnityEngine.Random.state = prevRandomState;
+
         Physics2D.SyncTransforms();
         camConfinerSetup.ConfigureBounds();
 
@@ -26,11 +36,26 @@ public class GameSetup : MonoBehaviour
         float maxScale = Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y));
         playerSpawnCheckRadius = playerCollider.radius * maxScale + spawnPadding;
 
-        playerSpawn.position = GetClosestClearSpawnPos(roomGen.FloorCentre);
-        trapSetup.SpawnTraps();
+        List<Vector2> reservedSpawns = new();
+        PositionSpawn(playerSpawn, reservedSpawns);
+        foreach (Transform extraSpawn in additionalPlayerSpawns)
+            PositionSpawn(extraSpawn, reservedSpawns);
+
+        if (spawnTraps)
+            trapSetup.SpawnTraps();
     }
 
-    private Vector2 GetClosestClearSpawnPos(Vector2 targetPos)
+    private void PositionSpawn(Transform spawn, List<Vector2> reservedSpawns)
+    {
+        if (spawn == null)
+            throw new System.InvalidOperationException("An additional player spawn is missing.");
+
+        Vector2 pos = GetClosestClearSpawnPos(roomGen.FloorCentre, reservedSpawns);
+        spawn.position = pos;
+        reservedSpawns.Add(pos);
+    }
+
+    private Vector2 GetClosestClearSpawnPos(Vector2 targetPos, List<Vector2> reservedSpawns)
     {
         Vector2 closest = default;
         float closestSqrDist = float.MaxValue;
@@ -38,6 +63,9 @@ public class GameSetup : MonoBehaviour
 
         foreach (Vector2 openPos in roomGen.OpenFloorPos)
         {
+            if (reservedSpawns.Contains(openPos))
+                continue;
+
             if (!SpawnSpaceChecker.IsCircleAreaClear(openPos, playerSpawnCheckRadius, blockedSpawnLayers))
                 continue;
 
