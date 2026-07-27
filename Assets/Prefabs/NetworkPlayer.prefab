@@ -430,6 +430,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerMovement
   moveSpeed: 5
+  acceleration: 50
+  deceleration: 50
+  collisionSkin: 0.02
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 576
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0
