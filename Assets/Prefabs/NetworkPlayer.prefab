@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 3207690917537043558}
   - component: {fileID: 7850645773688092266}
   - component: {fileID: 604642237215053626}
+  - component: {fileID: 5217935738293506594}
   m_Layer: 3
   m_Name: NetworkPlayer
   m_TagString: Untagged
@@ -376,6 +377,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 7850645773688092266}
   - {fileID: 604642237215053626}
+  - {fileID: 5217935738293506594}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7850645773688092266
 MonoBehaviour:
@@ -436,6 +438,18 @@ MonoBehaviour:
   collisionMask:
     serializedVersion: 2
     m_Bits: 576
+--- !u!114 &5217935738293506594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2da822b2c5e0e141a90639aa7f8e43d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkLocalPlayerCamera
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0

@@ -88,12 +88,10 @@ public class NetworkLauncher : MonoBehaviour
 
     private NetworkRunner GetConnectedRunner()
     {
-        foreach (NetworkRunner runner in NetworkRunner.Instances)
-        {
-            bool connected = runner != null && runner.IsRunning && (runner.IsServer || runner.IsConnectedToServer);
-            if (connected)
-                return runner;
-        }
-        return null;
+        NetworkRunner runner = NetworkRunner.GetRunnerForGameObject(gameObject);
+
+        bool connected = runner != null && runner.IsRunning && (runner.IsServer || runner.IsConnectedToServer);
+
+        return connected ? runner : null;
     }
 }

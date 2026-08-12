@@ -16,6 +16,7 @@ public class EnemySpawner : MonoBehaviour
     private Coroutine spawnCoroutine;
     private List<ZombieAI> activeEnemies;
     private DifficultyScaler difficultyScaler;
+    private PhysicsScene2D physicsScene;
 
     private void Awake()
     {
@@ -28,6 +29,8 @@ public class EnemySpawner : MonoBehaviour
         Vector3 scale = zombieCollider.transform.localScale;
         float maxScale = Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y));
         zombieSpawnCheckRadius = zombieCollider.radius * maxScale + spawnPadding;
+
+        physicsScene = gameObject.scene.GetPhysicsScene2D();
     }
 
     public void StartSpawning(DifficultyScaler difficultyScaler)
@@ -78,7 +81,7 @@ public class EnemySpawner : MonoBehaviour
             int idx = (startIdx + i) % roomGen.OpenFloorPos.Count;
             Vector2 candidate = roomGen.OpenFloorPos[idx];
             float distSqr = ((Vector2)player.position - candidate).sqrMagnitude;
-            if (distSqr >= minSpawnDistSqr && SpawnSpaceChecker.IsCircleAreaClear(candidate, zombieSpawnCheckRadius, blockedSpawnLayers))
+            if (distSqr >= minSpawnDistSqr && SpawnSpaceChecker.IsCircleAreaClear(candidate, zombieSpawnCheckRadius, blockedSpawnLayers, physicsScene))
             {
                 spawnPos = candidate;
                 return true;

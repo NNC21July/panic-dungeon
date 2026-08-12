@@ -14,10 +14,13 @@ public class GameSetup : MonoBehaviour
     [SerializeField] private int roomSeed = 12345;
     [SerializeField] private Transform[] additionalPlayerSpawns = System.Array.Empty<Transform>();
     private float playerSpawnCheckRadius;
+    private PhysicsScene2D physicsScene;
 
     private void Awake()
     {
         SerializedFieldValidator.Validate(this);
+
+        physicsScene = gameObject.scene.GetPhysicsScene2D();
 
         UnityEngine.Random.State prevRandomState = UnityEngine.Random.state;
         if (useFixedRoomSeed)
@@ -66,7 +69,7 @@ public class GameSetup : MonoBehaviour
             if (reservedSpawns.Contains(openPos))
                 continue;
 
-            if (!SpawnSpaceChecker.IsCircleAreaClear(openPos, playerSpawnCheckRadius, blockedSpawnLayers))
+            if (!SpawnSpaceChecker.IsCircleAreaClear(openPos, playerSpawnCheckRadius, blockedSpawnLayers, physicsScene))
                 continue;
 
             float sqrDist = (openPos - targetPos).sqrMagnitude;

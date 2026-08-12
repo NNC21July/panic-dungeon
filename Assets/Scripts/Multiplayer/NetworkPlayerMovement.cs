@@ -54,7 +54,8 @@ public class NetworkPlayerMovement : NetworkBehaviour
         float radius = bodyCollider.radius * Mathf.Max(scale.x, scale.y);
         Vector2 castOrigin = bodyPos + Vector2.Scale(bodyCollider.offset, scale);
 
-        RaycastHit2D hit = Physics2D.CircleCast(castOrigin, radius, dir, distance + collisionSkin, collisionMask);
+        PhysicsScene2D physicsScene = Runner.GetPhysicsScene2D();
+        RaycastHit2D hit = physicsScene.CircleCast(castOrigin, radius, dir, distance + collisionSkin, collisionMask);
         // if a circle of this size moved in this direction, what would it hit?
 
         if (hit.collider == null)
