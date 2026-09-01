@@ -5,10 +5,15 @@ using UnityEngine;
 [RequireComponent(typeof(CircleCollider2D))]
 public class NetworkPlayerMovement : NetworkBehaviour
 {
-    [SerializeField, Min(0f)] private float moveSpeed = 5f, acceleration = 50f, deceleration = 50f, collisionSkin = 0.02f;
+    [SerializeField, Min(0f)] private float moveSpeed = 5f, acceleration = 50f, deceleration = 50f, collisionSkin = 0.02f, dashSpeed = 22f, dashDuration = 0.15f, dashCooldown = 1f;
     [SerializeField] private LayerMask collisionMask;
     [Networked] private Vector2 CurVelocity { get; set; }
+    [Networked] private bool IsDashing { get; set; }
+    [Networked] private float DashTimer { get; set; }
+    [Networked] private float CooldownTimer { get; set; }
+    [Networked] private Vector2 DashDirection { get; set; }
     private CircleCollider2D bodyCollider;
+    private Vector2 lastMoveDirection = Vector2.right;
 
     private void Awake()
     {
@@ -20,14 +25,37 @@ public class NetworkPlayerMovement : NetworkBehaviour
         if (!GetInput(out NetworkInputData inputData))
             return;
 
-        Vector2 dir = inputData.MoveDir.normalized,
-            targetVelocity = dir * moveSpeed;
-        float changeRate = dir == Vector2.zero ? deceleration : acceleration;
+        if (inputData.Buttons.IsSet(NetworkInputButton.Dash) && CooldownTimer <= 0f && !IsDashing)
+        {
+            IsDashing = true;
+            DashDirection = lastMoveDirection;
+            DashTimer = dashDuration;
+            CooldownTimer = dashCooldown;
+        }
 
-        CurVelocity = Vector2.MoveTowards(CurVelocity, targetVelocity, changeRate * Runner.DeltaTime);
+        if (inputData.MoveDir != Vector2.zero)
+            lastMoveDirection = inputData.MoveDir.normalized;
 
-        Vector2 movement = CurVelocity * Runner.DeltaTime;
-        MoveWithStaticCollision(movement);
+        if (IsDashing)
+        {
+            DashTimer -= Runner.DeltaTime;
+            Vector2 dashMovement = DashDirection * dashSpeed * Runner.DeltaTime;
+            MoveWithStaticCollision(dashMovement);
+            if (DashTimer <= 0f)
+                IsDashing = false;
+        }
+        else
+        {
+            Vector2 dir = inputData.MoveDir.normalized, targetVelocity = dir * moveSpeed;
+            float changeRate = dir == Vector2.zero ? deceleration : acceleration;
+
+            CurVelocity = Vector2.MoveTowards(CurVelocity, targetVelocity, changeRate * Runner.DeltaTime);
+
+            Vector2 movement = CurVelocity * Runner.DeltaTime;
+            MoveWithStaticCollision(movement);
+        }
+        if (CooldownTimer > 0f)
+            CooldownTimer -= Runner.DeltaTime;
     }
 
     private void MoveWithStaticCollision(Vector2 movement)

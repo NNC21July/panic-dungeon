@@ -453,6 +453,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkInputProvider
   moveAction: {fileID: 4083755029162631677, guid: 4c8a0a5a8123c1c4795ff7d58207dcc3, type: 3}
+  dashAction: {fileID: -820681134634789287, guid: 4c8a0a5a8123c1c4795ff7d58207dcc3, type: 3}
+  attackAction: {fileID: 1994966078959137340, guid: 4c8a0a5a8123c1c4795ff7d58207dcc3, type: 3}
 --- !u!1 &331168168
 GameObject:
   m_ObjectHideFlags: 0

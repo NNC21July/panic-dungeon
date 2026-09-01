@@ -23,6 +23,8 @@ GameObject:
   - component: {fileID: 7850645773688092266}
   - component: {fileID: 604642237215053626}
   - component: {fileID: 5217935738293506594}
+  - component: {fileID: 5266316607965859844}
+  - component: {fileID: 4097093076710487639}
   m_Layer: 3
   m_Name: NetworkPlayer
   m_TagString: Untagged
@@ -378,6 +380,8 @@ MonoBehaviour:
   - {fileID: 7850645773688092266}
   - {fileID: 604642237215053626}
   - {fileID: 5217935738293506594}
+  - {fileID: 5266316607965859844}
+  - {fileID: 4097093076710487639}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7850645773688092266
 MonoBehaviour:
@@ -435,6 +439,9 @@ MonoBehaviour:
   acceleration: 50
   deceleration: 50
   collisionSkin: 0.02
+  dashSpeed: 22
+  dashDuration: 0.15
+  dashCooldown: 1
   collisionMask:
     serializedVersion: 2
     m_Bits: 576
@@ -450,6 +457,69 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2da822b2c5e0e141a90639aa7f8e43d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkLocalPlayerCamera
+--- !u!114 &5266316607965859844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ddb7efab65339c4a938e356f9e65c12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerCombat
+  attackCooldown: 0.45
+  swordPivot: {fileID: 4601009103805240474}
+  swordTrail: {fileID: 2307018436511758571}
+  swingAngle: 120
+  swingDuration: 0.3
+  swingCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  swordRenderer: {fileID: 2062627508772007368}
+  damage: 35
+  swordHitbox: {fileID: 1558956650081737702}
+  damageableLayers:
+    serializedVersion: 2
+    m_Bits: 8
+--- !u!114 &4097093076710487639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba75892567fabde42abe1c9ee7e5fc35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkHealth
+  maxHealth: 100
+  _CurrentHealth: 0
+  _IsDead:
+    RawValue: 0
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0
