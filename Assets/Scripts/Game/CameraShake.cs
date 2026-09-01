@@ -1,4 +1,5 @@
 using Unity.Cinemachine;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 [RequireComponent(typeof(CinemachineImpulseSource))]
@@ -11,13 +12,30 @@ public class CameraShake : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this);
-            return;
-        }
-        Instance = this;
+        if (Instance == null)
+            Instance = this;
         impulseSource = GetComponent<CinemachineImpulseSource>();
+    }
+
+    public static CameraShake FindInScene(Scene scene)
+    {
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            CameraShake cameraShake =
+                root.GetComponentInChildren<CameraShake>(
+                    includeInactive: true
+                );
+            if (cameraShake != null)
+                return cameraShake;
+        }
+        return null;
+    }
+
+    public void SetImpulseChannel(int channel)
+    {
+        if (channel == 0)
+            return;
+        impulseSource.ImpulseDefinition.ImpulseChannel = channel;
     }
 
     private void LateUpdate()

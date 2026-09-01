@@ -2,6 +2,7 @@ using Fusion;
 using UnityEngine;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(NetworkHealth))]
 public class NetworkPlayerCombat : NetworkBehaviour
 {
     [SerializeField, Min(0f)] private float attackCooldown = 0.45f;
@@ -22,6 +23,7 @@ public class NetworkPlayerCombat : NetworkBehaviour
     private readonly Collider2D[] hitResults = new Collider2D[8];
     private readonly HashSet<NetworkHealth> damagedTargets = new HashSet<NetworkHealth>();
     private ContactFilter2D hitFilter;
+    private NetworkHealth networkHealth;
 
     private void Awake()
     {
@@ -30,10 +32,18 @@ public class NetworkPlayerCombat : NetworkBehaviour
         hitFilter = new ContactFilter2D();
         hitFilter.SetLayerMask(damageableLayers);
         hitFilter.useTriggers = true;
+        networkHealth = GetComponent<NetworkHealth>();
     }
 
     public override void FixedUpdateNetwork()
     {
+        if (networkHealth.IsDead)
+        {
+            IsAttacking = false;
+            AttackTimer = 0f;
+            return;
+        }
+
         if (!GetInput(out NetworkInputData inputData))
             return;
 

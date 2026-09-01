@@ -1,27 +1,38 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Health))]
 [RequireComponent(typeof(SpriteRenderer))]
 public class DamageFlash : MonoBehaviour
 {
-    private Health health;
-    private SpriteRenderer spriteRenderer;
     [SerializeField] private Color flashColor;
     [SerializeField] private float flashDuration;
+    private Health health;
+    private SpriteRenderer spriteRenderer;
     private Color originalColor;
     private Coroutine flashCoroutine;
+    private NetworkHealth networkHealth;
 
     private void Awake()
     {
-        health = GetComponent<Health>();
+        networkHealth = GetComponent<NetworkHealth>();
+        if (networkHealth == null)
+            health = GetComponent<Health>();
+        if (networkHealth == null && health == null)
+        {
+            Debug.LogError("DamageFlash requires either Health or NetworkHealth.", this);
+            enabled = false;
+            return;
+        }
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalColor = spriteRenderer.color;
     }
 
     private void OnEnable()
     {
-        health.OnDamaged += HandleDamaged;
+        if (networkHealth != null)
+            networkHealth.OnDamaged += HandleNetworkDamaged;
+        else if (health != null)
+            health.OnDamaged += HandleDamaged;
     }
 
     private void OnDisable()
@@ -32,10 +43,23 @@ public class DamageFlash : MonoBehaviour
             flashCoroutine = null;
         }
         spriteRenderer.color = originalColor;
-        health.OnDamaged -= HandleDamaged;
+        if (networkHealth != null)
+            networkHealth.OnDamaged -= HandleNetworkDamaged;
+        else if (health != null)
+            health.OnDamaged -= HandleDamaged;
     }
 
-    private void HandleDamaged(DamageInfo damageInfo)
+    private void HandleNetworkDamaged()
+    {
+        PlayFlash();
+    }
+
+    private void HandleDamaged(DamageInfo _)
+    {
+        PlayFlash();
+    }
+
+    private void PlayFlash()
     {
         if (flashCoroutine != null)
             StopCoroutine(flashCoroutine);

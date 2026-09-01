@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,21 +10,23 @@ public class DamageVignetteUI : MonoBehaviour
     [SerializeField, Min(0.01f)] private float fadeDuration = 0.35f;
     [SerializeField, Range(0f, 1f)] private float maxAlpha = 0.45f;
     private Coroutine fadeCoroutine;
+    private NetworkHealth networkHealth;
 
     private void Awake()
     {
-        SerializedFieldValidator.Validate(this);
+        if (vignetteImage == null)
+            throw new InvalidOperationException("DamageVignetteUI requires a vignette Image.");
         SetAlpha(0f);
     }
 
     private void OnEnable()
     {
-        playerHealth.OnDamaged += HandleDamaged;
+        Subscribe();
     }
 
     private void OnDisable()
     {
-        playerHealth.OnDamaged -= HandleDamaged;
+        Unsubscribe();
         if (fadeCoroutine != null)
         {
             StopCoroutine(fadeCoroutine);
@@ -39,13 +42,50 @@ public class DamageVignetteUI : MonoBehaviour
         vignetteImage.color = temp;
     }
 
-    private void HandleDamaged(DamageInfo damageInfo)
+    private void PlayVignette()
     {
         if (fadeCoroutine != null)
             StopCoroutine(fadeCoroutine);
 
         SetAlpha(maxAlpha);
         fadeCoroutine = StartCoroutine(FadeOut());
+    }
+
+    public void Bind(NetworkHealth target)
+    {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+
+        Unsubscribe();
+        networkHealth = target;
+        if (isActiveAndEnabled)
+            Subscribe();
+    }
+
+    private void Subscribe()
+    {
+        if (networkHealth != null)
+            networkHealth.OnDamaged += HandleNetworkDamaged;
+        else if (playerHealth != null)
+            playerHealth.OnDamaged += HandleDamaged;
+    }
+
+    private void Unsubscribe()
+    {
+        if (networkHealth != null)
+            networkHealth.OnDamaged -= HandleNetworkDamaged;
+        else if (playerHealth != null)
+            playerHealth.OnDamaged -= HandleDamaged;
+    }
+
+    private void HandleNetworkDamaged()
+    {
+        PlayVignette();
+    }
+
+    private void HandleDamaged(DamageInfo _)
+    {
+        PlayVignette();
     }
 
     private IEnumerator FadeOut()

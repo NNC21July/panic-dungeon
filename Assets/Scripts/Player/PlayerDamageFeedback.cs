@@ -1,33 +1,69 @@
+using Fusion;
 using UnityEngine;
 
-[RequireComponent(typeof(Health))]
 public class PlayerDamageFeedback : MonoBehaviour
 {
     [SerializeField, Min(0f)] private float shakeStrength = 0.04f;
     [SerializeField, Range(0f, 1f)] private float damagedVolume = 0.5f;
     [SerializeField] private AudioClip damagedSfx;
     private Health health;
+    private NetworkHealth networkHealth;
+    private NetworkObject networkObject;
 
     private void Awake()
     {
         SerializedFieldValidator.Validate(this);
-        health = GetComponent<Health>();
+        networkHealth = GetComponent<NetworkHealth>();
+        if (networkHealth != null)
+            networkObject = GetComponent<NetworkObject>();
+        else
+            health = GetComponent<Health>();
+        if (networkHealth == null && health == null)
+        {
+            Debug.LogError(
+                "PlayerDamageFeedback requires either Health or NetworkHealth.", this);
+            enabled = false;
+        }
     }
 
     private void OnEnable()
     {
-        health.OnDamaged += HandleDamaged;
+        if (networkHealth != null)
+            networkHealth.OnDamaged += HandleNetworkDamaged;
+        else if (health != null)
+            health.OnDamaged += HandleDamaged;
     }
 
     private void OnDisable()
     {
-        health.OnDamaged -= HandleDamaged;
+        if (networkHealth != null)
+            networkHealth.OnDamaged -= HandleNetworkDamaged;
+        else if (health != null)
+            health.OnDamaged -= HandleDamaged;
+    }
+
+    private void HandleNetworkDamaged()
+    {
+        if (networkObject == null || !networkObject.HasInputAuthority)
+            return;
+        PlayFeedback(DamageType.Melee);
     }
 
     private void HandleDamaged(DamageInfo damageInfo)
     {
+        PlayFeedback(damageInfo.Type);
+    }
+
+    private void PlayFeedback(DamageType damageType)
+    {
         AudioManager.Instance?.PlaySfx(damagedSfx, damagedVolume);
-        if (damageInfo.Type != DamageType.Poison)
-            CameraShake.Instance?.AddShake(shakeStrength);
+
+        if (damageType == DamageType.Poison)
+            return;
+        CameraShake cameraShake = networkHealth != null
+                ? CameraShake.FindInScene(gameObject.scene)
+                : CameraShake.Instance;
+
+        cameraShake?.AddShake(shakeStrength);
     }
 }

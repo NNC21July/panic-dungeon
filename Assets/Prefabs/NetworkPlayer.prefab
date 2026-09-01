@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 5217935738293506594}
   - component: {fileID: 5266316607965859844}
   - component: {fileID: 4097093076710487639}
+  - component: {fileID: 8445514050212795160}
   m_Layer: 3
   m_Name: NetworkPlayer
   m_TagString: Untagged
@@ -382,6 +383,7 @@ MonoBehaviour:
   - {fileID: 5217935738293506594}
   - {fileID: 5266316607965859844}
   - {fileID: 4097093076710487639}
+  - {fileID: 8445514050212795160}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7850645773688092266
 MonoBehaviour:
@@ -520,6 +522,18 @@ MonoBehaviour:
   _CurrentHealth: 0
   _IsDead:
     RawValue: 0
+--- !u!114 &8445514050212795160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac7f39677fe2d2d4197f4d529ac214bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkLocalPlayerUIBinder
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0

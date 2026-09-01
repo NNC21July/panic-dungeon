@@ -3,6 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject))]
 [RequireComponent(typeof(CircleCollider2D))]
+[RequireComponent(typeof(NetworkHealth))]
 public class NetworkPlayerMovement : NetworkBehaviour
 {
     [SerializeField, Min(0f)] private float moveSpeed = 5f, acceleration = 50f, deceleration = 50f, collisionSkin = 0.02f, dashSpeed = 22f, dashDuration = 0.15f, dashCooldown = 1f;
@@ -14,14 +15,25 @@ public class NetworkPlayerMovement : NetworkBehaviour
     [Networked] private Vector2 DashDirection { get; set; }
     private CircleCollider2D bodyCollider;
     private Vector2 lastMoveDirection = Vector2.right;
+    private NetworkHealth networkHealth;
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
         bodyCollider = GetComponent<CircleCollider2D>();
+        networkHealth = GetComponent<NetworkHealth>();
     }
 
     public override void FixedUpdateNetwork()
     {
+        if (networkHealth.IsDead)
+        {
+            CurVelocity = Vector2.zero;
+            IsDashing = false;
+            DashTimer = 0f;
+            return;
+        }
+
         if (!GetInput(out NetworkInputData inputData))
             return;
 

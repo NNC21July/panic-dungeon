@@ -13,6 +13,7 @@ public class NetworkLocalPlayerCamera : NetworkBehaviour
         if (playerCam == null)
             return;
 
+        ConfigureImpulseChannel(playerCam);
         playerCam.Follow = transform;
         playerCam.gameObject.SetActive(true);
     }
@@ -27,5 +28,20 @@ public class NetworkLocalPlayerCamera : NetworkBehaviour
                 return playerCam;
         }
         return null;
+    }
+
+    private void ConfigureImpulseChannel(
+    CinemachineCamera playerCam)
+    {
+        int playerIndex = Mathf.Max(0, Object.InputAuthority.AsIndex),
+            impulseChannel = 1 << (playerIndex % 30);
+
+        CinemachineImpulseListener impulseListener = playerCam.GetComponent<CinemachineImpulseListener>();
+        if (impulseListener != null)
+            impulseListener.ChannelMask = impulseChannel;
+
+        CameraShake cameraShake = CameraShake.FindInScene(gameObject.scene);
+        if (cameraShake != null)
+            cameraShake.SetImpulseChannel(impulseChannel);
     }
 }
