@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TrapController : MonoBehaviour
@@ -16,18 +15,26 @@ public class TrapController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float minEnemySpawnInterval = 1.5f;
     [SerializeField, Min(0.01f)] private float enemySpawnIntervalReduction = 0.1f;
     [SerializeField, Min(0.01f)] private float diffScaleInterval = 6f;
-    [SerializeField] private EnemySpawner enemySpawner;
     [SerializeField] private AudioClip warningSfx;
     [SerializeField] private TrapSetup trapSetup;
     [SerializeField] private HazardWarningUI hazardWarningUI;
-    private bool roundActive = false;
-    private Coroutine trapCoroutine, diffScaleCoroutine;
+    private Coroutine commandedPatternCoroutine;
     private DifficultyScaler difficultyScaler;
     private SpikePattern topSpikes, bottomSpikes;
     private ArrowPattern leftArrows, rightArrows;
     private ITrapPattern curPattern;
-    private List<ITrapPattern> patterns;
-    private int prevPatternIdx = -1;
+    private static readonly TrapPatternId[] PatternIds = {
+        TrapPatternId.TopSpikes,
+        TrapPatternId.BottomSpikes,
+        TrapPatternId.LeftArrows,
+        TrapPatternId.RightArrows
+        };
+    private TrapPatternId previousPatternId = TrapPatternId.None;
+    public bool HasActivePattern => curPattern != null || commandedPatternCoroutine != null;
+    public float CurrentWarningDuration => difficultyScaler.CurWarningDuration;
+    public float CurrentPatternInterval => difficultyScaler.CurSpikeInterval;
+    public float DifficultyScaleInterval => diffScaleInterval;
+    public DifficultyScaler DifficultyScaler => difficultyScaler;
 
     private void Awake()
     {
@@ -48,47 +55,6 @@ public class TrapController : MonoBehaviour
 
         leftArrows = new ArrowPattern(trapSetup.LeftArrowShooters, warningSfx, warningFlashDuration);
         rightArrows = new ArrowPattern(trapSetup.RightArrowShooters, warningSfx, warningFlashDuration);
-
-        patterns = new List<ITrapPattern> { topSpikes, bottomSpikes, leftArrows, rightArrows };
-    }
-
-    public void StartTraps()
-    {
-        if (roundActive)
-            return;
-
-        topSpikes.Reset();
-        bottomSpikes.Reset();
-
-        roundActive = true;
-        difficultyScaler.Reset();
-
-        if (trapCoroutine != null)
-            StopCoroutine(trapCoroutine);
-        trapCoroutine = StartCoroutine(Trap());
-        if (diffScaleCoroutine != null)
-            StopCoroutine(diffScaleCoroutine);
-        diffScaleCoroutine = StartCoroutine(DiffScale());
-
-        enemySpawner.StartSpawning(difficultyScaler);
-    }
-
-    public void StopTraps()
-    {
-        curPattern?.Cancel();
-        curPattern = null;
-        roundActive = false;
-        if (trapCoroutine != null)
-        {
-            StopCoroutine(trapCoroutine);
-            trapCoroutine = null;
-        }
-        if (diffScaleCoroutine != null)
-        {
-            StopCoroutine(diffScaleCoroutine);
-            diffScaleCoroutine = null;
-        }
-        enemySpawner.StopSpawning();
     }
 
     public void ResetTraps()
@@ -97,43 +63,94 @@ public class TrapController : MonoBehaviour
         bottomSpikes.Reset();
     }
 
-    private ITrapPattern SelectRandomPattern()
+    public void ResetForNewRound()
     {
-        if (patterns.Count == 0)
-            return null;
+        CancelCurrentPattern();
+        ResetTraps();
+        previousPatternId = TrapPatternId.None;
+        difficultyScaler.Reset();
+    }
 
-        if (patterns.Count == 1)
-            return patterns[0];
+    public bool StartPattern(TrapPatternId patternId, float warningDuration)
+    {
+        if (HasActivePattern)
+            return false;
+        if (GetPattern(patternId) == null)
+            return false;
+        commandedPatternCoroutine = StartCoroutine(RunCommandedPattern(patternId, warningDuration));
+        return true;
+    }
 
-        int selectedIdx;
+    public void CancelCurrentPattern()
+    {
+        if (commandedPatternCoroutine != null)
+        {
+            StopCoroutine(commandedPatternCoroutine);
+            commandedPatternCoroutine = null;
+        }
+        curPattern?.Cancel();
+        curPattern = null;
+    }
+
+    public void IncreaseDifficulty()
+    {
+        difficultyScaler.IncreaseDiff();
+    }
+
+    public bool PatternPreventsEnemySpawning(TrapPatternId patternId)
+    {
+        ITrapPattern pattern = GetPattern(patternId);
+        return pattern?.PreventsEnemySpawning ?? false;
+    }
+
+    public float GetPatternDuration(TrapPatternId patternId, float warningDuration)
+    {
+        ITrapPattern pattern = GetPattern(patternId);
+        return pattern?.GetDuration(warningDuration) ?? 0f;
+    }
+
+    public TrapPatternId SelectRandomPatternId()
+    {
+        TrapPatternId selectedId;
         do
-            selectedIdx = Random.Range(0, patterns.Count);
-        while (selectedIdx == prevPatternIdx);
-        prevPatternIdx = selectedIdx;
-        return patterns[selectedIdx];
+        {
+            int index = Random.Range(0, PatternIds.Length);
+            selectedId = PatternIds[index];
+        }
+        while (selectedId == previousPatternId);
+        previousPatternId = selectedId;
+        return selectedId;
     }
 
-    private IEnumerator Trap()
+    private ITrapPattern GetPattern(TrapPatternId patternId)
     {
-        while (roundActive)
+        return patternId switch
         {
-            curPattern = SelectRandomPattern();
-            enemySpawner.SetSpawnPaused(curPattern.PreventsEnemySpawning);
-            yield return curPattern.Run(difficultyScaler.CurWarningDuration);
+            TrapPatternId.TopSpikes => topSpikes,
+            TrapPatternId.BottomSpikes => bottomSpikes,
+            TrapPatternId.LeftArrows => leftArrows,
+            TrapPatternId.RightArrows => rightArrows,
+            _ => null
+        };
+    }
+
+    public IEnumerator RunPattern(TrapPatternId patternId, float warningDuration)
+    {
+        ITrapPattern selectedPattern = GetPattern(patternId);
+
+        if (selectedPattern == null || selectedPattern.IsActive)
+            yield break;
+
+        curPattern = selectedPattern;
+        yield return selectedPattern.Run(warningDuration);
+
+        if (curPattern == selectedPattern)
             curPattern = null;
-            enemySpawner.SetSpawnPaused(false);
-
-            yield return new WaitForSeconds(difficultyScaler.CurSpikeInterval);
-        }
-        trapCoroutine = null;
     }
 
-    private IEnumerator DiffScale()
+    private IEnumerator RunCommandedPattern(TrapPatternId patternId, float warningDuration)
     {
-        while (roundActive)
-        {
-            yield return new WaitForSeconds(diffScaleInterval);
-            difficultyScaler.IncreaseDiff();
-        }
+        yield return RunPattern(patternId, warningDuration);
+        commandedPatternCoroutine = null;
     }
 }

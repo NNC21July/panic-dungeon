@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Health))]
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField, Min(0f)] private float moveSpeed = 5f, acceleration = 10f, deceleration = 100f;
+    [SerializeField] private PlayerTuning playerTuning;
     private Rigidbody2D rb;
     private PlayerDash playerDash;
     private Health health;
@@ -14,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
         rb = GetComponent<Rigidbody2D>();
         playerDash = GetComponent<PlayerDash>();
         health = GetComponent<Health>();
@@ -25,9 +26,14 @@ public class PlayerMovement : MonoBehaviour
         if (playerDash != null && playerDash.IsDashing())
             return;
 
-        Vector2 targetVelocity = moveInput.normalized * moveSpeed;
-        float changeRate = moveInput == Vector2.zero ? deceleration : acceleration;
-        rb.linearVelocity = Vector2.MoveTowards(rb.linearVelocity, targetVelocity, changeRate * Time.fixedDeltaTime);
+        rb.linearVelocity = PlayerMovementMotion.CalculateVelocity(
+            rb.linearVelocity,
+            moveInput,
+            playerTuning.MoveSpeed,
+            playerTuning.Acceleration,
+            playerTuning.Deceleration,
+            Time.fixedDeltaTime
+        );
     }
 
     public void Move(InputAction.CallbackContext context)

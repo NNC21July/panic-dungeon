@@ -3,7 +3,7 @@ using Fusion;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject))]
-public class NetworkHealth : NetworkBehaviour
+public class NetworkHealth : NetworkBehaviour, IDamageable
 {
     [SerializeField, Min(1f)] private float maxHealth = 100f;
     [Networked, OnChangedRender(nameof(HandleCurrentHealthChanged))] public float CurrentHealth { get; private set; }
@@ -23,12 +23,12 @@ public class NetworkHealth : NetworkBehaviour
         previouslyRenderedHealth = CurrentHealth;
     }
 
-    public bool TryTakeDamage(float amount)
+    public bool TakeDamage(DamageInfo damageInfo)
     {
-        if (!Object.HasStateAuthority || IsDead || amount <= 0f)
+        if (!Object.HasStateAuthority || IsDead || damageInfo.Amount <= 0f)
             return false;
 
-        CurrentHealth = Mathf.Max(CurrentHealth - amount, 0f);
+        CurrentHealth = Mathf.Max(CurrentHealth - damageInfo.Amount, 0f);
         if (CurrentHealth <= 0f)
             IsDead = true;
         return true;

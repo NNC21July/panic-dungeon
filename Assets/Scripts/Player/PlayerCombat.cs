@@ -4,11 +4,10 @@ using System.Collections;
 
 public class PlayerCombat : MonoBehaviour
 {
+    [SerializeField] private PlayerTuning playerTuning;
     [SerializeField] private Camera worldCamera;
     [SerializeField] private Transform swordPivot;
     [SerializeField] private Sword sword;
-    [SerializeField] private AnimationCurve swingCurve;
-    [SerializeField] private float swingAngle = 120f, swingDuration = 0.15f, attackCooldown = 0.45f;
     private Health health;
     private bool isAttacking = false, canAttack = true;
     private Coroutine swingCoroutine;
@@ -64,26 +63,35 @@ public class PlayerCombat : MonoBehaviour
 
     private IEnumerator Swing(Vector2 direction)
     {
-        float baseAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        float startAngle = baseAngle - swingAngle / 2f;
-        float endAngle = baseAngle + swingAngle / 2f;
-
-        float timer = swingDuration;
+        float timer = playerTuning.SwingDuration;
         while (timer >= 0f)
         {
             timer -= Time.deltaTime;
-            float t = Mathf.Clamp01(1f - timer / swingDuration),
-                  swingProgress = Mathf.Clamp01(swingCurve.Evaluate(t));
+            float progress = 1f - timer / playerTuning.SwingDuration,
+                  currentAngle = SwordSwingMotion.CalculateAngle(
+                      direction,
+                      progress,
+                      playerTuning.SwingAngle,
+                      playerTuning.SwingCurve
+                  );
 
-            swordPivot.rotation = Quaternion.Euler(0f, 0f, Mathf.Lerp(startAngle, endAngle, swingProgress));
+            swordPivot.rotation = Quaternion.Euler(0f, 0f, currentAngle);
 
             yield return null;
         }
+        float endAngle = SwordSwingMotion.CalculateAngle(
+            direction,
+            1f,
+            playerTuning.SwingAngle,
+            playerTuning.SwingCurve
+        );
         swordPivot.rotation = Quaternion.Euler(0f, 0f, endAngle);
         isAttacking = false;
         sword.EndSwing();
 
-        yield return new WaitForSeconds(Mathf.Max(0f, attackCooldown - swingDuration));
+        yield return new WaitForSeconds(
+            Mathf.Max(0f, playerTuning.AttackCooldown - playerTuning.SwingDuration)
+        );
         canAttack = true;
         swingCoroutine = null;
     }

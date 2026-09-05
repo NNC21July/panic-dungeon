@@ -4,9 +4,11 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
 [RequireComponent(typeof(CircleCollider2D))]
 [RequireComponent(typeof(NetworkHealth))]
+[RequireComponent(typeof(NetworkPlayerGameplayGate))]
 public class NetworkPlayerMovement : NetworkBehaviour
 {
-    [SerializeField, Min(0f)] private float moveSpeed = 5f, acceleration = 50f, deceleration = 50f, collisionSkin = 0.02f, dashSpeed = 22f, dashDuration = 0.15f, dashCooldown = 1f;
+    [SerializeField] private PlayerTuning playerTuning;
+    [SerializeField, Min(0f)] private float collisionSkin = 0.02f;
     [SerializeField] private LayerMask collisionMask;
     [Networked] private Vector2 CurVelocity { get; set; }
     [Networked] private bool IsDashing { get; set; }
@@ -15,18 +17,17 @@ public class NetworkPlayerMovement : NetworkBehaviour
     [Networked] private Vector2 DashDirection { get; set; }
     private CircleCollider2D bodyCollider;
     private Vector2 lastMoveDirection = Vector2.right;
-    private NetworkHealth networkHealth;
-
+    private NetworkPlayerGameplayGate gameplayGate;
     private void Awake()
     {
         SerializedFieldValidator.Validate(this);
         bodyCollider = GetComponent<CircleCollider2D>();
-        networkHealth = GetComponent<NetworkHealth>();
+        gameplayGate = GetComponent<NetworkPlayerGameplayGate>();
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (networkHealth.IsDead)
+        if (!gameplayGate.CanAct)
         {
             CurVelocity = Vector2.zero;
             IsDashing = false;
@@ -41,8 +42,8 @@ public class NetworkPlayerMovement : NetworkBehaviour
         {
             IsDashing = true;
             DashDirection = lastMoveDirection;
-            DashTimer = dashDuration;
-            CooldownTimer = dashCooldown;
+            DashTimer = playerTuning.DashDuration;
+            CooldownTimer = playerTuning.DashCooldown;
         }
 
         if (inputData.MoveDir != Vector2.zero)
@@ -51,17 +52,28 @@ public class NetworkPlayerMovement : NetworkBehaviour
         if (IsDashing)
         {
             DashTimer -= Runner.DeltaTime;
-            Vector2 dashMovement = DashDirection * dashSpeed * Runner.DeltaTime;
+            float progress = 1f - DashTimer / playerTuning.DashDuration;
+            Vector2 dashVelocity = PlayerMovementMotion.CalculateDashVelocity(
+                        DashDirection,
+                        playerTuning.DashSpeed,
+                        progress,
+                        playerTuning.DashSpeedCurve
+                    ),
+                    dashMovement = dashVelocity * Runner.DeltaTime;
             MoveWithStaticCollision(dashMovement);
             if (DashTimer <= 0f)
                 IsDashing = false;
         }
         else
         {
-            Vector2 dir = inputData.MoveDir.normalized, targetVelocity = dir * moveSpeed;
-            float changeRate = dir == Vector2.zero ? deceleration : acceleration;
-
-            CurVelocity = Vector2.MoveTowards(CurVelocity, targetVelocity, changeRate * Runner.DeltaTime);
+            CurVelocity = PlayerMovementMotion.CalculateVelocity(
+                CurVelocity,
+                inputData.MoveDir,
+                playerTuning.MoveSpeed,
+                playerTuning.Acceleration,
+                playerTuning.Deceleration,
+                Runner.DeltaTime
+            );
 
             Vector2 movement = CurVelocity * Runner.DeltaTime;
             MoveWithStaticCollision(movement);

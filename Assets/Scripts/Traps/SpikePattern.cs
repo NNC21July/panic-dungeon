@@ -87,4 +87,12 @@ public class SpikePattern : ITrapPattern
         isActive = false;
         onWarningEnd?.Invoke();
     }
+
+    public float GetDuration(float warningDuration)
+    {
+        if (spikes.Count == 0)
+            return 0f;
+
+        return warningDuration + spikes[0].MoveDuration + retractDelay + spikes[0].MoveDuration;
+    }
 }

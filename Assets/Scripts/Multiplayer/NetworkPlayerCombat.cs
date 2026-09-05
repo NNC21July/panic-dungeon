@@ -3,16 +3,13 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(NetworkHealth))]
+[RequireComponent(typeof(NetworkPlayerGameplayGate))]
 public class NetworkPlayerCombat : NetworkBehaviour
 {
-    [SerializeField, Min(0f)] private float attackCooldown = 0.45f;
+    [SerializeField] private PlayerTuning playerTuning;
     [SerializeField] private Transform swordPivot;
     [SerializeField] private TrailRenderer swordTrail;
-    [SerializeField, Min(0f)] private float swingAngle = 120f;
-    [SerializeField, Min(0.01f)] private float swingDuration = 0.3f;
-    [SerializeField] private AnimationCurve swingCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     [SerializeField] private SpriteRenderer swordRenderer;
-    [SerializeField, Min(0f)] private float damage = 35f;
     [SerializeField] private BoxCollider2D swordHitbox;
     [SerializeField] private LayerMask damageableLayers;
     [Networked] private bool IsAttacking { get; set; }
@@ -23,7 +20,7 @@ public class NetworkPlayerCombat : NetworkBehaviour
     private readonly Collider2D[] hitResults = new Collider2D[8];
     private readonly HashSet<NetworkHealth> damagedTargets = new HashSet<NetworkHealth>();
     private ContactFilter2D hitFilter;
-    private NetworkHealth networkHealth;
+    private NetworkPlayerGameplayGate gameplayGate;
 
     private void Awake()
     {
@@ -32,12 +29,12 @@ public class NetworkPlayerCombat : NetworkBehaviour
         hitFilter = new ContactFilter2D();
         hitFilter.SetLayerMask(damageableLayers);
         hitFilter.useTriggers = true;
-        networkHealth = GetComponent<NetworkHealth>();
+        gameplayGate = GetComponent<NetworkPlayerGameplayGate>();
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (networkHealth.IsDead)
+        if (!gameplayGate.CanAct)
         {
             IsAttacking = false;
             AttackTimer = 0f;
@@ -52,8 +49,8 @@ public class NetworkPlayerCombat : NetworkBehaviour
             if (inputData.AimDirection.sqrMagnitude > 0.0001f)
                 attackDirection = inputData.AimDirection.normalized;
             IsAttacking = true;
-            AttackTimer = swingDuration;
-            CooldownTimer = attackCooldown;
+            AttackTimer = playerTuning.SwingDuration;
+            CooldownTimer = playerTuning.AttackCooldown;
             if (Object.HasStateAuthority)
                 damagedTargets.Clear();
         }
@@ -120,19 +117,19 @@ public class NetworkPlayerCombat : NetworkBehaviour
                 continue;
             if (!damagedTargets.Add(targetHealth))
                 continue;
-            targetHealth.TryTakeDamage(damage);
+            targetHealth.TakeDamage(new DamageInfo(playerTuning.SwordDamage, gameObject, DamageType.Melee));
         }
     }
 
     private float GetCurrentSwingAngle()
     {
-        float progress = 1f - Mathf.Clamp01(AttackTimer / swingDuration),
-            curvedProgress = Mathf.Clamp01(swingCurve.Evaluate(progress)),
-            baseAngle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg,
-            startAngle = baseAngle - swingAngle / 2f,
-            endAngle = baseAngle + swingAngle / 2f,
-            currentAngle = Mathf.Lerp(startAngle, endAngle, curvedProgress);
+        float progress = 1f - AttackTimer / playerTuning.SwingDuration;
 
-        return currentAngle;
+        return SwordSwingMotion.CalculateAngle(
+            attackDirection,
+            progress,
+            playerTuning.SwingAngle,
+            playerTuning.SwingCurve
+        );
     }
 }

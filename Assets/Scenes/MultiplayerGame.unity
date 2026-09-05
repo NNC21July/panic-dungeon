@@ -1370,7 +1370,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &662368480
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3037,7 +3037,7 @@ MonoBehaviour:
     m_Bits: 576
   spawnPadding: 0.1
   useFixedRoomSeed: 1
-  spawnTraps: 0
+  spawnTraps: 1
   roomSeed: 12345
   additionalPlayerSpawns:
   - {fileID: 623303632}
@@ -3070,7 +3070,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95d5c3a7c7a4cf742a8cfcfada54c010, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoundManager
-  trapController: {fileID: 1581613496}
+  trapDirector: {fileID: 0}
   playerHealth: {fileID: 1842462764}
   playerReset: {fileID: 1842462775}
   countdownDuration: 3
@@ -4739,6 +4739,112 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHealth: 70
+--- !u!1 &1534750428
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1534750429}
+  - component: {fileID: 1534750431}
+  - component: {fileID: 1534750430}
+  - component: {fileID: 1534750432}
+  - component: {fileID: 1534750433}
+  m_Layer: 0
+  m_Name: NetworkMatchManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1534750429
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534750428}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.26986, y: 0.57467, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1534750430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534750428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89dfc43a76c4586429e07a19629806ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkMatchManager
+  minimumPlayers: 2
+  _State: 0
+  countdownDuration: 3
+  matchDuration: 20
+--- !u!114 &1534750431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534750428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 1763652513
+  SendPriority: 1
+  EnableInterpolation: 1
+  Flags: 262146
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 1534750430}
+  - {fileID: 1534750432}
+  - {fileID: 1534750433}
+  ForceRemoteRenderTimeframe: 0
+--- !u!114 &1534750432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534750428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef7e5ae716b41cf4dbcd103b916093b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkMatchUI
+  resultText: {fileID: 850661491}
+  roundOverPanel: {fileID: 2113556837}
+  darkOverlay: {fileID: 1957587685}
+  restartButton: {fileID: 1713995955}
+  countdownText: {fileID: 1181589332}
+  timerText: {fileID: 1969046488}
+--- !u!114 &1534750433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534750428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a68e2064faa893b4abaa8d6feda00ab5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkTrapDirector
+  matchManager: {fileID: 1534750430}
+  trapController: {fileID: 1581613496}
+  trapSetup: {fileID: 1581613497}
 --- !u!1 &1562650353
 GameObject:
   m_ObjectHideFlags: 0
@@ -4896,7 +5002,6 @@ MonoBehaviour:
   minEnemySpawnInterval: 1
   enemySpawnIntervalReduction: 0.1
   diffScaleInterval: 6
-  enemySpawner: {fileID: 107502594}
   warningSfx: {fileID: 8300000, guid: 952536754de5f6b469f897be0ed37f0e, type: 3}
   trapSetup: {fileID: 1581613497}
   hazardWarningUI: {fileID: 662368481}
@@ -5261,9 +5366,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1525411933}
-        m_TargetAssemblyTypeName: RoundUI, Assembly-CSharp
-        m_MethodName: RestartRound
+      - m_Target: {fileID: 1534750430}
+        m_TargetAssemblyTypeName: NetworkMatchManager, Assembly-CSharp
+        m_MethodName: RestartMatch
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6349,3 +6454,4 @@ SceneRoots:
   - {fileID: 1212292212}
   - {fileID: 57177398}
   - {fileID: 492969066}
+  - {fileID: 1534750429}

@@ -2922,7 +2922,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95d5c3a7c7a4cf742a8cfcfada54c010, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoundManager
-  trapController: {fileID: 1581613496}
+  trapDirector: {fileID: 941774079}
   playerHealth: {fileID: 1842462764}
   playerReset: {fileID: 1842462775}
   countdownDuration: 3
@@ -4681,6 +4681,7 @@ GameObject:
   - component: {fileID: 1581613495}
   - component: {fileID: 1581613497}
   - component: {fileID: 1581613496}
+  - component: {fileID: 941774079}
   - component: {fileID: 1581613498}
   m_Layer: 0
   m_Name: Room
@@ -4729,10 +4730,23 @@ MonoBehaviour:
   minEnemySpawnInterval: 1
   enemySpawnIntervalReduction: 0.1
   diffScaleInterval: 6
-  enemySpawner: {fileID: 107502594}
   warningSfx: {fileID: 8300000, guid: 952536754de5f6b469f897be0ed37f0e, type: 3}
   trapSetup: {fileID: 1581613497}
   hazardWarningUI: {fileID: 662368481}
+--- !u!114 &941774079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581613494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67245e5489784515923e349c6657983b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SinglePlayerTrapDirector
+  trapController: {fileID: 1581613496}
+  enemySpawner: {fileID: 107502594}
 --- !u!114 &1581613497
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -8,10 +8,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerDash : MonoBehaviour
 {
-    [SerializeField] private float dashSpeed = 14f, dashDuration = 0.15f, dashCooldown = 1f;
-
+    [SerializeField] private PlayerTuning playerTuning;
     [SerializeField] private ParticleSystem dustEffect;
-    [SerializeField] private AnimationCurve dashSpeedCurve;
     private Rigidbody2D rb;
     private PlayerMovement playerMovement;
     private Health health;
@@ -38,7 +36,7 @@ public class PlayerDash : MonoBehaviour
             {
                 isDashing = false;
                 canDash = false;
-                cooldownTimer = dashCooldown;
+                cooldownTimer = playerTuning.DashCooldown;
             }
         }
         if (!canDash)
@@ -54,9 +52,13 @@ public class PlayerDash : MonoBehaviour
         if (!isDashing)
             return;
 
-        float t = 1f - Mathf.Clamp01(dashTimer / dashDuration);
-        float speedMultiplier = Mathf.Max(0f, dashSpeedCurve.Evaluate(t));
-        rb.linearVelocity = dashDirection * dashSpeed * speedMultiplier;
+        float progress = 1f - dashTimer / playerTuning.DashDuration;
+        rb.linearVelocity = PlayerMovementMotion.CalculateDashVelocity(
+            dashDirection,
+            playerTuning.DashSpeed,
+            progress,
+            playerTuning.DashSpeedCurve
+        );
     }
 
     public void Dash(InputAction.CallbackContext context)
@@ -66,7 +68,7 @@ public class PlayerDash : MonoBehaviour
 
         dashDirection = playerMovement.GetLastMoveDirection();
         isDashing = true;
-        dashTimer = dashDuration;
+        dashTimer = playerTuning.DashDuration;
 
         float angle = Mathf.Atan2(-dashDirection.y, -dashDirection.x) * Mathf.Rad2Deg;
         dustEffect.transform.localRotation = Quaternion.Euler(0f, 0f, angle);

@@ -40,4 +40,9 @@ public class ArrowPattern : ITrapPattern
     {
         isActive = false;
     }
+
+    public float GetDuration(float warningDuration)
+    {
+        return Mathf.Max(0.01f, warningDuration);
+    }
 }

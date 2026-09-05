@@ -12,11 +12,7 @@ GameObject:
   - component: {fileID: 2090041174427001459}
   - component: {fileID: 1071186936839953983}
   - component: {fileID: 7889853023326318243}
-  - component: {fileID: 2567398682644843154}
-  - component: {fileID: 6135655485102824214}
   - component: {fileID: 66808811368973026}
-  - component: {fileID: 3389776890447986661}
-  - component: {fileID: 2191763142315943645}
   - component: {fileID: -3141393018627299544}
   - component: {fileID: 3081663107275854773}
   - component: {fileID: 3207690917537043558}
@@ -26,6 +22,7 @@ GameObject:
   - component: {fileID: 5266316607965859844}
   - component: {fileID: 4097093076710487639}
   - component: {fileID: 8445514050212795160}
+  - component: {fileID: -3169564537378372308}
   m_Layer: 3
   m_Name: NetworkPlayer
   m_TagString: Untagged
@@ -173,61 +170,6 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
---- !u!114 &2567398682644843154
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4898517791944016510}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4089525c52f85a54285ba432a2ac3bc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  moveSpeed: 5
-  acceleration: 75
-  deceleration: 50
---- !u!114 &6135655485102824214
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4898517791944016510}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb866ac669ac5ba4c82bf12ef52dda7c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
-  dashSpeed: 22
-  dashDuration: 0.15
-  dashCooldown: 1
-  dustEffect: {fileID: 6035401514808129135}
-  dashSpeedCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1.398873
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1.0074735
-      value: 0.25000653
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!114 &66808811368973026
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,7 +197,7 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2567398682644843154}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
         m_MethodName: Move
         m_Mode: 0
@@ -271,7 +213,7 @@ MonoBehaviour:
     m_ActionName: 'Movement/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6135655485102824214}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PlayerDash, Assembly-CSharp
         m_MethodName: Dash
         m_Mode: 0
@@ -306,31 +248,6 @@ MonoBehaviour:
   m_DefaultActionMap: Movement
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &3389776890447986661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4898517791944016510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d328ccf8ecafeb147bf3ed331aec0beb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 100
---- !u!114 &2191763142315943645
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4898517791944016510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c011ec1ba42e7f54db11cc9b3dbbcfb8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StatusEffectController
 --- !u!114 &-3141393018627299544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,6 +301,7 @@ MonoBehaviour:
   - {fileID: 5266316607965859844}
   - {fileID: 4097093076710487639}
   - {fileID: 8445514050212795160}
+  - {fileID: -3169564537378372308}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7850645773688092266
 MonoBehaviour:
@@ -437,16 +355,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50e5d59a049e0f24e9cc1a6447906fd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerMovement
-  moveSpeed: 5
-  acceleration: 50
-  deceleration: 50
+  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
   collisionSkin: 0.02
-  dashSpeed: 22
-  dashDuration: 0.15
-  dashCooldown: 1
   collisionMask:
     serializedVersion: 2
-    m_Bits: 576
+    m_Bits: 1728
 --- !u!114 &5217935738293506594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -471,37 +384,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ddb7efab65339c4a938e356f9e65c12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerCombat
-  attackCooldown: 0.45
+  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
   swordPivot: {fileID: 4601009103805240474}
   swordTrail: {fileID: 2307018436511758571}
-  swingAngle: 120
-  swingDuration: 0.3
-  swingCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   swordRenderer: {fileID: 2062627508772007368}
-  damage: 35
   swordHitbox: {fileID: 1558956650081737702}
   damageableLayers:
     serializedVersion: 2
@@ -534,6 +420,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac7f39677fe2d2d4197f4d529ac214bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkLocalPlayerUIBinder
+--- !u!114 &-3169564537378372308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89dbff2bee0e24c4cb22c877cf9ecf92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerGameplayGate
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0
@@ -641,7 +539,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce425ad355ea2274b81f78c639ff0168, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sword
-  damage: 35
+  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
   swingTrail: {fileID: 2307018436511758571}
 --- !u!61 &1558956650081737702
 BoxCollider2D:
@@ -968,10 +866,5 @@ PrefabInstance:
 --- !u!4 &6035401514808129129 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2282438384830233660, guid: 7697a49ea05824642b45a2fab61c81c4, type: 3}
-  m_PrefabInstance: {fileID: 5507572685594135125}
-  m_PrefabAsset: {fileID: 0}
---- !u!198 &6035401514808129135 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 2282438384830233658, guid: 7697a49ea05824642b45a2fab61c81c4, type: 3}
   m_PrefabInstance: {fileID: 5507572685594135125}
   m_PrefabAsset: {fileID: 0}

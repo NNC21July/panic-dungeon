@@ -6,4 +6,5 @@ public interface ITrapPattern
     bool PreventsEnemySpawning { get; }
     IEnumerator Run(float warningDuration);
     void Cancel();
+    float GetDuration(float warningDuration);
 }

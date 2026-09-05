@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public class Sword : MonoBehaviour
 {
-    [SerializeField] private float damage = 35f;
+    [SerializeField] private PlayerTuning playerTuning;
     [SerializeField] private TrailRenderer swingTrail;
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D swordCollider;
@@ -58,7 +58,9 @@ public class Sword : MonoBehaviour
         if (hitTargets.Contains(damageable))
             return;
 
-        damageable.TakeDamage(new DamageInfo(damage, owner, DamageType.Melee));
+        damageable.TakeDamage(
+            new DamageInfo(playerTuning.SwordDamage, owner, DamageType.Melee)
+        );
         hitTargets.Add(damageable);
     }
 }

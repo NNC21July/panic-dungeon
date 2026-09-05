@@ -7,7 +7,7 @@ public enum RoundState
 
 public class RoundManager : MonoBehaviour
 {
-    [SerializeField] private TrapController trapController;
+    [SerializeField] private SinglePlayerTrapDirector trapDirector;
     [SerializeField] private Health playerHealth;
     [SerializeField] private PlayerReset playerReset;
     [SerializeField] private float countdownDuration = 3f, roundDuration = 60f;
@@ -61,7 +61,7 @@ public class RoundManager : MonoBehaviour
         if (curState != RoundState.Waiting && curState != RoundState.RoundOver)
             return;
         if (curState == RoundState.RoundOver) // if restarting
-            trapController.ResetTraps();
+            trapDirector.ResetTraps();
         playerReset.ResetAt(playerSpawn.position);
         curState = RoundState.Countdown;
         countdownTimer = countdownDuration;
@@ -74,7 +74,7 @@ public class RoundManager : MonoBehaviour
     {
         curState = RoundState.Playing;
         roundTimer = roundDuration;
-        trapController.StartTraps();
+        trapDirector.StartTraps();
         playerHealth.SetDamageEnabled(true);
         AudioManager.Instance?.PlaySfx(roundStartSfx);
     }
@@ -94,7 +94,7 @@ public class RoundManager : MonoBehaviour
         if (curState != RoundState.Playing)
             return;
         curState = RoundState.RoundOver;
-        trapController.StopTraps();
+        trapDirector.StopTraps();
         playerHealth.SetDamageEnabled(false);
         roundResult = result;
         AudioManager.Instance?.PlaySfx(resultSfx, 0.4f);

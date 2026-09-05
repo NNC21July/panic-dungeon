@@ -179,9 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4089525c52f85a54285ba432a2ac3bc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  moveSpeed: 5
-  acceleration: 75
-  deceleration: 50
+  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
 --- !u!114 &6135655485102824214
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -194,34 +192,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb866ac669ac5ba4c82bf12ef52dda7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
-  dashSpeed: 22
-  dashDuration: 0.15
-  dashCooldown: 1
+  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
   dustEffect: {fileID: 6035401514808129135}
-  dashSpeedCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1.398873
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1.0074735
-      value: 0.25000653
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!114 &66808811368973026
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -349,45 +321,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e6b3147b2151714c91840850483a6e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
+  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
   worldCamera: {fileID: 0}
   swordPivot: {fileID: 4601009103805240474}
   sword: {fileID: 7131183108736040963}
-  swingCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.49997303
-      value: 0.65056086
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  swingAngle: 120
-  swingDuration: 0.3
-  attackCooldown: 0.45
 --- !u!114 &-3141393018627299544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -524,7 +461,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce425ad355ea2274b81f78c639ff0168, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sword
-  damage: 35
+  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
   swingTrail: {fileID: 2307018436511758571}
 --- !u!61 &1558956650081737702
 BoxCollider2D:
