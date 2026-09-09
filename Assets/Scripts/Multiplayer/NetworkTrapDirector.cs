@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
@@ -13,6 +14,9 @@ public class NetworkTrapDirector : NetworkBehaviour
     [Networked] private int PatternSequence { get; set; }
     [Networked] private TickTimer NextPatternTimer { get; set; }
     [Networked] private TickTimer DifficultyTimer { get; set; }
+    [Networked, Capacity(MaxSpikesPerRow)]
+    private NetworkArray<NetworkSpikeState> ActiveSpikeStates => default;
+    private const int MaxSpikesPerRow = 64;
     private int handledPatternSequence = -1;
     private bool locallyRunning;
 
@@ -28,6 +32,7 @@ public class NetworkTrapDirector : NetworkBehaviour
         handledPatternSequence = -1;
         locallyRunning = false;
         RegisterTrapVisibility();
+        RegisterSpikeCallbacks();
 
         if (!Object.HasStateAuthority)
             return;
@@ -38,11 +43,20 @@ public class NetworkTrapDirector : NetworkBehaviour
         DifficultyTimer = TickTimer.None;
     }
 
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        foreach (Spike spike in trapSetup.TopSpikes)
+            UnsubscribeSpike(spike);
+        foreach (Spike spike in trapSetup.BottomSpikes)
+            UnsubscribeSpike(spike);
+    }
+
     public override void FixedUpdateNetwork()
     {
         if (Object.HasStateAuthority)
             UpdateAuthorityState();
         ApplyNetworkStateLocally();
+        ApplyAuthoritativeSpikeStates();
     }
 
     private void UpdateAuthorityState()
@@ -83,10 +97,15 @@ public class NetworkTrapDirector : NetworkBehaviour
         ActivePattern = TrapPatternId.None;
         NextPatternTimer = TickTimer.None;
         DifficultyTimer = TickTimer.None;
+        if (Object.HasStateAuthority)
+            ClearSpikeStates();
     }
 
     private void StartNextPattern()
     {
+        if (Object.HasStateAuthority)
+            ClearSpikeStates();
+
         TrapPatternId selectedPattern = trapController.SelectRandomPatternId();
         float warningDuration = trapController.CurrentWarningDuration;
 
@@ -135,5 +154,88 @@ public class NetworkTrapDirector : NetworkBehaviour
             Runner.AddVisibilityNodes(shooter.gameObject);
         foreach (ArrowShooter shooter in trapSetup.RightArrowShooters)
             Runner.AddVisibilityNodes(shooter.gameObject);
+    }
+
+    private void RegisterSpikeCallbacks()
+    {
+        foreach (Spike spike in trapSetup.TopSpikes)
+            RegisterSpike(spike);
+        foreach (Spike spike in trapSetup.BottomSpikes)
+            RegisterSpike(spike);
+    }
+
+    private void RegisterSpike(Spike spike)
+    {
+        spike.ResolveContactsLocally = Object.HasStateAuthority;
+        spike.DamageContactHandler = ResolveSpikeDamage;
+        spike.CollisionStopped += HandleSpikeStopped;
+    }
+
+    private void UnsubscribeSpike(Spike spike)
+    {
+        spike.CollisionStopped -= HandleSpikeStopped;
+        spike.DamageContactHandler = null;
+        spike.ResolveContactsLocally = true;
+    }
+
+    private bool ResolveSpikeDamage(IDamageable damageable, DamageInfo damageInfo)
+    {
+        return Object.HasStateAuthority ? damageable.TakeDamage(damageInfo) : false;
+    }
+
+    private IReadOnlyList<Spike> GetActiveSpikeRow()
+    {
+        return ActivePattern switch
+        {
+            TrapPatternId.TopSpikes => trapSetup.TopSpikes,
+            TrapPatternId.BottomSpikes => trapSetup.BottomSpikes,
+            _ => null
+        };
+    }
+
+    private void HandleSpikeStopped(Spike spike, float blockedPathProgress)
+    {
+        if (!Object.HasStateAuthority)
+            return;
+
+        IReadOnlyList<Spike> activeSpikeRow = GetActiveSpikeRow();
+        if (activeSpikeRow == null)
+            return;
+        if (activeSpikeRow.Count > MaxSpikesPerRow)
+            return;
+
+        int spikeIdx = -1;
+        for (int i = 0; i < activeSpikeRow.Count; i++)
+        {
+            if (spike.Equals(activeSpikeRow[i]))
+            {
+                spikeIdx = i;
+                break;
+            }
+        }
+        if (spikeIdx < 0)
+            return;
+
+        ActiveSpikeStates.Set(spikeIdx, new NetworkSpikeState { IsStopped = true, StopProgress = blockedPathProgress });
+    }
+
+    private void ClearSpikeStates()
+    {
+        for (int i = 0; i < ActiveSpikeStates.Length; i++)
+            ActiveSpikeStates.Set(i, default);
+    }
+
+    private void ApplyAuthoritativeSpikeStates()
+    {
+        IReadOnlyList<Spike> activeSpikeRow = GetActiveSpikeRow();
+        if (activeSpikeRow == null)
+            return;
+        for (int i = 0; i < Mathf.Min(activeSpikeRow.Count, ActiveSpikeStates.Length); i++)
+        {
+            NetworkSpikeState spikeState = ActiveSpikeStates[i];
+            if (spikeState.IsStopped)
+                activeSpikeRow[i].ApplyAuthoritativeStop(spikeState.StopProgress);
+        }
+
     }
 }

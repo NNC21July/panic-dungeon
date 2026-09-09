@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
@@ -20,14 +22,18 @@ public class Spike : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
     private Coroutine warningCoroutine, moveCoroutine;
-    private bool isAttacking = false, isBlocked = false;
+    private bool isAttacking = false, isBlocked = false, isCycleActive = false;
     private PolygonCollider2D spikeCollider;
     private Rigidbody2D rb;
     private HashSet<IDamageable> damagedTargets;
     private float blockedPathProgress;
     public float MoveDuration => moveDuration;
+    public float BlockedPathProgress => blockedPathProgress;
     public Vector2 TipPos => tipPoint.position;
     public Vector2 AttackDir => (targetPos - originPos).normalized;
+    public Func<IDamageable, DamageInfo, bool> DamageContactHandler { get; set; }
+    public event Action<Spike, float> CollisionStopped;
+    public bool ResolveContactsLocally { get; set; } = true;
 
     private void Awake()
     {
@@ -64,6 +70,8 @@ public class Spike : MonoBehaviour
 
     public void ForceIdle()
     {
+        isCycleActive = false;
+
         if (warningCoroutine != null)
         {
             StopCoroutine(warningCoroutine);
@@ -97,6 +105,8 @@ public class Spike : MonoBehaviour
 
     public void BeginAttack()
     {
+        isCycleActive = true;
+
         if (warningCoroutine != null)
         {
             StopCoroutine(warningCoroutine);
@@ -114,7 +124,7 @@ public class Spike : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!isAttacking || isBlocked)
+        if (!ResolveContactsLocally || !isAttacking || isBlocked)
             return;
 
         int otherLayer = other.gameObject.layer;
@@ -122,7 +132,7 @@ public class Spike : MonoBehaviour
         if (otherLayer == GameLayers.Obstacle) // stops when hitting an obstacle
         {
             if (solidTipCollider.bounds.max.x >= other.bounds.min.x + minLaneOverlap && solidTipCollider.bounds.min.x <= other.bounds.max.x - minLaneOverlap) // check if spike and obstacle overlaps horizontally
-                StopInPlace(true);
+                StopFromCollision();
             return;
         }
 
@@ -136,10 +146,13 @@ public class Spike : MonoBehaviour
         if (damagedTargets.Contains(damageable))
             return;
 
-        if (!damageable.TakeDamage(new DamageInfo(damageAmount, gameObject, DamageType.Spike)))
+        DamageInfo damageInfo = new DamageInfo(damageAmount, gameObject, DamageType.Spike);
+        bool contactAccepted = DamageContactHandler != null ? DamageContactHandler(damageable, damageInfo) : damageable.TakeDamage(damageInfo);
+        if (!contactAccepted)
             return;
+
         damagedTargets.Add(damageable);
-        StopInPlace(true);
+        StopFromCollision();
     }
 
     public void PrepareRetract()
@@ -170,6 +183,12 @@ public class Spike : MonoBehaviour
         isAttacking = active;
     }
 
+    private void StopFromCollision()
+    {
+        StopInPlace(true);
+        CollisionStopped?.Invoke(this, blockedPathProgress);
+    }
+
     public void StopInPlace(bool playImpactEffect)
     {
         if (warningCoroutine != null)
@@ -187,6 +206,35 @@ public class Spike : MonoBehaviour
         blockedAt = rb.position;
         blockedPathProgress = Mathf.Clamp01(Vector2.Distance(originPos, blockedAt) / Vector2.Distance(originPos, targetPos));
         if (playImpactEffect)
+            PlayImpactEffect();
+    }
+
+    public void ApplyAuthoritativeStop(float pathProgress)
+    {
+        if (!isCycleActive)
+            return;
+
+        pathProgress = Mathf.Clamp01(pathProgress);
+
+        if (isBlocked && Mathf.Approximately(blockedPathProgress, pathProgress))
+            return;
+
+        bool shouldPlayEffect = !isBlocked;
+        if (moveCoroutine != null)
+        {
+            StopCoroutine(moveCoroutine);
+            moveCoroutine = null;
+        }
+        SetDamageActive(false);
+
+        isBlocked = true;
+        blockedPathProgress = pathProgress;
+        blockedAt = Vector2.Lerp(originPos, targetPos, pathProgress);
+
+        rb.MovePosition(blockedAt);
+        solidTipCollider.enabled = true;
+
+        if (shouldPlayEffect)
             PlayImpactEffect();
     }
 
