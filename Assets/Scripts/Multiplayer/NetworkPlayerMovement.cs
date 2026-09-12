@@ -7,97 +7,95 @@ using UnityEngine;
 [RequireComponent(typeof(CircleCollider2D))]
 [RequireComponent(typeof(NetworkHealth))]
 [RequireComponent(typeof(NetworkPlayerGameplayGate))]
+[RequireComponent(typeof(PlayerMovement))]
+[RequireComponent(typeof(PlayerDash))]
+[RequireComponent(typeof(NetworkPlayerMovementSync))]
 public class NetworkPlayerMovement : NetworkBehaviour
 {
-    [SerializeField] private PlayerTuning playerTuning;
-    [Networked] private bool IsDashing { get; set; }
-    [Networked] private float DashTimer { get; set; }
-    [Networked] private float CooldownTimer { get; set; }
-    [Networked] private Vector2 DashDirection { get; set; }
-    [Networked] private Vector2 MoveInput { get; set; }
     private Rigidbody2D rb;
-    private Vector2 lastMoveDirection = Vector2.right;
+    private PlayerMovement playerMovement;
+    private PlayerDash playerDash;
     private NetworkPlayerGameplayGate gameplayGate;
+    public Vector2 SavedDashDirection { get; private set; }
+    public int DashCount { get; private set; }
+
     private void Awake()
     {
-        SerializedFieldValidator.Validate(this);
         rb = GetComponent<Rigidbody2D>();
+        playerMovement = GetComponent<PlayerMovement>();
+        playerDash = GetComponent<PlayerDash>();
         gameplayGate = GetComponent<NetworkPlayerGameplayGate>();
+
+        playerMovement.enabled = false;
+        playerDash.enabled = false;
     }
 
     public override void Spawned()
     {
         Runner.SetIsSimulated(Object, true);
+        rb.linearVelocity = Vector2.zero;
+        rb.bodyType = Object.HasInputAuthority
+            ? RigidbodyType2D.Dynamic
+            : RigidbodyType2D.Kinematic;
+        rb.interpolation = Object.HasInputAuthority
+            ? RigidbodyInterpolation2D.Interpolate
+            : RigidbodyInterpolation2D.None;
+        rb.useFullKinematicContacts = true;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (Object == null || !Object.IsValid)
             return;
 
-        if (!gameplayGate.CanAct)
-        {
-            rb.linearVelocity = Vector2.zero;
-            return;
-        }
-        if (IsDashing)
-        {
-            float progress = 1f - DashTimer / playerTuning.DashDuration;
-
-            rb.linearVelocity =
-                PlayerMovementMotion.CalculateDashVelocity(
-                    DashDirection,
-                    playerTuning.DashSpeed,
-                    progress,
-                    playerTuning.DashSpeedCurve
-                );
-            return;
-        }
-        rb.linearVelocity =
-            PlayerMovementMotion.CalculateVelocity(
-                rb.linearVelocity,
-                MoveInput,
-                playerTuning.MoveSpeed,
-                playerTuning.Acceleration,
-                playerTuning.Deceleration,
-                Time.fixedDeltaTime
-            );
+        UpdateControlState();
+        if (Object.HasInputAuthority && !Runner.ProvideInput)
+            playerMovement.SetMoveInput(Vector2.zero);
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (!Object.HasInputAuthority && !Object.HasStateAuthority) // doesn't control this body
+        if (!Object.HasInputAuthority || !Runner.IsForward)
             return;
-        if (!gameplayGate.CanAct)
+
+        UpdateControlState();
+        if (!playerMovement.enabled)
+            return;
+
+        bool hasInput = GetInput(out NetworkInputData inputData) && Runner.ProvideInput;
+        playerMovement.SetMoveInput(hasInput ? inputData.MoveDir : Vector2.zero);
+
+        if (hasInput && inputData.Buttons.IsSet(NetworkInputButton.Dash) && playerDash.TryDash()) // dash and play dust effect
         {
-            MoveInput = Vector2.zero;
-            IsDashing = false;
-            DashTimer = 0f;
+            SavedDashDirection = playerMovement.GetLastMoveDirection();
+            DashCount++;
+        }
+    }
+
+    private void UpdateControlState()
+    {
+        bool canAct = Object.HasInputAuthority && gameplayGate.CanAct &&
+            (Runner.IsServer || Runner.IsConnectedToServer);
+
+        if (!canAct)
+        {
+            if (playerMovement.enabled)
+                playerMovement.StopMovement();
+            if (playerDash.enabled)
+                playerDash.StopDash();
+
+            rb.bodyType = RigidbodyType2D.Kinematic;
             return;
         }
 
-        bool hasInput = GetInput(out NetworkInputData inputData);
-        MoveInput = hasInput ? inputData.MoveDir : Vector2.zero;
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        playerMovement.enabled = true;
+        playerDash.enabled = true;
+    }
 
-        if (hasInput && inputData.Buttons.IsSet(NetworkInputButton.Dash) && CooldownTimer <= 0f && !IsDashing)
-        {
-            IsDashing = true;
-            DashDirection = lastMoveDirection;
-            DashTimer = playerTuning.DashDuration;
-            CooldownTimer = playerTuning.DashCooldown;
-        }
-
-        if (IsDashing)
-        {
-            DashTimer -= Runner.DeltaTime;
-            if (DashTimer <= 0f)
-                IsDashing = false;
-        }
-
-        if (MoveInput != Vector2.zero)
-            lastMoveDirection = MoveInput.normalized;
-
-        if (CooldownTimer > 0f)
-            CooldownTimer -= Runner.DeltaTime;
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        playerMovement.StopMovement();
+        playerDash.StopDash();
     }
 }

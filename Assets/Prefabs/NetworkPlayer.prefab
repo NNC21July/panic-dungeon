@@ -23,6 +23,8 @@ GameObject:
   - component: {fileID: 4097093076710487639}
   - component: {fileID: 8445514050212795160}
   - component: {fileID: -3169564537378372308}
+  - component: {fileID: 8034000000000000001}
+  - component: {fileID: 8034000000000000002}
   m_Layer: 3
   m_Name: NetworkPlayer
   m_TagString: Untagged
@@ -292,7 +294,7 @@ MonoBehaviour:
   SortKey: 3300738797
   SendPriority: 1
   EnableInterpolation: 1
-  Flags: 262402
+  Flags: 262146
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 7850645773688092266}
@@ -312,37 +314,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 4898517791944016510}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Script: {fileID: 11500000, guid: 7d1dc31f508a409aad22ec56c3fa173a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkTransform
-  _stateAuthorityChangeErrorCorrectionDelta: 0
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  ConfigFlags: 0
-  PhysicsSettings:
-    ForecastEnabled: 1
-    DebugPhysics: 0
-    GravityForecast: 2
-    MaxExtrapolationTime: 0.15
-    MinLinearDetectedError: 0.02
-    MinAngularDetectedError: 3
-    MaxLinearError: 0
-    MaxAngularError: 0
-    LowCorrectionProgressThreshold: 0.015
-    HighErrorSimilarityThreshold: 1
-    MaxErrorTotalTime: 0.5
-    MaxRemoteSleepIgnoreTime: 0.5
-    ErrorCorrectionType: 0
-    LinearVelCorrectionMul: 1
-    AngularVelCorrectionMul: 1
-    PositionCorrectionLerp: 0.15
-    RotationCorrectionLerp: 0.15
-    Spring: 75
-    Damper: 2
-    MinImpactfulCollisionAlignment: 0.3
-    ImpactStartCorrectionTime: 0.1
-    ImpactCorrectionTimeComplete: 0.3
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerMovementSync
+  reportsPerSecond: 30
+  maxReportSpeed: 40
+  maxBufferedTime: 0.25
+  positionTolerance: 0.5
+  collisionTolerance: 0.05
+  blockingLayers:
+    serializedVersion: 2
+    m_Bits: 576
+  logCorrections: 1
+  _AcceptedPosition: {x: 0, y: 0}
+  _CorrectionCount: 0
 --- !u!114 &604642237215053626
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,11 +340,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50e5d59a049e0f24e9cc1a6447906fd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerMovement
-  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
-  collisionSkin: 0.02
-  collisionMask:
-    serializedVersion: 2
-    m_Bits: 1728
 --- !u!114 &5217935738293506594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -432,6 +412,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89dbff2bee0e24c4cb22c877cf9ecf92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerGameplayGate
+--- !u!114 &8034000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4089525c52f85a54285ba432a2ac3bc1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
+--- !u!114 &8034000000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb866ac669ac5ba4c82bf12ef52dda7c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
+  playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
+  dustEffect: {fileID: 6035401514808129135}
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0
@@ -866,5 +873,10 @@ PrefabInstance:
 --- !u!4 &6035401514808129129 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2282438384830233660, guid: 7697a49ea05824642b45a2fab61c81c4, type: 3}
+  m_PrefabInstance: {fileID: 5507572685594135125}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &6035401514808129135 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 2282438384830233658, guid: 7697a49ea05824642b45a2fab61c81c4, type: 3}
   m_PrefabInstance: {fileID: 5507572685594135125}
   m_PrefabAsset: {fileID: 0}

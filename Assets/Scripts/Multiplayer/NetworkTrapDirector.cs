@@ -8,6 +8,7 @@ public class NetworkTrapDirector : NetworkBehaviour
     [SerializeField] private NetworkMatchManager matchManager;
     [SerializeField] private TrapController trapController;
     [SerializeField] private TrapSetup trapSetup;
+    [SerializeField] private ParticleSystem poisonSplashPrefab;
     [Networked] private NetworkBool TrapsRunning { get; set; }
     [Networked] private TrapPatternId ActivePattern { get; set; }
     [Networked] private float ActiveWarningDuration { get; set; }
@@ -34,6 +35,11 @@ public class NetworkTrapDirector : NetworkBehaviour
         RegisterTrapVisibility();
         RegisterSpikeCallbacks();
 
+        foreach (ArrowShooter shooter in trapSetup.LeftArrowShooters)
+            shooter.ArrowSpawned += RegisterArrow;
+        foreach (ArrowShooter shooter in trapSetup.RightArrowShooters)
+            shooter.ArrowSpawned += RegisterArrow;
+
         if (!Object.HasStateAuthority)
             return;
 
@@ -49,6 +55,11 @@ public class NetworkTrapDirector : NetworkBehaviour
             UnsubscribeSpike(spike);
         foreach (Spike spike in trapSetup.BottomSpikes)
             UnsubscribeSpike(spike);
+
+        foreach (ArrowShooter shooter in trapSetup.LeftArrowShooters)
+            shooter.ArrowSpawned -= RegisterArrow;
+        foreach (ArrowShooter shooter in trapSetup.RightArrowShooters)
+            shooter.ArrowSpawned -= RegisterArrow;
     }
 
     public override void FixedUpdateNetwork()
@@ -237,5 +248,31 @@ public class NetworkTrapDirector : NetworkBehaviour
                 activeSpikeRow[i].ApplyAuthoritativeStop(spikeState.StopProgress);
         }
 
+    }
+
+    private void RegisterArrow(Arrow arrow)
+    {
+        Runner.AddVisibilityNodes(arrow.gameObject);
+        if (arrow is PoisonArrow poisonArrow)
+            poisonArrow.SplashHandler = HandlePoisonSplash;
+    }
+
+    private void HandlePoisonSplash(Vector2 position)
+    {
+        if (Object == null || !Object.IsValid || !Object.HasStateAuthority)
+            return;
+
+        RPC_PlayPoisonSplash(position);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_PlayPoisonSplash(Vector2 position)
+    {
+        ParticleSystem splash = Instantiate(poisonSplashPrefab, position, Quaternion.identity);
+
+        UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(splash.gameObject, gameObject.scene);
+
+        Runner.AddVisibilityNodes(splash.gameObject);
+        splash.Play();
     }
 }

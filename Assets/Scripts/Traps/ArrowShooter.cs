@@ -26,6 +26,7 @@ public class ArrowShooter : MonoBehaviour
     private float localWarningLineLength, chevronStartX, chevronOffset, actualChevronSpacing;
     private int chevronCount;
     public bool IsActive => isActive;
+    public event Action<Arrow> ArrowSpawned;
 
     private void Awake()
     {
@@ -34,7 +35,7 @@ public class ArrowShooter : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalColor = spriteRenderer.color;
         warningLineOriginalColor = warningLine.color;
-        warningLine.enabled = false;
+        warningLine.gameObject.SetActive(false);
     }
 
     public void Configure(Vector2 direction, float worldWarningLineLength, float shooterHalfWidth)
@@ -85,7 +86,7 @@ public class ArrowShooter : MonoBehaviour
             StopCoroutine(warningCoroutine);
 
         ResetWarningVisuals();
-        warningLine.enabled = true;
+        warningLine.gameObject.SetActive(true);
         SetChevronsVisible(true);
         warningCoroutine = StartCoroutine(WarningFlash());
     }
@@ -94,7 +95,11 @@ public class ArrowShooter : MonoBehaviour
     {
         Arrow arrowInstance = Instantiate(SelectArrow(), transform.position, Quaternion.identity);
 
+        UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(arrowInstance.gameObject, gameObject.scene);
+
         arrowInstance.Initialize(fireDirection, gameObject);
+
+        ArrowSpawned?.Invoke(arrowInstance);
 
         AudioManager.Instance?.PlayTrapSfx(fireSfx, 0.15f);
     }
@@ -122,7 +127,8 @@ public class ArrowShooter : MonoBehaviour
             chevronSR.sprite = chevronSprite;
             chevronSR.color = chevronColor;
             chevronSR.sortingOrder = warningLine.sortingOrder + 1;
-            chevronSR.enabled = false;
+            chevronSR.enabled = true;
+            chevronObj.SetActive(false);
 
             float warningLineHeight = warningLine.sprite.bounds.size.y * Mathf.Abs(warningLine.transform.localScale.y),
             chevronSpriteHeight = chevronSR.sprite.bounds.size.y,
@@ -140,7 +146,7 @@ public class ArrowShooter : MonoBehaviour
     private void SetChevronsVisible(bool visible)
     {
         foreach (SpriteRenderer chevron in chevrons)
-            chevron.enabled = visible;
+            chevron.gameObject.SetActive(visible);
     }
 
     private void AnimateChevrons(float dt)
@@ -204,13 +210,14 @@ public class ArrowShooter : MonoBehaviour
     {
         spriteRenderer.color = originalColor;
         warningLine.color = warningLineOriginalColor;
-        warningLine.enabled = false;
+        warningLine.gameObject.SetActive(false);
         SetChevronsVisible(false);
         warningCoroutine = null;
     }
 
     private void OnDisable()
     {
+        warningLine.gameObject.SetActive(false);
         SetChevronsVisible(false);
     }
 

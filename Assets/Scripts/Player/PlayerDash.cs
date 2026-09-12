@@ -3,8 +3,6 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerMovement))]
-[RequireComponent(typeof(PlayerInput))]
-[RequireComponent(typeof(Health))]
 
 public class PlayerDash : MonoBehaviour
 {
@@ -24,7 +22,8 @@ public class PlayerDash : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponent<PlayerMovement>();
         health = GetComponent<Health>();
-        health.OnDeath += HandleDeath;
+        if (health != null)
+            health.OnDeath += HandleDeath;
     }
 
     private void Update()
@@ -63,14 +62,26 @@ public class PlayerDash : MonoBehaviour
 
     public void Dash(InputAction.CallbackContext context)
     {
-        if (!context.performed || !canDash || isDashing || health.IsDead)
-            return;
+        if (context.performed)
+            TryDash();
+    }
+
+    public bool TryDash()
+    {
+        if (!isActiveAndEnabled || !canDash || isDashing || (health != null && health.IsDead))
+            return false;
 
         dashDirection = playerMovement.GetLastMoveDirection();
         isDashing = true;
         dashTimer = playerTuning.DashDuration;
 
-        float angle = Mathf.Atan2(-dashDirection.y, -dashDirection.x) * Mathf.Rad2Deg;
+        PlayDashEffect(dashDirection);
+        return true;
+    }
+
+    public void PlayDashEffect(Vector2 direction)
+    {
+        float angle = Mathf.Atan2(-direction.y, -direction.x) * Mathf.Rad2Deg;
         dustEffect.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
         dustEffect.Play();
     }
@@ -82,8 +93,24 @@ public class PlayerDash : MonoBehaviour
 
     private void HandleDeath(DamageInfo damageInfo)
     {
+        StopDash();
+    }
+
+    public void CancelDash()
+    {
+        if (isDashing)
+        {
+            canDash = false;
+            cooldownTimer = playerTuning.DashCooldown;
+        }
         isDashing = false;
+        dashTimer = 0f;
         rb.linearVelocity = Vector2.zero;
+    }
+
+    public void StopDash()
+    {
+        CancelDash();
         enabled = false;
     }
 
@@ -99,6 +126,7 @@ public class PlayerDash : MonoBehaviour
 
     private void OnDestroy()
     {
-        health.OnDeath -= HandleDeath;
+        if (health != null)
+            health.OnDeath -= HandleDeath;
     }
 }

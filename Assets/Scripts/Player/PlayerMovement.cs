@@ -2,8 +2,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(PlayerInput))]
-[RequireComponent(typeof(Health))]
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private PlayerTuning playerTuning;
@@ -18,7 +16,8 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerDash = GetComponent<PlayerDash>();
         health = GetComponent<Health>();
-        health.OnDeath += HandleDeath;
+        if (health != null)
+            health.OnDeath += HandleDeath;
     }
 
     private void FixedUpdate()
@@ -38,7 +37,15 @@ public class PlayerMovement : MonoBehaviour
 
     public void Move(InputAction.CallbackContext context)
     {
-        moveInput = context.ReadValue<Vector2>();
+        SetMoveInput(context.ReadValue<Vector2>());
+    }
+
+    public void SetMoveInput(Vector2 direction)
+    {
+        if (!isActiveAndEnabled || (health != null && health.IsDead))
+            return;
+
+        moveInput = direction;
         if (moveInput != Vector2.zero)
             lastMoveDirection = moveInput.normalized;
     }
@@ -50,6 +57,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleDeath(DamageInfo damageInfo)
     {
+        StopMovement();
+    }
+
+    public void StopMovement()
+    {
+        moveInput = new Vector2(0, 0);
         rb.linearVelocity = Vector2.zero;
         enabled = false;
     }
