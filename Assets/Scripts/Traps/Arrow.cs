@@ -13,6 +13,7 @@ public class Arrow : MonoBehaviour
     protected GameObject Shooter => shooter;
     public bool SimulateLocally { get; set; } = true;
     public Action<Arrow, bool> FinishHandler { get; set; }
+    public event Action<IDamageable> DamageDealt;
 
     protected virtual void Awake()
     {
@@ -89,6 +90,7 @@ public class Arrow : MonoBehaviour
         bool damaged = damageable.TakeDamage(new DamageInfo(damageAmount, shooter, DamageType.Arrow));
         if (damaged)
         {
+            DamageDealt?.Invoke(damageable);
             OnSuccessfulHit(other);
             Finish(true);
         }

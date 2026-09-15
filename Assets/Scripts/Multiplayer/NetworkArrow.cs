@@ -13,6 +13,8 @@ public class NetworkArrow : NetworkBehaviour
     [Networked] private NetworkBool HitSomething { get; set; }
     [Networked] private NetworkBool HasPoisonSplash { get; set; }
     [Networked] private Vector2 PoisonSplashPosition { get; set; }
+    [Networked] private NetworkId DamagedTargetId { get; set; }
+    [Networked] private int DamagedTargetSequence { get; set; }
     private TickTimer cleanupTimer;
     private Renderer[] arrowRenderers;
     private bool impactShown;
@@ -51,6 +53,7 @@ public class NetworkArrow : NetworkBehaviour
 
         arrow.SimulateLocally = isHost;
         arrow.FinishHandler = HandleFinished;
+        arrow.DamageDealt += RecordDamagedTarget;
 
         rb.bodyType = isHost ? RigidbodyType2D.Dynamic : RigidbodyType2D.Kinematic;
         rb.interpolation = RigidbodyInterpolation2D.None;
@@ -62,6 +65,8 @@ public class NetworkArrow : NetworkBehaviour
             HitSomething = false;
             HasPoisonSplash = false;
             PoisonSplashPosition = Vector2.zero;
+            DamagedTargetId = default;
+            DamagedTargetSequence = 0;
 
             rb.position = transform.position;
             arrow.Initialize(fireDirection, shooter);
@@ -172,6 +177,8 @@ public class NetworkArrow : NetworkBehaviour
             ParticleSystem splash = poisonArrow.PlaySplash(PoisonSplashPosition);
             Runner.AddVisibilityNodes(splash.gameObject);
         }
+
+        NotifyTargetOfArrowImpact();
     }
 
     private void HandleFinished(Arrow finishedArrow, bool hitSomething)
@@ -193,6 +200,7 @@ public class NetworkArrow : NetworkBehaviour
     {
         arrow.SimulateLocally = false;
         arrow.FinishHandler = null;
+        arrow.DamageDealt -= RecordDamagedTarget;
         rb.linearVelocity = Vector2.zero;
         rb.simulated = false;
 
@@ -209,6 +217,19 @@ public class NetworkArrow : NetworkBehaviour
             arrowRenderer.forceRenderingOff = !visible;
     }
 
+    private void RecordDamagedTarget(IDamageable target)
+    {
+        if (Object == null || !Object.IsValid || !Object.HasStateAuthority || HasFinished)
+            return;
+        if (target is not NetworkHealth targetHealth)
+            return;
+        if (targetHealth.Object == null || !targetHealth.Object.IsValid)
+            return;
+
+        DamagedTargetId = targetHealth.Object.Id;
+        DamagedTargetSequence = targetHealth.DamageSequence;
+    }
+
     private void RecordPoisonSplash(Vector2 position)
     {
         if (Object == null || !Object.IsValid ||
@@ -217,5 +238,21 @@ public class NetworkArrow : NetworkBehaviour
 
         HasPoisonSplash = true;
         PoisonSplashPosition = position;
+    }
+
+    private void NotifyTargetOfArrowImpact()
+    {
+        if (!DamagedTargetId.IsValid || DamagedTargetSequence <= 0)
+            return;
+
+        if (!Runner.TryFindObject(
+            DamagedTargetId,
+            out NetworkObject targetObject))
+            return;
+
+        NetworkHealth targetHealth = targetObject.GetComponent<NetworkHealth>();
+
+        if (targetHealth != null)
+            targetHealth.NotifyArrowImpactShown(DamagedTargetSequence);
     }
 }

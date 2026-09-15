@@ -53,8 +53,10 @@ public class NetworkPlayerMovementSync : NetworkBehaviour
     {
         if (Object.HasStateAuthority)
         {
-            AcceptedPosition = rb.position;
-            CorrectionPosition = rb.position;
+            Vector2 spawnPosition = transform.position;
+            AcceptedPosition = spawnPosition;
+            CorrectionPosition = spawnPosition;
+
             CorrectionCount = 0;
             AcceptedDashCount = 0;
             AcceptedDashDirection = Vector2.zero;

@@ -243,7 +243,9 @@ public class Spike : MonoBehaviour
         impactEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         impactEffect.Play();
         AudioManager.Instance?.PlayTrapSfx(impactSfx, 0.15f);
-        CameraShake.Instance?.AddShake();
+
+        CameraShake cameraShake = CameraShake.FindInScene(gameObject.scene);
+        cameraShake?.AddShake();
     }
 
     private IEnumerator WarningFlash(float warningDuration, float warningFlashDuration)

@@ -46,7 +46,7 @@ public class PlayerDamageFeedback : MonoBehaviour
     {
         if (networkObject == null || !networkObject.HasInputAuthority)
             return;
-        PlayFeedback(DamageType.Melee);
+        PlayFeedback(networkHealth.PresentedDamageType);
     }
 
     private void HandleDamaged(DamageInfo damageInfo)
