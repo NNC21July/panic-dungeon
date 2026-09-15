@@ -4846,6 +4846,8 @@ MonoBehaviour:
   trapController: {fileID: 1581613496}
   trapSetup: {fileID: 1581613497}
   poisonSplashPrefab: {fileID: 5673423209690850590, guid: d2781ad881a7ccf43af25818b634bd8d, type: 3}
+  networkArrowPrefab: {fileID: 1793549609812298304, guid: dd743cff412da2b4689c17705fbec0af, type: 3}
+  networkPoisonArrowPrefab: {fileID: 8762443439563781778, guid: d2a5b0b1293578745802884a27d5d448, type: 3}
 --- !u!1 &1562650353
 GameObject:
   m_ObjectHideFlags: 0

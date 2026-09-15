@@ -27,6 +27,8 @@ public class ArrowShooter : MonoBehaviour
     private int chevronCount;
     public bool IsActive => isActive;
     public event Action<Arrow> ArrowSpawned;
+    public bool CanSpawnArrows { get; set; } = true;
+    public Func<ArrowShooter, Arrow, Vector2, Arrow> SpawnHandler { get; set; }
 
     private void Awake()
     {
@@ -93,14 +95,31 @@ public class ArrowShooter : MonoBehaviour
 
     private void Fire()
     {
-        Arrow arrowInstance = Instantiate(SelectArrow(), transform.position, Quaternion.identity);
+        if (CanSpawnArrows)
+        {
+            Arrow selectedPrefab = SelectArrow(), arrowInstance;
 
-        UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(arrowInstance.gameObject, gameObject.scene);
+            if (SpawnHandler != null)
+                arrowInstance = SpawnHandler(this, selectedPrefab, fireDirection);
+            else // single player
+            {
+                arrowInstance = Instantiate(
+                    selectedPrefab,
+                    transform.position,
+                    Quaternion.identity
+                );
 
-        arrowInstance.Initialize(fireDirection, gameObject);
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(
+                    arrowInstance.gameObject,
+                    gameObject.scene
+                );
 
-        ArrowSpawned?.Invoke(arrowInstance);
+                arrowInstance.Initialize(fireDirection, gameObject);
+            }
 
+            if (arrowInstance != null)
+                ArrowSpawned?.Invoke(arrowInstance);
+        }
         AudioManager.Instance?.PlayTrapSfx(fireSfx, 0.15f);
     }
 

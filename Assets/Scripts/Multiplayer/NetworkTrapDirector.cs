@@ -8,7 +8,7 @@ public class NetworkTrapDirector : NetworkBehaviour
     [SerializeField] private NetworkMatchManager matchManager;
     [SerializeField] private TrapController trapController;
     [SerializeField] private TrapSetup trapSetup;
-    [SerializeField] private ParticleSystem poisonSplashPrefab;
+    [SerializeField] private NetworkObject networkArrowPrefab, networkPoisonArrowPrefab;
     [Networked] private NetworkBool TrapsRunning { get; set; }
     [Networked] private TrapPatternId ActivePattern { get; set; }
     [Networked] private float ActiveWarningDuration { get; set; }
@@ -20,6 +20,8 @@ public class NetworkTrapDirector : NetworkBehaviour
     private const int MaxSpikesPerRow = 64;
     private int handledPatternSequence = -1;
     private bool locallyRunning;
+    public bool IsMatchPlaying =>
+    matchManager != null && matchManager.State == NetworkMatchState.Playing;
 
     private void Awake()
     {
@@ -36,9 +38,9 @@ public class NetworkTrapDirector : NetworkBehaviour
         RegisterSpikeCallbacks();
 
         foreach (ArrowShooter shooter in trapSetup.LeftArrowShooters)
-            shooter.ArrowSpawned += RegisterArrow;
+            RegisterShooter(shooter);
         foreach (ArrowShooter shooter in trapSetup.RightArrowShooters)
-            shooter.ArrowSpawned += RegisterArrow;
+            RegisterShooter(shooter);
 
         if (!Object.HasStateAuthority)
             return;
@@ -57,9 +59,9 @@ public class NetworkTrapDirector : NetworkBehaviour
             UnsubscribeSpike(spike);
 
         foreach (ArrowShooter shooter in trapSetup.LeftArrowShooters)
-            shooter.ArrowSpawned -= RegisterArrow;
+            UnsubscribeShooter(shooter);
         foreach (ArrowShooter shooter in trapSetup.RightArrowShooters)
-            shooter.ArrowSpawned -= RegisterArrow;
+            UnsubscribeShooter(shooter);
     }
 
     public override void FixedUpdateNetwork()
@@ -110,6 +112,38 @@ public class NetworkTrapDirector : NetworkBehaviour
         DifficultyTimer = TickTimer.None;
         if (Object.HasStateAuthority)
             ClearSpikeStates();
+    }
+
+    private Arrow SpawnNetworkArrow(ArrowShooter shooter, Arrow selectedPrefab, Vector2 direction)
+    {
+        if (Object == null || !Object.IsValid || !Object.HasStateAuthority)
+            return null;
+        if (matchManager.State != NetworkMatchState.Playing)
+            return null;
+
+        NetworkObject prefab = selectedPrefab is PoisonArrow
+            ? networkPoisonArrowPrefab
+            : networkArrowPrefab;
+
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+        NetworkObject spawnedArrow = Runner.Spawn(
+            prefab,
+            shooter.transform.position,
+            Quaternion.Euler(0f, 0f, angle),
+            onBeforeSpawned: (runner, obj) =>
+            {
+                obj.GetComponent<NetworkArrow>().Configure(
+                    direction,
+                    shooter.gameObject,
+                    this
+                );
+            }
+        );
+
+        return spawnedArrow != null
+            ? spawnedArrow.GetComponent<Arrow>()
+            : null;
     }
 
     private void StartNextPattern()
@@ -250,29 +284,15 @@ public class NetworkTrapDirector : NetworkBehaviour
 
     }
 
-    private void RegisterArrow(Arrow arrow)
+    private void RegisterShooter(ArrowShooter shooter)
     {
-        Runner.AddVisibilityNodes(arrow.gameObject);
-        if (arrow is PoisonArrow poisonArrow)
-            poisonArrow.SplashHandler = HandlePoisonSplash;
+        shooter.CanSpawnArrows = Object.HasStateAuthority;
+        shooter.SpawnHandler = SpawnNetworkArrow;
     }
 
-    private void HandlePoisonSplash(Vector2 position)
+    private void UnsubscribeShooter(ArrowShooter shooter)
     {
-        if (Object == null || !Object.IsValid || !Object.HasStateAuthority)
-            return;
-
-        RPC_PlayPoisonSplash(position);
-    }
-
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void RPC_PlayPoisonSplash(Vector2 position)
-    {
-        ParticleSystem splash = Instantiate(poisonSplashPrefab, position, Quaternion.identity);
-
-        UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(splash.gameObject, gameObject.scene);
-
-        Runner.AddVisibilityNodes(splash.gameObject);
-        splash.Play();
+        shooter.CanSpawnArrows = false;
+        shooter.SpawnHandler = null;
     }
 }

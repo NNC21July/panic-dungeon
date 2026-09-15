@@ -22,11 +22,16 @@ public class PoisonArrow : Arrow
             SplashHandler(impactPos);
             return;
         }
+        PlaySplash(impactPos);
+    }
 
-        ParticleSystem splash = Instantiate(poisonSplash, impactPos, Quaternion.identity);
+    public ParticleSystem PlaySplash(Vector2 position)
+    {
+        ParticleSystem splash = Instantiate(poisonSplash, position, Quaternion.identity);
 
         UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(splash.gameObject, gameObject.scene);
 
         splash.Play();
+        return splash;
     }
 }
