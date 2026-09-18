@@ -2,12 +2,6 @@ using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
-public struct ArrowRenderSample : INetworkStruct
-{
-    public int FromTick, ToTick;
-    public float Alpha;
-}
-
 [RequireComponent(typeof(NetworkObject))]
 [RequireComponent(typeof(NetworkTransform))]
 [RequireComponent(typeof(Arrow))]
@@ -43,10 +37,10 @@ public class NetworkArrow : NetworkBehaviour
     private Quaternion prevArrowRotation;
     private double prevArrowRenderTime;
     private NetworkTransform networkTransform;
-    private ArrowRenderSample prevArrowSample;
+    private ContactRenderSample prevArrowSample;
     private PlayerContactSample prevPlayerSample;
     private Vector3 arrowScale;
-    private readonly SortedList<int, NetworkTRSPData> hostArrowHistory = new();
+    private readonly ContactHistory<NetworkTRSPData> hostArrowHistory = new();
 
     private void Awake()
     {
@@ -253,7 +247,7 @@ public class NetworkArrow : NetworkBehaviour
     }
 
     public bool TryResolveReportedContact(NetworkHealth target, CircleCollider2D targetCollider,
-        ArrowRenderSample start, ArrowRenderSample end, PlayerContactSample playerStart, PlayerContactSample playerEnd,
+        ContactRenderSample start, ContactRenderSample end, PlayerContactSample playerStart, PlayerContactSample playerEnd,
         out bool accepted)
     {
         accepted = false;
@@ -288,9 +282,9 @@ public class NetworkArrow : NetworkBehaviour
         return true;
     }
 
-    private double GetSampleTime(ArrowRenderSample sample)
+    private double GetSampleTime(ContactRenderSample sample)
     {
-        return (sample.FromTick + ((double)sample.ToTick - sample.FromTick) * sample.Alpha) * Runner.DeltaTime;
+        return sample.GetTime(Runner.DeltaTime);
     }
 
     private void RecordDamagedTarget(IDamageable target)
@@ -387,7 +381,7 @@ public class NetworkArrow : NetworkBehaviour
             prevContactFrame = -1;
             return;
         }
-        ArrowRenderSample curArrowSample = new()
+        ContactRenderSample curArrowSample = new()
         {
             FromTick = fromBuffer.Tick,
             ToTick = toBuffer.Tick,
@@ -406,7 +400,7 @@ public class NetworkArrow : NetworkBehaviour
 
         Vector2 start = center;
         PlayerContactSample reportStartPlayer = curPlayerSample;
-        ArrowRenderSample reportStartSample = curArrowSample;
+        ContactRenderSample reportStartSample = curArrowSample;
 
         if (canSweep)
         {
@@ -417,7 +411,7 @@ public class NetworkArrow : NetworkBehaviour
             reportStartSample = prevArrowSample;
         }
 
-        bool touched = ArrowContactDetector.SweptTouchesCircle(transform, arrowOutline, arrowCollider.offset, start, center, radius);
+        bool touched = PolygonContactDetector.SweptTouchesCircle(transform, arrowOutline, arrowCollider.offset, start, center, radius);
 
         prevContactFrame = Time.frameCount;
         prevContactPlayer = playerObject.Id;
@@ -459,13 +453,7 @@ public class NetworkArrow : NetworkBehaviour
         if (hostArrowHistory.Count == 0)
             return;
 
-        int newestTick = hostArrowHistory.Keys[hostArrowHistory.Count - 1],
-            ticksToKeep = Mathf.CeilToInt(historyDuration / Runner.DeltaTime),
-            oldestAllowedTick = newestTick - ticksToKeep;
-
-        while (hostArrowHistory.Count > 0 &&
-            hostArrowHistory.Keys[0] < oldestAllowedTick)
-            hostArrowHistory.RemoveAt(0);
+        hostArrowHistory.Prune(Mathf.CeilToInt(historyDuration / Runner.DeltaTime));
     }
 
     private bool TryGetHostArrowState(
@@ -478,7 +466,7 @@ public class NetworkArrow : NetworkBehaviour
         return hostArrowHistory.TryGetValue(tick, out state);
     }
 
-    private bool TryReconstructArrowPose(ArrowRenderSample sample, out Vector3 position, out Quaternion rotation, out int teleportKey)
+    private bool TryReconstructArrowPose(ContactRenderSample sample, out Vector3 position, out Quaternion rotation, out int teleportKey)
     {
         position = default;
         rotation = Quaternion.identity;
@@ -515,7 +503,7 @@ public class NetworkArrow : NetworkBehaviour
         return true;
     }
 
-    private bool TryCheckReportedContact(ArrowRenderSample startSample, ArrowRenderSample endSample, Vector2 startPlayerCenter, Vector2 endPlayerCenter, float playerRadius, out bool touched, out float fraction, out Vector2 impactPosition)
+    private bool TryCheckReportedContact(ContactRenderSample startSample, ContactRenderSample endSample, Vector2 startPlayerCenter, Vector2 endPlayerCenter, float playerRadius, out bool touched, out float fraction, out Vector2 impactPosition)
     {
         touched = false;
         fraction = 0f;
@@ -574,7 +562,7 @@ public class NetworkArrow : NetworkBehaviour
         Vector2 relativePlayerStart =
             startPlayerCenter + arrowMovement;
 
-        touched = ArrowContactDetector.TryGetContactFraction(
+        touched = PolygonContactDetector.TryGetContactFraction(
             arrowMatrix,
             arrowOutline,
             arrowCollider.offset,

@@ -30,6 +30,8 @@ public class TrapController : MonoBehaviour
         TrapPatternId.RightArrows
         };
     private TrapPatternId previousPatternId = TrapPatternId.None;
+    private bool remoteSpikeWarning, remoteWarningBeeped;
+    private bool remoteWarningIsTop;
     public bool HasActivePattern => curPattern != null || commandedPatternCoroutine != null;
     public float CurrentWarningDuration => difficultyScaler.CurWarningDuration;
     public float CurrentPatternInterval => difficultyScaler.CurSpikeInterval;
@@ -90,6 +92,20 @@ public class TrapController : MonoBehaviour
         }
         curPattern?.Cancel();
         curPattern = null;
+    }
+
+    public void PresentSpikeWarning(bool visible, bool isTop, float flashBlend)
+    {
+        if (visible && (!remoteSpikeWarning || remoteWarningIsTop != isTop))
+            hazardWarningUI.ShowSpikeWarning(isTop);
+        else if (!visible && remoteSpikeWarning)
+            hazardWarningUI.HideSpikeWarning();
+
+        if (visible && flashBlend >= 0.5f && !remoteWarningBeeped)
+            AudioManager.Instance?.PlayTrapSfx(warningSfx, 0.15f);
+        remoteWarningBeeped = visible && flashBlend >= 0.5f;
+        remoteSpikeWarning = visible;
+        remoteWarningIsTop = isTop;
     }
 
     public void IncreaseDifficulty()

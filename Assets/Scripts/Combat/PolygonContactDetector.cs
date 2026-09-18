@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class ArrowContactDetector
+public static class PolygonContactDetector
 {
     public static bool TouchesCircle(Matrix4x4 arrowMatrix, Vector2[] outline, Vector2 offset, Vector2 center, float radius)
     {

@@ -26,6 +26,7 @@ GameObject:
   - component: {fileID: 8034000000000000001}
   - component: {fileID: 8034000000000000002}
   - component: {fileID: 8224023533266791270}
+  - component: {fileID: 8224023533266791271}
   m_Layer: 3
   m_Name: NetworkPlayer
   m_TagString: Untagged
@@ -306,6 +307,7 @@ MonoBehaviour:
   - {fileID: 8445514050212795160}
   - {fileID: -3169564537378372308}
   - {fileID: 8224023533266791270}
+  - {fileID: 8224023533266791271}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7850645773688092266
 MonoBehaviour:
@@ -445,6 +447,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
   playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
   dustEffect: {fileID: 6035401514808129135}
+--- !u!114 &8224023533266791271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a69f59112ad74ef096e7aa2a9c00effe, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerSpikeHitReporter
 --- !u!114 &8224023533266791270
 MonoBehaviour:
   m_ObjectHideFlags: 0

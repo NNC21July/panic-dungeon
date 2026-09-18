@@ -16,7 +16,7 @@ public class NetworkPlayerArrowHitReporter : NetworkBehaviour
     private const double HistoryWaitDuration = 0.25d;
     private struct PendingReport
     {
-        public ArrowRenderSample Start, End;
+        public ContactRenderSample Start, End;
         public PlayerContactSample PlayerStart, PlayerEnd;
         public double Deadline;
     }
@@ -59,7 +59,7 @@ public class NetworkPlayerArrowHitReporter : NetworkBehaviour
         nextCleanupTime = 0d;
     }
 
-    public bool ReportArrowContact(NetworkArrow networkArrow, ArrowRenderSample startSample, ArrowRenderSample endSample,
+    public bool ReportArrowContact(NetworkArrow networkArrow, ContactRenderSample startSample, ContactRenderSample endSample,
         PlayerContactSample playerStart, PlayerContactSample playerEnd)
     {
         if (!CanReport || Object.HasStateAuthority || !Runner.IsConnectedToServer ||
@@ -79,7 +79,7 @@ public class NetworkPlayerArrowHitReporter : NetworkBehaviour
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority,
     Channel = RpcChannel.Reliable, TickAligned = false,
     HostMode = RpcHostMode.SourceIsHostPlayer)]
-    private void RPC_ReportArrowContact(NetworkId arrowId, ArrowRenderSample startSample, ArrowRenderSample endSample,
+    private void RPC_ReportArrowContact(NetworkId arrowId, ContactRenderSample startSample, ContactRenderSample endSample,
         PlayerContactSample playerStart, PlayerContactSample playerEnd, RpcInfo info = default)
     {
         if (!Object.HasStateAuthority || info.Source != Object.InputAuthority ||
@@ -177,21 +177,15 @@ public class NetworkPlayerArrowHitReporter : NetworkBehaviour
             health.NotifyArrowImpactShown(damageSequence);
     }
 
-    private bool CanInspectReport(NetworkId arrowId, ArrowRenderSample start, ArrowRenderSample end,
+    private bool CanInspectReport(NetworkId arrowId, ContactRenderSample start, ContactRenderSample end,
         PlayerContactSample playerStart, PlayerContactSample playerEnd)
     {
         if (!arrowId.IsValid || !gameplayGate.CanAct || !playerCollider.enabled ||
-            !IsValidArrowSample(start) || !IsValidArrowSample(end) ||
-            !IsFinite(playerStart.Time) || !IsFinite(playerEnd.Time))
+            !ContactRenderSample.CanCheckPath(start, end, playerStart, playerEnd,
+                Runner.SimulationTime, Runner.DeltaTime, maxReportAge, maxContactInterval))
             return false;
 
-        double startTime = GetArrowSampleTime(start), endTime = GetArrowSampleTime(end);
-        if (endTime < startTime || endTime - startTime > maxContactInterval ||
-            playerEnd.Time < playerStart.Time || playerEnd.Time - playerStart.Time > maxContactInterval ||
-            playerStart.Time < startTime - Runner.DeltaTime * 2d ||
-            playerEnd.Time < endTime - Runner.DeltaTime * 2d ||
-            playerStart.Time - startTime > maxReportAge || playerEnd.Time - endTime > maxReportAge)
-            return false;
+        double startTime = start.GetTime(Runner.DeltaTime);
 
         if (!Runner.TryFindObject(arrowId, out NetworkObject arrowObject) ||
             arrowObject == null || !arrowObject.IsValid || !arrowObject.HasStateAuthority)
@@ -202,25 +196,4 @@ public class NetworkPlayerArrowHitReporter : NetworkBehaviour
             startTime >= networkArrow.HostSpawnTime - Runner.DeltaTime * 2d;
     }
 
-    private static bool IsFinite(double value)
-    {
-        return !double.IsNaN(value) && !double.IsInfinity(value);
-    }
-
-    private bool IsValidArrowSample(ArrowRenderSample sample)
-    {
-        if (sample.FromTick < 0 || sample.ToTick < sample.FromTick ||
-            !IsFinite(sample.Alpha) || sample.Alpha < 0f || sample.Alpha > 1f)
-            return false;
-
-        double fromTime = sample.FromTick * (double)Runner.DeltaTime;
-        double toTime = sample.ToTick * (double)Runner.DeltaTime;
-        return fromTime >= Runner.SimulationTime - maxReportAge &&
-            toTime <= Runner.SimulationTime + Runner.DeltaTime * 2d;
-    }
-
-    private double GetArrowSampleTime(ArrowRenderSample sample)
-    {
-        return (sample.FromTick + ((double)sample.ToTick - sample.FromTick) * sample.Alpha) * Runner.DeltaTime;
-    }
 }

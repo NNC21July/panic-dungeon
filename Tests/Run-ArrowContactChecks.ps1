@@ -15,17 +15,23 @@ $compiler = Join-Path $Matches[2] ($Matches[1] + '/Roslyn/bincore/csc.dll')
 $engine = Join-Path $UnityEditor 'Data/Managed/UnityEngine'
 $reference = Join-Path $UnityEditor 'Data/NetStandard/ref/2.1.0/netstandard.dll'
 $core = Join-Path $engine 'UnityEngine.CoreModule.dll'
+$fusion = Join-Path $root 'Assets/Photon/Fusion/Assemblies'
 $assembly = Join-Path $output 'ArrowContactChecks.dll'
 
 & dotnet $compiler -nologo -target:exe -langversion:9.0 -nostdlib `
-    "-reference:$reference" "-reference:$core" "-out:$assembly" `
-    (Join-Path $root 'Assets/Scripts/Combat/ArrowContactDetector.cs') `
+    "-reference:$reference" "-reference:$core" "-reference:$fusion/Fusion.Runtime.dll" "-reference:$fusion/Fusion.Common.dll" "-out:$assembly" `
+    (Join-Path $root 'Assets/Scripts/Combat/PolygonContactDetector.cs') `
+    (Join-Path $root 'Assets/Scripts/Combat/ContactHistory.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/ContactRenderSample.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/PlayerContactSample.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/NetworkSpikeState.cs') `
+    (Join-Path $PSScriptRoot 'SpikeContactChecks.cs') `
     (Join-Path $PSScriptRoot 'ArrowContactChecks.cs')
 if ($LASTEXITCODE -ne 0) {
     throw 'Contact checks failed to compile.'
 }
 
-& dotnet exec --runtimeconfig (Join-Path $PSScriptRoot 'ArrowContactChecks.runtimeconfig.json') $assembly $engine
+& dotnet exec --runtimeconfig (Join-Path $PSScriptRoot 'ArrowContactChecks.runtimeconfig.json') $assembly $engine $fusion
 if ($LASTEXITCODE -ne 0) {
     throw 'Contact checks failed.'
 }

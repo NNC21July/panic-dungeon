@@ -1523,10 +1523,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Fusion.Unity::Fusion.FusionBootstrap
   RunnerPrefab: {fileID: 154352477}
-  StartMode: 2
-  AutoStartAs: 2
+  StartMode: 1
+  AutoStartAs: 3
   AutoHideGUI: 1
-  AutoClients: 1
+  AutoClients: 2
   ClientStartDelay: 0.1
   ServerPort: 0
   DefaultRoomName: panic-dungeon-test

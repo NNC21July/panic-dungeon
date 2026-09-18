@@ -13,6 +13,10 @@
 
 ## Automated geometry checks
 
+The shared geometry helper is now named `PolygonContactDetector` (formerly `ArrowContactDetector`).
+Arrows and spikes also share `ContactHistory<T>`, `ContactRenderSample`, and `PlayerContactSample`.
+The command below runs both the arrow regression checks and spike/shared-history checks.
+
 Run from the project root with a .NET 8+ SDK installed:
 
 ```powershell

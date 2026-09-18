@@ -27,6 +27,20 @@ public class Spike : MonoBehaviour
     private Rigidbody2D rb;
     private HashSet<IDamageable> damagedTargets;
     private float blockedPathProgress;
+    private bool isWarning, isRetracting;
+    private float warningBlend;
+    private int impactCount;
+    private RigidbodyInterpolation2D originalInterpolation;
+    public Vector2 BodyPosition => rb.position;
+    public PolygonCollider2D DamageCollider => spikeCollider;
+    public bool IsWarning => isWarning;
+    public bool IsAttacking => isAttacking;
+    public bool IsRetracting => isRetracting;
+    public bool IsCycleActive => isCycleActive;
+    public bool IsBlocked => isBlocked;
+    public bool IsSolid => solidTipCollider.enabled;
+    public float WarningBlend => warningBlend;
+    public int ImpactCount => impactCount;
     public float MoveDuration => moveDuration;
     public float BlockedPathProgress => blockedPathProgress;
     public Vector2 TipPos => tipPoint.position;
@@ -41,6 +55,7 @@ public class Spike : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         spikeCollider = GetComponent<PolygonCollider2D>();
         rb = GetComponent<Rigidbody2D>();
+        originalInterpolation = rb.interpolation;
         damagedTargets = new HashSet<IDamageable>();
         originalColor = spriteRenderer.color;
         SetDamageActive(false);
@@ -71,6 +86,9 @@ public class Spike : MonoBehaviour
     public void ForceIdle()
     {
         isCycleActive = false;
+        isWarning = false;
+        isRetracting = false;
+        warningBlend = 0f;
 
         if (warningCoroutine != null)
         {
@@ -94,6 +112,7 @@ public class Spike : MonoBehaviour
 
     public void BeginWarning(float newWarningDuration, float newWarningFlashDuration)
     {
+        isWarning = true;
         newWarningDuration = Mathf.Max(0.01f, newWarningDuration);
         newWarningFlashDuration = Mathf.Max(0.01f, newWarningFlashDuration);
         SetDamageActive(false);
@@ -106,6 +125,9 @@ public class Spike : MonoBehaviour
     public void BeginAttack()
     {
         isCycleActive = true;
+        isWarning = false;
+        isRetracting = false;
+        warningBlend = 0f;
 
         if (warningCoroutine != null)
         {
@@ -157,6 +179,7 @@ public class Spike : MonoBehaviour
 
     public void PrepareRetract()
     {
+        isRetracting = true;
         SetDamageActive(false);
         if (moveCoroutine != null)
         {
@@ -191,6 +214,8 @@ public class Spike : MonoBehaviour
 
     public void StopInPlace(bool playImpactEffect)
     {
+        isWarning = false;
+        warningBlend = 0f;
         if (warningCoroutine != null)
         {
             StopCoroutine(warningCoroutine);
@@ -209,37 +234,9 @@ public class Spike : MonoBehaviour
             PlayImpactEffect();
     }
 
-    public void ApplyAuthoritativeStop(float pathProgress)
-    {
-        if (!isCycleActive)
-            return;
-
-        pathProgress = Mathf.Clamp01(pathProgress);
-
-        if (isBlocked && Mathf.Approximately(blockedPathProgress, pathProgress))
-            return;
-
-        bool shouldPlayEffect = !isBlocked;
-        if (moveCoroutine != null)
-        {
-            StopCoroutine(moveCoroutine);
-            moveCoroutine = null;
-        }
-        SetDamageActive(false);
-
-        isBlocked = true;
-        blockedPathProgress = pathProgress;
-        blockedAt = Vector2.Lerp(originPos, targetPos, pathProgress);
-
-        rb.MovePosition(blockedAt);
-        solidTipCollider.enabled = true;
-
-        if (shouldPlayEffect)
-            PlayImpactEffect();
-    }
-
     private void PlayImpactEffect()
     {
+        impactCount++;
         impactEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         impactEffect.Play();
         AudioManager.Instance?.PlayTrapSfx(impactSfx, 0.15f);
@@ -256,6 +253,7 @@ public class Spike : MonoBehaviour
             timer += Time.deltaTime;
 
             float t = Mathf.PingPong(timer / (warningFlashDuration / 2f), 1f);
+            warningBlend = t;
 
             Color lerped = Color.Lerp(originalColor, warningFlashColor, t);
             lerped.a = originalColor.a;
@@ -265,6 +263,7 @@ public class Spike : MonoBehaviour
             yield return null;
         }
         spriteRenderer.color = originalColor;
+        warningBlend = 0f;
         warningCoroutine = null;
     }
 
@@ -285,6 +284,42 @@ public class Spike : MonoBehaviour
             PlayImpactEffect();
         moveCoroutine = null;
         SetDamageActive(false);
+    }
+
+    public void SetPlaybackControlled(bool controlled)
+    {
+        ForceIdle();
+        rb.interpolation = controlled ? RigidbodyInterpolation2D.None : originalInterpolation;
+    }
+
+    public void ApplyPlayback(Vector2 position, bool solid, float flashBlend, bool playImpact)
+    {
+        // The picture and its colliders use the same position, with no second smoothing pass.
+        rb.position = position;
+        transform.position = new Vector3(position.x, position.y, transform.position.z);
+        SetDamageActive(false);
+        solidTipCollider.enabled = solid;
+        Color color = Color.Lerp(originalColor, warningFlashColor, flashBlend);
+        color.a = originalColor.a;
+        spriteRenderer.color = color;
+        if (playImpact)
+            PlayImpactEffect();
+    }
+
+    public bool TryApplyReportedDamage(IDamageable damageable, Vector2 contactPosition)
+    {
+        // A delayed report must never restart a retraction or resurrect an idle spike.
+        if (!isCycleActive || isRetracting || isBlocked || damageable == null || damagedTargets.Contains(damageable))
+            return false;
+        if (!damageable.TakeDamage(new DamageInfo(damageAmount, gameObject, DamageType.Spike)))
+            return false;
+
+        damagedTargets.Add(damageable);
+        rb.position = contactPosition;
+        rb.MovePosition(contactPosition);
+        transform.position = new Vector3(contactPosition.x, contactPosition.y, transform.position.z);
+        StopFromCollision();
+        return true;
     }
 
 }

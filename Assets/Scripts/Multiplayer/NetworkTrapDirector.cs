@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject))]
-public class NetworkTrapDirector : NetworkBehaviour
+public partial class NetworkTrapDirector : NetworkBehaviour
 {
     [SerializeField] private NetworkMatchManager matchManager;
     [SerializeField] private TrapController trapController;
@@ -15,8 +14,8 @@ public class NetworkTrapDirector : NetworkBehaviour
     [Networked] private int PatternSequence { get; set; }
     [Networked] private TickTimer NextPatternTimer { get; set; }
     [Networked] private TickTimer DifficultyTimer { get; set; }
-    [Networked, Capacity(MaxSpikesPerRow)]
-    private NetworkArray<NetworkSpikeState> ActiveSpikeStates => default;
+    [Networked, Capacity(MaxSpikesPerRow * 2)]
+    private NetworkArray<NetworkSpikeState> SpikeStates => default;
     private const int MaxSpikesPerRow = 64;
     private int handledPatternSequence = -1;
     private bool locallyRunning;
@@ -36,6 +35,7 @@ public class NetworkTrapDirector : NetworkBehaviour
         locallyRunning = false;
         RegisterTrapVisibility();
         RegisterSpikeCallbacks();
+        InitializeSpikePlayback();
 
         foreach (ArrowShooter shooter in trapSetup.LeftArrowShooters)
             RegisterShooter(shooter);
@@ -49,10 +49,12 @@ public class NetworkTrapDirector : NetworkBehaviour
         ActivePattern = TrapPatternId.None;
         NextPatternTimer = TickTimer.None;
         DifficultyTimer = TickTimer.None;
+        CaptureSpikeStates();
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        ClearSpikePlayback();
         foreach (Spike spike in trapSetup.TopSpikes)
             UnsubscribeSpike(spike);
         foreach (Spike spike in trapSetup.BottomSpikes)
@@ -69,7 +71,8 @@ public class NetworkTrapDirector : NetworkBehaviour
         if (Object.HasStateAuthority)
             UpdateAuthorityState();
         ApplyNetworkStateLocally();
-        ApplyAuthoritativeSpikeStates();
+        if (Object.HasStateAuthority)
+            CaptureSpikeStates();
     }
 
     private void UpdateAuthorityState()
@@ -110,8 +113,6 @@ public class NetworkTrapDirector : NetworkBehaviour
         ActivePattern = TrapPatternId.None;
         NextPatternTimer = TickTimer.None;
         DifficultyTimer = TickTimer.None;
-        if (Object.HasStateAuthority)
-            ClearSpikeStates();
     }
 
     private Arrow SpawnNetworkArrow(ArrowShooter shooter, Arrow selectedPrefab, Vector2 direction)
@@ -148,9 +149,6 @@ public class NetworkTrapDirector : NetworkBehaviour
 
     private void StartNextPattern()
     {
-        if (Object.HasStateAuthority)
-            ClearSpikeStates();
-
         TrapPatternId selectedPattern = trapController.SelectRandomPatternId();
         float warningDuration = trapController.CurrentWarningDuration;
 
@@ -185,6 +183,14 @@ public class NetworkTrapDirector : NetworkBehaviour
         if (ActivePattern == TrapPatternId.None)
             return;
 
+        if (!Object.HasStateAuthority &&
+            (ActivePattern == TrapPatternId.TopSpikes || ActivePattern == TrapPatternId.BottomSpikes))
+        {
+            trapController.CancelCurrentPattern();
+            handledPatternSequence = PatternSequence;
+            return;
+        }
+
         if (trapController.StartPattern(ActivePattern, ActiveWarningDuration))
             handledPatternSequence = PatternSequence;
     }
@@ -213,75 +219,26 @@ public class NetworkTrapDirector : NetworkBehaviour
     {
         spike.ResolveContactsLocally = Object.HasStateAuthority;
         spike.DamageContactHandler = ResolveSpikeDamage;
-        spike.CollisionStopped += HandleSpikeStopped;
+        if (!Object.HasStateAuthority)
+            spike.SetPlaybackControlled(true);
     }
 
     private void UnsubscribeSpike(Spike spike)
     {
-        spike.CollisionStopped -= HandleSpikeStopped;
         spike.DamageContactHandler = null;
         spike.ResolveContactsLocally = true;
+        if (!Object.HasStateAuthority)
+            spike.SetPlaybackControlled(false);
     }
 
     private bool ResolveSpikeDamage(IDamageable damageable, DamageInfo damageInfo)
     {
-        return Object.HasStateAuthority ? damageable.TakeDamage(damageInfo) : false;
-    }
-
-    private IReadOnlyList<Spike> GetActiveSpikeRow()
-    {
-        return ActivePattern switch
-        {
-            TrapPatternId.TopSpikes => trapSetup.TopSpikes,
-            TrapPatternId.BottomSpikes => trapSetup.BottomSpikes,
-            _ => null
-        };
-    }
-
-    private void HandleSpikeStopped(Spike spike, float blockedPathProgress)
-    {
         if (!Object.HasStateAuthority)
-            return;
-
-        IReadOnlyList<Spike> activeSpikeRow = GetActiveSpikeRow();
-        if (activeSpikeRow == null)
-            return;
-        if (activeSpikeRow.Count > MaxSpikesPerRow)
-            return;
-
-        int spikeIdx = -1;
-        for (int i = 0; i < activeSpikeRow.Count; i++)
-        {
-            if (spike.Equals(activeSpikeRow[i]))
-            {
-                spikeIdx = i;
-                break;
-            }
-        }
-        if (spikeIdx < 0)
-            return;
-
-        ActiveSpikeStates.Set(spikeIdx, new NetworkSpikeState { IsStopped = true, StopProgress = blockedPathProgress });
-    }
-
-    private void ClearSpikeStates()
-    {
-        for (int i = 0; i < ActiveSpikeStates.Length; i++)
-            ActiveSpikeStates.Set(i, default);
-    }
-
-    private void ApplyAuthoritativeSpikeStates()
-    {
-        IReadOnlyList<Spike> activeSpikeRow = GetActiveSpikeRow();
-        if (activeSpikeRow == null)
-            return;
-        for (int i = 0; i < Mathf.Min(activeSpikeRow.Count, ActiveSpikeStates.Length); i++)
-        {
-            NetworkSpikeState spikeState = ActiveSpikeStates[i];
-            if (spikeState.IsStopped)
-                activeSpikeRow[i].ApplyAuthoritativeStop(spikeState.StopProgress);
-        }
-
+            return false;
+        // A remote player's owner reports visible contact instead of using the host's older player copy.
+        if (damageable is NetworkHealth target && !target.Object.HasInputAuthority)
+            return false;
+        return damageable.TakeDamage(damageInfo);
     }
 
     private void RegisterShooter(ArrowShooter shooter)
