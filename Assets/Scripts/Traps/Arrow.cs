@@ -8,11 +8,12 @@ public class Arrow : MonoBehaviour
     [SerializeField] private AudioClip hitSfx;
     private Rigidbody2D rb;
     private Vector2 travelDirection;
-    private bool isInit = false, hasHit = false;
+    private bool isInit = false, hasHit = false, hasDealtDamage = false;
     private GameObject shooter;
     protected GameObject Shooter => shooter;
     public bool SimulateLocally { get; set; } = true;
     public Action<Arrow, bool> FinishHandler { get; set; }
+    public Func<Collider2D, bool> ContactDamageFilter { get; set; }
     public event Action<IDamageable> DamageDealt;
 
     protected virtual void Awake()
@@ -41,6 +42,7 @@ public class Arrow : MonoBehaviour
         this.shooter = shooter;
         hasHit = false;
         isInit = true;
+        hasDealtDamage = false;
     }
 
     private void Finish(bool hitSomething)
@@ -60,6 +62,26 @@ public class Arrow : MonoBehaviour
             PlayHitSound();
 
         Destroy(gameObject);
+    }
+
+    public bool TryApplyDamage(Collider2D other, Vector2 impactPos)
+    {
+        if (other == null || shooter == null || hasDealtDamage)
+            return false;
+
+        IDamageable damageable = other.GetComponentInParent<IDamageable>();
+        if (damageable == null)
+            return false;
+
+        bool damaged = damageable.TakeDamage(new DamageInfo(damageAmount, shooter, DamageType.Arrow));
+        if (damaged)
+        {
+            hasDealtDamage = true;
+            DamageDealt?.Invoke(damageable);
+            OnSuccessfulHit(other, impactPos);
+            return true;
+        }
+        return false;
     }
 
     public void PlayHitSound()
@@ -83,18 +105,12 @@ public class Arrow : MonoBehaviour
         if (otherLayer != GameLayers.Player && otherLayer != GameLayers.Enemy)
             return;
 
-        IDamageable damageable = other.GetComponentInParent<IDamageable>();
-        if (damageable == null)
+        if (ContactDamageFilter != null && !ContactDamageFilter(other))
             return;
 
-        bool damaged = damageable.TakeDamage(new DamageInfo(damageAmount, shooter, DamageType.Arrow));
-        if (damaged)
-        {
-            DamageDealt?.Invoke(damageable);
-            OnSuccessfulHit(other);
+        if (TryApplyDamage(other, other.ClosestPoint(transform.position)))
             Finish(true);
-        }
     }
 
-    protected virtual void OnSuccessfulHit(Collider2D other) { }
+    protected virtual void OnSuccessfulHit(Collider2D other, Vector2 impactPos) { }
 }

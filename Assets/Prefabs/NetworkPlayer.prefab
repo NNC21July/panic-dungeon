@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: -3169564537378372308}
   - component: {fileID: 8034000000000000001}
   - component: {fileID: 8034000000000000002}
+  - component: {fileID: 8224023533266791270}
   m_Layer: 3
   m_Name: NetworkPlayer
   m_TagString: Untagged
@@ -304,6 +305,7 @@ MonoBehaviour:
   - {fileID: 4097093076710487639}
   - {fileID: 8445514050212795160}
   - {fileID: -3169564537378372308}
+  - {fileID: 8224023533266791270}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7850645773688092266
 MonoBehaviour:
@@ -328,6 +330,8 @@ MonoBehaviour:
   logCorrections: 1
   _AcceptedPosition: {x: 0, y: 0}
   _CorrectionCount: 0
+  _AcceptedDashDirection: {x: 0, y: 0}
+  _AcceptedDashCount: 0
 --- !u!114 &604642237215053626
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -385,9 +389,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkHealth
   maxHealth: 100
+  arrowFeedbackTimeout: 0.75
   _CurrentHealth: 0
   _IsDead:
     RawValue: 0
+  _DamageSequence: 0
 --- !u!114 &8445514050212795160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -422,7 +428,7 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4089525c52f85a54285ba432a2ac3bc1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
 --- !u!114 &8034000000000000002
@@ -435,10 +441,22 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eb866ac669ac5ba4c82bf12ef52dda7c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
   playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
   dustEffect: {fileID: 6035401514808129135}
+--- !u!114 &8224023533266791270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62629ce21996d234a857837357e083fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerArrowHitReporter
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0

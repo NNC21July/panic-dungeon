@@ -7,15 +7,13 @@ public class PoisonArrow : Arrow
     [SerializeField] private ParticleSystem poisonSplash;
     public Action<Vector2> SplashHandler { get; set; }
 
-    protected override void OnSuccessfulHit(Collider2D other)
+    protected override void OnSuccessfulHit(Collider2D other, Vector2 impactPos)
     {
         StatusEffectController statusEffectController = other.GetComponentInParent<StatusEffectController>();
 
         if (statusEffectController != null)
             statusEffectController.Apply(
                 new PoisonEffect(duration, tickInterval, tickDamage, Shooter));
-
-        Vector2 impactPos = other.ClosestPoint(transform.position);
 
         if (SplashHandler != null)
         {

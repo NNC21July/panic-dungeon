@@ -1,0 +1,31 @@
+param(
+    [string]$UnityEditor = 'D:\Unity Hub\Editor\6000.5.3f1\Editor'
+)
+
+$ErrorActionPreference = 'Stop'
+$root = Split-Path -Parent $PSScriptRoot
+$output = Join-Path $root 'Temp/ArrowFeatureChecks'
+New-Item -ItemType Directory -Path $output -Force | Out-Null
+
+$sdk = (& dotnet --list-sdks | Select-Object -Last 1)
+if ($sdk -notmatch '^(\S+) \[(.+)\]$') {
+    throw 'A .NET 8 or newer SDK is required.'
+}
+$compiler = Join-Path $Matches[2] ($Matches[1] + '/Roslyn/bincore/csc.dll')
+$engine = Join-Path $UnityEditor 'Data/Managed/UnityEngine'
+$reference = Join-Path $UnityEditor 'Data/NetStandard/ref/2.1.0/netstandard.dll'
+$core = Join-Path $engine 'UnityEngine.CoreModule.dll'
+$assembly = Join-Path $output 'ArrowContactChecks.dll'
+
+& dotnet $compiler -nologo -target:exe -langversion:9.0 -nostdlib `
+    "-reference:$reference" "-reference:$core" "-out:$assembly" `
+    (Join-Path $root 'Assets/Scripts/Combat/ArrowContactDetector.cs') `
+    (Join-Path $PSScriptRoot 'ArrowContactChecks.cs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'Contact checks failed to compile.'
+}
+
+& dotnet exec --runtimeconfig (Join-Path $PSScriptRoot 'ArrowContactChecks.runtimeconfig.json') $assembly $engine
+if ($LASTEXITCODE -ne 0) {
+    throw 'Contact checks failed.'
+}

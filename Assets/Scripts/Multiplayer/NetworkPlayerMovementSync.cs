@@ -1,5 +1,13 @@
+using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
+
+public struct PlayerContactSample : INetworkStruct
+{
+    public Vector2 Center;
+    public double Time;
+    public int MovementSequence, CorrectionCount;
+}
 
 [DefaultExecutionOrder(-1600)]
 [RequireComponent(typeof(NetworkObject))]
@@ -21,6 +29,8 @@ public class NetworkPlayerMovementSync : NetworkBehaviour
     [Networked] public int CorrectionCount { get; private set; }
     [Networked] public Vector2 AcceptedDashDirection { get; private set; }
     [Networked] public int AcceptedDashCount { get; private set; }
+    [Networked] public int AcceptedReportSequence { get; private set; }
+    public int AppliedCorrectionCount => appliedCorrectionCount;
     private Rigidbody2D rb;
     private CircleCollider2D playerCollider;
     private PlayerMovement playerMovement;
@@ -34,6 +44,14 @@ public class NetworkPlayerMovementSync : NetworkBehaviour
     private int reportSequence, lastReportSequence, appliedCorrectionCount, lastShownDashCount;
     private int restoreInterpolationFrame = -1;
     private bool waitingForCorrection, previousForceRemoteTimeframe;
+    private struct AcceptedMovementSample
+    {
+        public Vector2 Position;
+        public double OwnerTime, ReceivedTime;
+        public int CorrectionCount;
+    }
+    private readonly Dictionary<int, AcceptedMovementSample> acceptedMovementHistory = new();
+    private readonly List<int> expiredMovementSamples = new();
 
     private void Awake()
     {
@@ -60,6 +78,7 @@ public class NetworkPlayerMovementSync : NetworkBehaviour
             CorrectionCount = 0;
             AcceptedDashCount = 0;
             AcceptedDashDirection = Vector2.zero;
+            AcceptedReportSequence = 0;
         }
 
         reportSequence = 0;
@@ -69,6 +88,9 @@ public class NetworkPlayerMovementSync : NetworkBehaviour
         nextReportTime = 0d;
         ResetMovementBudget();
         SetBodyPosition(AcceptedPosition);
+        acceptedMovementHistory.Clear();
+        if (Object.HasStateAuthority)
+            RecordAcceptedMovement(Runner.SimulationTime);
 
         previousForceRemoteTimeframe = Object.ForceRemoteRenderTimeframe;
         if (!Object.HasStateAuthority && !Object.HasInputAuthority)
@@ -111,18 +133,23 @@ public class NetworkPlayerMovementSync : NetworkBehaviour
             networkPlayerMovement.SavedDashDirection,
             networkPlayerMovement.DashCount,
             reportSequence,
-            appliedCorrectionCount
+            appliedCorrectionCount,
+            Runner.SimulationTime
         );
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority,
         Channel = RpcChannel.Unreliable, TickAligned = false,
         HostMode = RpcHostMode.SourceIsHostPlayer)]
-    private void RPC_ReportPosition(Vector2 position, Vector2 dashDirection, int dashCount, int sequence, int correctionCount, RpcInfo info = default)
+    private void RPC_ReportPosition(Vector2 position, Vector2 dashDirection, int dashCount, int sequence, int correctionCount, double ownerTime, RpcInfo info = default)
     {
         if (!Object.HasStateAuthority || info.Source != Object.InputAuthority)
             return;
         if (correctionCount != CorrectionCount || unchecked(sequence - lastReportSequence) <= 0)
+            return;
+        if (double.IsNaN(ownerTime) || double.IsInfinity(ownerTime) ||
+            ownerTime < Runner.SimulationTime - 1d ||
+            ownerTime > Runner.SimulationTime + maxBufferedTime + Runner.DeltaTime * 2d)
             return;
 
         lastReportSequence = sequence;
@@ -145,6 +172,8 @@ public class NetworkPlayerMovementSync : NetworkBehaviour
         AcceptedDashDirection = dashDirection;
         AcceptedDashCount = dashCount;
         SetBodyPosition(position);
+        AcceptedReportSequence = sequence;
+        RecordAcceptedMovement(ownerTime);
     }
 
     private bool CanAcceptPosition(Vector2 position, out string reason)
@@ -213,6 +242,7 @@ public class NetworkPlayerMovementSync : NetworkBehaviour
         CorrectionPosition = position;
         CorrectionCount = unchecked(CorrectionCount + 1);
         waitingForCorrection = true;
+        acceptedMovementHistory.Clear();
         ResetMovementBudget();
 
         if (Object.HasInputAuthority)
@@ -305,6 +335,83 @@ public class NetworkPlayerMovementSync : NetworkBehaviour
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         Object.ForceRemoteRenderTimeframe = previousForceRemoteTimeframe;
+        acceptedMovementHistory.Clear();
+    }
+
+    public PlayerContactSample CaptureContactSample(Vector2 center)
+    {
+        return new PlayerContactSample
+        {
+            Center = center,
+            Time = Runner.SimulationTime,
+            MovementSequence = AcceptedReportSequence,
+            CorrectionCount = appliedCorrectionCount
+        };
+    }
+
+    private void RecordAcceptedMovement(double ownerTime)
+    {
+        double now = Runner.SimulationTime;
+        acceptedMovementHistory[AcceptedReportSequence] = new AcceptedMovementSample
+        {
+            Position = AcceptedPosition,
+            OwnerTime = ownerTime,
+            ReceivedTime = now,
+            CorrectionCount = CorrectionCount
+        };
+        expiredMovementSamples.Clear();
+        foreach (var entry in acceptedMovementHistory)
+            if (entry.Value.ReceivedTime < now - 2d)
+                expiredMovementSamples.Add(entry.Key);
+        foreach (int sequence in expiredMovementSamples)
+            acceptedMovementHistory.Remove(sequence);
+    }
+
+    public bool CanAcceptContactPath(PlayerContactSample start, PlayerContactSample end)
+    {
+        if (!Object.HasStateAuthority || !gameplayGate.CanAct || waitingForCorrection ||
+            start.CorrectionCount != CorrectionCount || end.CorrectionCount != CorrectionCount ||
+            !CanAcceptContactSample(start) || !CanAcceptContactSample(end))
+            return false;
+
+        double elapsed = end.Time - start.Time;
+        if (elapsed < 0d || elapsed > 0.15d)
+            return false;
+        float allowance = maxReportSpeed * ((float)elapsed + Time.fixedDeltaTime * 2f) + positionTolerance;
+        return Vector2.Distance(start.Center, end.Center) <= allowance &&
+            ContactPathIsClear(start.Center, end.Center);
+    }
+
+    private bool CanAcceptContactSample(PlayerContactSample sample)
+    {
+        if (!IsFinite(sample.Center) || double.IsNaN(sample.Time) || double.IsInfinity(sample.Time) ||
+            !acceptedMovementHistory.TryGetValue(sample.MovementSequence, out var accepted) ||
+            accepted.CorrectionCount != sample.CorrectionCount)
+            return false;
+
+        double now = Runner.SimulationTime;
+        double elapsed = sample.Time - accepted.OwnerTime;
+        // The owner's present-time player is not on the arrow's delayed render clock.
+        if (sample.Time < now - 1d || sample.Time > now + maxBufferedTime + Runner.DeltaTime * 2d ||
+            elapsed < -Runner.DeltaTime * 2d || elapsed > maxBufferedTime + Runner.DeltaTime * 2d)
+            return false;
+
+        Vector2 center = accepted.Position + (Vector2)transform.TransformVector(playerCollider.offset);
+        float allowance = maxReportSpeed * ((float)System.Math.Max(0d, elapsed) + Time.fixedDeltaTime * 2f) + positionTolerance;
+        return Vector2.Distance(center, sample.Center) <= allowance && ContactPathIsClear(center, sample.Center);
+    }
+
+    private bool ContactPathIsClear(Vector2 start, Vector2 end)
+    {
+        Vector2 movement = end - start;
+        float distance = movement.magnitude;
+        if (distance <= 0.0001f)
+            return true;
+        Vector3 scale = transform.lossyScale;
+        float radius = Mathf.Max(0.01f,
+            playerCollider.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y)) - collisionTolerance);
+        return Runner.GetPhysicsScene2D().CircleCast(
+            start, radius, movement / distance, distance, blockingFilter, blockingHits) == 0;
     }
 
     private void ShowRemoteDashEffect(int dashCount, Vector2 direction, bool showEffect = true)

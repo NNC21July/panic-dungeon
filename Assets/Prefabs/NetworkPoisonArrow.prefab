@@ -140,7 +140,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PoisonArrow
   speed: 20
   damageAmount: 20
-  lifetime: 3
   hitSfx: {fileID: 8300000, guid: f3f96a39bc526c649876b72ee632b607, type: 3}
   duration: 5
   tickInterval: 1.5
@@ -391,3 +390,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13cbeae406424104fbbb26f4759cbef7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkArrow
+  finishedRetentionDuration: 2

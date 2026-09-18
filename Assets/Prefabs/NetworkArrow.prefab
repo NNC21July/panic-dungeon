@@ -385,4 +385,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13cbeae406424104fbbb26f4759cbef7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkArrow
-  logMovement: 0
+  finishedRetentionDuration: 2
