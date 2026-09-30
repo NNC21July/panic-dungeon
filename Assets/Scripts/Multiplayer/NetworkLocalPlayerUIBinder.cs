@@ -4,6 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkHealth))]
 public class NetworkLocalPlayerUIBinder : NetworkBehaviour
 {
+    private PoisonStatusUI poisonStatus;
     public override void Spawned()
     {
         if (!Object.HasInputAuthority)
@@ -19,6 +20,20 @@ public class NetworkLocalPlayerUIBinder : NetworkBehaviour
         DamageVignetteUI damageVignette = FindInScene<DamageVignetteUI>();
         if (damageVignette != null)
             damageVignette.Bind(networkHealth);
+
+        poisonStatus = FindInScene<PoisonStatusUI>();
+        if (poisonStatus != null)
+        {
+            poisonStatus.Bind(networkHealth);
+            poisonStatus.enabled = true;
+        }
+    }
+
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        if (poisonStatus != null)
+            poisonStatus.Bind(null);
+        poisonStatus = null;
     }
 
     private T FindInScene<T>() where T : Component

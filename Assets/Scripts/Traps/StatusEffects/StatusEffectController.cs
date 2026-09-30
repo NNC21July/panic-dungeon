@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Health))]
-public class StatusEffectController : MonoBehaviour
+public class StatusEffectController : MonoBehaviour, IPoisonReceiver
 {
     private Health health;
     private Dictionary<Type, Coroutine> activeEffects = new Dictionary<Type, Coroutine>();
@@ -31,6 +31,11 @@ public class StatusEffectController : MonoBehaviour
         activeEffects[effectType] = StartCoroutine(TickEffect(effect));
         if (!wasAlreadyActive)
             EffectStarted?.Invoke(effectType);
+    }
+
+    public void ApplyPoison(PoisonEffect effect)
+    {
+        Apply(effect);
     }
 
     private void StopAllEffects(DamageInfo damageInfo)
@@ -60,12 +65,19 @@ public class StatusEffectController : MonoBehaviour
 
     private IEnumerator TickEffect(StatusEffect effect)
     {
-        float timer = effect.Duration;
-        while (timer - effect.TickInterval >= 0f)
+        StatusEffectTimer timer = new StatusEffectTimer(effect);
+        while (!timer.IsComplete)
         {
-            yield return new WaitForSeconds(effect.TickInterval);
-            effect.ApplyTick(health);
-            timer -= effect.TickInterval;
+            yield return null;
+            int ticks = timer.Advance(Time.deltaTime);
+            for (int i = 0; i < ticks; i++)
+            {
+                if (health.IsDead)
+                    yield break;
+                effect.ApplyTick(health);
+                if (health.IsDead)
+                    yield break;
+            }
         }
         Type effectType = effect.GetType();
         activeEffects.Remove(effectType);

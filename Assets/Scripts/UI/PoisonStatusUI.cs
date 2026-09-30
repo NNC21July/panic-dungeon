@@ -11,30 +11,71 @@ public class PoisonStatusUI : MonoBehaviour
     [SerializeField] private Color flashColor;
     private Coroutine flashColorCoroutine;
     private Color originalColor;
+    private NetworkHealth networkHealth;
 
     private void Awake()
     {
-        SerializedFieldValidator.Validate(this);
+        if (poisonStatusTxt == null)
+            throw new InvalidOperationException("PoisonStatusUI requires poisonStatusTxt.");
         poisonStatusTxt.gameObject.SetActive(false);
         originalColor = poisonStatusTxt.color;
     }
 
     private void OnEnable()
     {
-        statusEffectController.EffectStarted += ShowUI;
-        statusEffectController.EffectEnded += HideUI;
-
-        if (statusEffectController.IsEffectActive(typeof(PoisonEffect)))
-            ShowUI(typeof(PoisonEffect));
-        else
-            HideUI(typeof(PoisonEffect));
+        Subscribe();
+        RefreshStatus();
     }
 
     private void OnDisable()
     {
         HideUI(typeof(PoisonEffect));
-        statusEffectController.EffectStarted -= ShowUI;
-        statusEffectController.EffectEnded -= HideUI;
+        Unsubscribe();
+    }
+
+    public void Bind(NetworkHealth target)
+    {
+        Unsubscribe();
+        networkHealth = target;
+        statusEffectController = null;
+        if (isActiveAndEnabled)
+        {
+            Subscribe();
+            RefreshStatus();
+        }
+    }
+
+    private void Subscribe()
+    {
+        if (networkHealth != null)
+            networkHealth.OnPoisonChanged += RefreshStatus;
+        else if (statusEffectController != null)
+        {
+            statusEffectController.EffectStarted += ShowUI;
+            statusEffectController.EffectEnded += HideUI;
+        }
+    }
+
+    private void Unsubscribe()
+    {
+        if (networkHealth != null)
+            networkHealth.OnPoisonChanged -= RefreshStatus;
+        else if (statusEffectController != null)
+        {
+            statusEffectController.EffectStarted -= ShowUI;
+            statusEffectController.EffectEnded -= HideUI;
+        }
+    }
+
+    private void RefreshStatus()
+    {
+        bool active = networkHealth != null
+            ? networkHealth.Object != null && networkHealth.Object.IsValid && networkHealth.IsPoisoned
+            : statusEffectController != null && statusEffectController.IsEffectActive(typeof(PoisonEffect));
+        if (active)
+            ShowUI(typeof(PoisonEffect));
+        else
+            HideUI(typeof(PoisonEffect));
     }
 
     private void ShowUI(Type effectType)

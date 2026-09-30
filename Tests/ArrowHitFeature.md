@@ -81,7 +81,7 @@ Use fresh, matching host/client builds after the RPC layout changes. Editor mult
 6. Walk into the location of an already-finished arrow: no new damage from retained evidence.
 7. Fatal hit, round end, restart, disconnect/rejoin: no old pending report damages a new player or round.
 8. Test real separate processes and added latency/packet loss. Check that rejected/timed-out reports do not leave a live arrow permanently hidden.
-9. Poison arrow direct hit: shared splash callback runs once. Networked poison-over-time is a separate pre-existing status-effect task, not implemented here.
+9. Poison arrow direct hit: shared splash callback runs once. Networked poison ticks use the shared effect/timer and server-owned health; see `Tests/PoisonFeature.md`.
 
 ## Limits of this authority model
 

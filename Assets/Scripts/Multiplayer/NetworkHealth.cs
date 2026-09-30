@@ -4,7 +4,7 @@ using Fusion;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject))]
-public class NetworkHealth : NetworkBehaviour, IDamageable
+public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonReceiver
 {
     [SerializeField, Min(1f)] private float maxHealth = 100f;
     [SerializeField, Min(0.1f)] private float arrowFeedbackTimeout = 0.75f;
@@ -30,6 +30,7 @@ public class NetworkHealth : NetworkBehaviour, IDamageable
             IsDead = false;
             DamageSequence = 0;
         }
+        InitializePoison();
         initialDamageSequence = DamageSequence;
         PresentedDamageType = DamageType.Normal;
         feedbackWaitingForImpact.Clear();
@@ -45,7 +46,10 @@ public class NetworkHealth : NetworkBehaviour, IDamageable
 
         CurrentHealth = Mathf.Max(CurrentHealth - damageInfo.Amount, 0f);
         if (CurrentHealth <= 0f)
+        {
             IsDead = true;
+            ClearPoison();
+        }
         DamageSequence++;
         RPC_QueueDamageFeedback(DamageSequence, damageInfo.Type);
         return true;
@@ -119,6 +123,8 @@ public class NetworkHealth : NetworkBehaviour, IDamageable
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        poisonEffect = null;
+        poisonTimer = null;
         feedbackWaitingForImpact.Clear();
         earlyArrowImpacts.Clear();
         shownDamageFeedback.Clear();

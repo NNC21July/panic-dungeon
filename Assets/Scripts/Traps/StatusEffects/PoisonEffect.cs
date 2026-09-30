@@ -8,7 +8,7 @@ public class PoisonEffect : StatusEffect
 
     public PoisonEffect(float duration, float tickInterval, float tickDamage, GameObject source) : base(duration, tickInterval)
     {
-        if (tickDamage <= 0f)
+        if (float.IsNaN(tickDamage) || float.IsInfinity(tickDamage) || tickDamage <= 0f)
             throw new ArgumentOutOfRangeException(nameof(tickDamage), tickDamage, "Poison tick damage must be greater than zero");
         this.tickDamage = tickDamage;
         this.source = source;

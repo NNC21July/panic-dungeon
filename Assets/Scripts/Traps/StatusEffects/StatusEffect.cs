@@ -7,11 +7,11 @@ public abstract class StatusEffect
 
     protected StatusEffect(float duration, float tickInterval)
     {
-        if (duration <= 0f)
+        if (float.IsNaN(duration) || float.IsInfinity(duration) || duration <= 0f)
             throw new ArgumentOutOfRangeException(nameof(duration), duration, "Status effect duration must be greater than zero");
         Duration = duration;
 
-        if (tickInterval <= 0f)
+        if (float.IsNaN(tickInterval) || float.IsInfinity(tickInterval) || tickInterval <= 0f)
             throw new ArgumentOutOfRangeException(nameof(tickInterval), tickInterval, "Status effect tick interval must be greater than zero");
         TickInterval = tickInterval;
     }

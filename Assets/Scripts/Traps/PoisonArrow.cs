@@ -9,10 +9,10 @@ public class PoisonArrow : Arrow
 
     protected override void OnSuccessfulHit(Collider2D other, Vector2 impactPos)
     {
-        StatusEffectController statusEffectController = other.GetComponentInParent<StatusEffectController>();
+        IPoisonReceiver poisonReceiver = other.GetComponentInParent<IPoisonReceiver>();
 
-        if (statusEffectController != null)
-            statusEffectController.Apply(
+        if (poisonReceiver != null)
+            poisonReceiver.ApplyPoison(
                 new PoisonEffect(duration, tickInterval, tickDamage, Shooter));
 
         if (SplashHandler != null)

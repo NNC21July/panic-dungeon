@@ -24,6 +24,7 @@ internal static class ArrowContactChecks
         Console.WriteLine($"Passed {checks} arrow contact checks.");
         SpikeContactChecks.Run();
         TrapContactPreviewChecks.Run();
+        PoisonEffectChecks.Run();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

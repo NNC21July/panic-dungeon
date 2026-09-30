@@ -22,6 +22,11 @@ $assembly = Join-Path $output 'ArrowContactChecks.dll'
     "-reference:$reference" "-reference:$core" "-reference:$fusion/Fusion.Runtime.dll" "-reference:$fusion/Fusion.Common.dll" "-out:$assembly" `
     (Join-Path $root 'Assets/Scripts/Combat/PolygonContactDetector.cs') `
     (Join-Path $root 'Assets/Scripts/Combat/ContactHistory.cs') `
+    (Join-Path $root 'Assets/Scripts/Combat/DamageInfo.cs') `
+    (Join-Path $root 'Assets/Scripts/Combat/IDamageable.cs') `
+    (Join-Path $root 'Assets/Scripts/Traps/StatusEffects/StatusEffect.cs') `
+    (Join-Path $root 'Assets/Scripts/Traps/StatusEffects/PoisonEffect.cs') `
+    (Join-Path $root 'Assets/Scripts/Traps/StatusEffects/StatusEffectTimer.cs') `
     (Join-Path $root 'Assets/Scripts/Multiplayer/ContactRenderSample.cs') `
     (Join-Path $root 'Assets/Scripts/Multiplayer/PlayerContactSample.cs') `
     (Join-Path $root 'Assets/Scripts/Multiplayer/NetworkSpikeState.cs') `
@@ -29,6 +34,7 @@ $assembly = Join-Path $output 'ArrowContactChecks.dll'
     (Join-Path $root 'Assets/Scripts/Multiplayer/SpikeObserverHold.cs') `
     (Join-Path $PSScriptRoot 'SpikeContactChecks.cs') `
     (Join-Path $PSScriptRoot 'TrapContactPreviewChecks.cs') `
+    (Join-Path $PSScriptRoot 'PoisonEffectChecks.cs') `
     (Join-Path $PSScriptRoot 'ArrowContactChecks.cs')
 if ($LASTEXITCODE -ne 0) {
     throw 'Contact checks failed to compile.'
