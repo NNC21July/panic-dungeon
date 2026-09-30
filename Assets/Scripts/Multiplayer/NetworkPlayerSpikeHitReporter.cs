@@ -50,7 +50,7 @@ public class NetworkPlayerSpikeHitReporter : NetworkBehaviour
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        if (director != null && reportedCycles != null)
+        if (Object.HasInputAuthority && director != null && reportedCycles != null)
             for (int i = 0; i < reportedCycles.Length; i++)
                 director.ResolveSpikeReport(i, reportedCycles[i], false);
         pendingReports.Clear();
@@ -201,11 +201,16 @@ public class NetworkPlayerSpikeHitReporter : NetworkBehaviour
         }
     }
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority,
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All,
     Channel = RpcChannel.Reliable, TickAligned = false)]
     private void RPC_ResolveSpikeContact(int index, int cycle, bool accepted)
     {
         if (director != null)
-            director.ResolveSpikeReport(index, cycle, accepted);
+        {
+            if (Object.HasInputAuthority)
+                director.ResolveSpikeReport(index, cycle, accepted);
+            else
+                director.ResolveObservedSpike(index, cycle, Object.Id, accepted);
+        }
     }
 }

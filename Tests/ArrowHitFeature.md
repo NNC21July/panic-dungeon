@@ -11,7 +11,51 @@
 - Finished arrows retain evidence briefly; flying arrows do not expire on a timer. A late pre-wall contact can still be accepted. A stationary retained arrow is not intended to create new hits.
 - Final visible contact is sampled in LateUpdate before hiding. Feedback notification is independent of whether a wall impact was already displayed.
 
-## Automated geometry checks
+## Observer arrow preview
+
+`NetworkArrow.Observers.cs` is part of the existing `NetworkArrow` component, not a component to attach.
+Both normal and poison network arrows use it automatically. `NetworkInputProvider` and damage rules are unchanged.
+
+- Each client checks its rendered arrow outline against other players' rendered circles using `PolygonContactDetector`.
+  Relative-motion sweeps cover consecutive frames (at most 0.1s), including a player dashing in the arrow's direction.
+  Gaps remain misses. Corrections, teleports, pose changes and frame discontinuities do not invent a swept path.
+- Visible contact opens a local `TrapContactPreview<NetworkId>` ticket. The arrow's renderers are hidden, but it is
+  NOT despawned or stopped. Its snapshots and the victim's ordinary contact reporting continue.
+- The victim alone reports their own hit. Server history checks and shared arrow damage are unchanged. The result
+  RPC now also reaches observers so a rejected claim can cancel a matching preview. Rejection of another target
+  does not release this target's preview. A rejection received before contact prevents a later preview for that target.
+- Hiding does not call `ShowImpact`, subtract health, notify `NetworkHealth`, or play sound/splash. Confirmed impact
+  and damage feedback still follow the existing server-driven path. A preview is not confirmation of a hit.
+- `Observer Hide Duration` defaults to 0.5 seconds. Timeout, rejection, missing playback, target departure, or proximity
+  to the local player releases the preview. One preview per arrow lifetime prevents repeated hide/show loops.
+  Spawn/despawn clears tickets and samples, including when a NetworkObject is reused.
+- The local player's checks run after observer safety checks. An arrow approaching the owner's circle (plus a 0.25-unit
+  safety margin) cannot remain hidden by an observer guess. The margin only vetoes hiding; it is not damage reach.
+  Owner samples keep updating while an observer preview is active, but an active preview cannot itself submit an owner hit.
+- Visibility combines three reasons to hide: confirmed impact, the owner's pending/accepted claim, or the observer ticket.
+  Rejecting an observer guess cannot accidentally show an arrow already hidden for a real confirmed impact or own claim.
+
+The shared `TrapContactPreview<TTarget>` stores the target, attack/lifetime number, deadline, and whether this attempt
+already happened. `SpikeObserverHold` delegates those rules to it while retaining spike-specific position, phase and impact
+checks. Arrows use the same ticket for hiding. Neither the helper nor observer checks can authorize damage.
+
+### Observer tests in Unity
+
+Use a non-playing server plus two clients with fresh matching code (the result RPC targets changed). No new Inspector wiring.
+
+1. On A, watch B stand in an arrow's path, then swap A/B. The arrow should hide at observed contact, before deep penetration.
+2. Repeat while B moves/dashes in the arrow's direction, against it, and past it with a small visible gap. Test normal and poison arrows.
+3. Observe a rejected/timed-out preview under added latency: a still-live arrow may reappear, but must not flicker repeatedly
+   or leave false sounds, poison splashes, damage, or feedback. Reappearance is an intentional fallback, not a guaranteed invisible rewind.
+4. Put A behind B in the arrow path; also try both players together. Observer hiding must not conceal a danger approaching A
+   or prevent A's own valid report. An observer preview must never damage B on its own.
+5. Test wall hits, fatal hits, B disconnecting, round end/restart, and simultaneous arrows. No old hidden state may leak into a new arrow.
+6. Re-test spike preview/stopping/retraction and the single-player scene. Spike lifetime rules should behave as before.
+
+This reduces delayed disappearance in an observer's view, not differences in server-approved damage timing. A server rejection
+or different approved target can still require a visible correction. No physics body/artwork separation was introduced.
+
+## Automated geometry and preview checks
 
 The shared geometry helper is now named `PolygonContactDetector` (formerly `ArrowContactDetector`).
 Arrows and spikes also share `ContactHistory<T>`, `ContactRenderSample`, and `PlayerContactSample`.

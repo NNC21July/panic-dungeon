@@ -78,7 +78,61 @@ internal static class SpikeContactChecks
         Check(!ContactRenderSample.CanCheckPath(start, end, playerStart, playerEnd, 1d, dt), "infinite owner timestamp");
         playerEnd.Time = 1.3d;
         Check(!ContactRenderSample.CanCheckPath(start, end, playerStart, playerEnd, 1d, dt), "oversized interval");
-        Console.WriteLine($"Passed {checks} spike/shared history and timing checks.");
+        CheckObserverHolds();
+        Console.WriteLine($"Passed {checks} spike/shared history, timing and observer hold checks.");
+    }
+
+    private static void CheckObserverHolds()
+    {
+        NetworkSpikeState advancing = new NetworkSpikeState
+        {
+            Position = new Vector2(0f, 4f), PatternSequence = 7, ImpactCount = 3,
+            Phase = SpikePhase.Advancing, IsSolid = true
+        };
+        Vector2 contact = new Vector2(0f, 2f);
+        var hold = new SpikeObserverHold();
+        Check(hold.Evaluate(advancing, 0d, true) == advancing.Position, "no hold uses recorded position");
+        Check(hold.TryBegin(advancing, contact, 1d, 0.5d), "observer starts provisional hold");
+        Check(hold.Evaluate(advancing, 1.1d, true) == contact && hold.IsActive, "advancing playback stays at observed contact");
+        Check(advancing.Position.y == 4f && advancing.Phase == SpikePhase.Advancing && advancing.ImpactCount == 3,
+            "observer cannot modify replicated spike state");
+        Check(!hold.TryBegin(advancing, Vector2.zero, 1.4d, 2d), "repeated contact cannot restart hold timer");
+        var state = advancing;
+        state.Phase = SpikePhase.Holding;
+        Check(hold.Evaluate(state, 1.4d, true) == contact, "waiting at full extension preserves provisional hold");
+        Check(hold.Evaluate(state, 1.5d, true) == state.Position && !hold.IsActive, "timeout releases at deadline");
+        Check(!hold.TryBegin(advancing, contact, 2d, 0.5d), "same attack cannot repeatedly freeze after timeout");
+        state = advancing;
+        state.PatternSequence++;
+        Check(hold.TryBegin(state, contact, 2d, 0.5d), "new attack can hold again");
+        hold.Release();
+        Check(!hold.IsActive && hold.Evaluate(state, 2.1d, true) == state.Position, "rejection releases hold");
+        Check(!hold.TryBegin(state, contact, 2.2d, 0.5d), "rejected attack cannot immediately hold again");
+
+        foreach (SpikePhase phase in new[] { SpikePhase.Stopped, SpikePhase.Retracting, SpikePhase.Idle, SpikePhase.Warning })
+        {
+            hold = new SpikeObserverHold();
+            hold.TryBegin(advancing, contact, 1d, 0.5d);
+            state = advancing;
+            state.Phase = phase;
+            Check(hold.Evaluate(state, 1.1d, true) == state.Position && !hold.IsActive, "phase releases hold: " + phase);
+            Check(!new SpikeObserverHold().TryBegin(state, contact, 1d, 0.5d), "non-advancing phase cannot start hold: " + phase);
+        }
+
+        hold = new SpikeObserverHold();
+        hold.TryBegin(advancing, contact, 1d, 0.5d);
+        state = advancing;
+        state.ImpactCount++;
+        Check(hold.Evaluate(state, 1.1d, true) == state.Position && !hold.IsActive, "authoritative impact replaces hold");
+        hold = new SpikeObserverHold();
+        hold.TryBegin(advancing, contact, 1d, 0.5d);
+        state = advancing;
+        state.PatternSequence++;
+        Check(hold.Evaluate(state, 1.1d, true) == state.Position && !hold.IsActive, "new attack releases old hold");
+        hold = new SpikeObserverHold();
+        hold.TryBegin(advancing, contact, 1d, 0.5d);
+        Check(hold.Evaluate(advancing, 1.1d, false) == advancing.Position && !hold.IsActive,
+            "local player safety or departure releases observer hold");
     }
 
     private static void Check(bool condition, string name)

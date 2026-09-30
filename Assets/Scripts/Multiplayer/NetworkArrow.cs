@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(Arrow))]
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PolygonCollider2D))]
-public class NetworkArrow : NetworkBehaviour
+public partial class NetworkArrow : NetworkBehaviour
 {
     [SerializeField, Min(0.1f)] private float finishedRetentionDuration = 2f;
     [SerializeField, Min(0.1f)] private float historyDuration = 2f;
@@ -21,7 +21,7 @@ public class NetworkArrow : NetworkBehaviour
     public double HostSpawnTime { get; private set; }
     private TickTimer cleanupTimer;
     private Renderer[] arrowRenderers;
-    private bool impactShown, splashShown, localReportPending;
+    private bool impactShown, splashShown, localReportPending, localReportAccepted;
     private int presentedDamageSequence;
     private double finishedTime;
     private Arrow arrow;
@@ -69,6 +69,8 @@ public class NetworkArrow : NetworkBehaviour
         impactShown = false;
         splashShown = false;
         localReportPending = false;
+        localReportAccepted = false;
+        ResetArrowObservers();
         presentedDamageSequence = 0;
         finishedTime = double.PositiveInfinity;
         cleanupTimer = TickTimer.None;
@@ -139,8 +141,10 @@ public class NetworkArrow : NetworkBehaviour
             return;
         RecordHostArrowHistory();
         // NetworkTransform has rendered; check the final visible interval before hiding.
+        CheckObservedPlayerContact();
         CheckLocalPlayerContact();
         PresentFinishedState();
+        RefreshArrowVisibility();
     }
 
     private void PresentFinishedState()
@@ -178,6 +182,7 @@ public class NetworkArrow : NetworkBehaviour
             arrow.PlayHitSound();
         impactShown = true;
         localReportPending = false;
+        observedArrowContact.Release();
         SetArrowVisible(false);
 
         if (!splashShown && HasPoisonSplash && arrow is PoisonArrow poisonArrow)
@@ -223,6 +228,7 @@ public class NetworkArrow : NetworkBehaviour
             poisonArrow.SplashHandler = null;
         prevContactFrame = -1;
         hostArrowHistory.Clear();
+        ResetArrowObservers();
     }
 
     private void SetArrowVisible(bool visible)
@@ -241,8 +247,8 @@ public class NetworkArrow : NetworkBehaviour
     public void ResolveLocalReport(bool accepted)
     {
         localReportPending = false;
-        if (!accepted && !impactShown)
-            SetArrowVisible(true);
+        localReportAccepted = accepted;
+        RefreshArrowVisibility();
         prevContactFrame = -1;
     }
 
@@ -422,7 +428,8 @@ public class NetworkArrow : NetworkBehaviour
         prevArrowRenderTime = arrowRenderTime;
         prevArrowSample = curArrowSample;
 
-        if (touched && reporter.ReportArrowContact(this, reportStartSample, curArrowSample, reportStartPlayer, curPlayerSample))
+        if (touched && !observedArrowContact.IsActive &&
+            reporter.ReportArrowContact(this, reportStartSample, curArrowSample, reportStartPlayer, curPlayerSample))
         {
             localReportPending = true;
             SetArrowVisible(false);

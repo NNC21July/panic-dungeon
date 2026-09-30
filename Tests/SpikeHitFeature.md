@@ -47,6 +47,46 @@ Single-player and the host's own player keep their normal physics contact path.
 
 ## Test before committing
 
+### Observer stop preview
+
+`NetworkTrapDirector.SpikeObservers.cs` is another part of the existing director, not a component to attach.
+It uses the existing polygon/circle contact detector against other players' displayed positions on this runner.
+`SpikeObserverHold` keeps the spike-specific contact position, phase and impact-count checks. It delegates the target,
+deadline, matching rejection and one-attempt-per-cycle rules to `TrapContactPreview<NetworkId>`, also used by arrows.
+Spikes still stop their whole body; arrows only hide. Neither preview can approve damage.
+
+1. Client A watches client B. A checks the moving spike tip against B's displayed circle, including the path
+   between consecutive frames. Discontinuous frames, corrections and attack boundaries do not produce a sweep.
+2. If A sees contact, A temporarily holds that spike's whole root AND solid body at the contact point. This
+   does not change the replicated state, report a hit on B's behalf, play impact effects, or subtract health.
+3. B's existing own-player reporter still sends the real contact claim. The server still performs the same checks
+   and decides damage and the real stop. No new observer hit-report traffic is sent.
+4. A hands playback back to the recorded stop when it arrives. Rejection, retraction, a new attack, departure,
+   match end or timeout also releases the provisional hold. The default `Observer Hold Duration` on the existing
+   director is 0.5 seconds. Each spike can start this observer hold only once per attack, so a rejected guess cannot
+   repeatedly freeze it. Server replies now reach observers as well as the victim; rejection is target-specific.
+5. A's own contact reporting takes priority. Observer holds are skipped/released if the spike's held-to-recorded
+   path approaches A's player (the normal radius plus a 0.25-unit safety margin). This margin is NOT extra damage
+   reach; it only prevents a guessed remote contact from obstructing the owner's contact checks.
+
+The artwork is not separated from physics. Because the solid body is held too, this is a provisional local placement,
+not a purely cosmetic sprite effect. It can still affect local collision; the owner safety check limits that interference.
+Server confirmation can differ from the observer's guess, so a residual correction is possible. Damage feedback still
+waits for server approval. This change targets the large observer-side overshoot, not zero-latency damage feedback.
+
+Test this with a non-playing server and two clients, using fresh matching code on every peer:
+
+- Keep A away from the tip, watch B stand in a top/bottom spike's path, then swap roles. The observer should see
+  a provisional stop instead of the spike continuing deeply through the player while waiting for B's report.
+- Repeat with moving and dashing B, and on a non-final killing blow. No premature hold release solely because B died.
+- Move A near the held spike and try simultaneous contacts. A's own hit detection must still work; safety releases
+  can expose a correction here and should not leave a permanent barrier.
+- Check rejection/timeout under latency, B disconnecting, round end/restart, full retraction and the next attack.
+  No permanently stuck tip, repeated hold in one attack, duplicate damage, or speculative impact effects.
+- Repeat arrows and single-player as regression checks. They have no new observer-stop logic.
+
+### Existing hit-report checks
+
 Start with fresh matching code on both peers; RPC/NetworkBehaviour layouts changed. Stop Play mode before reimporting.
 No Inspector wiring is needed for the new reporter. Do not add the `.Spikes` partial class as another component.
 

@@ -25,7 +25,10 @@ $assembly = Join-Path $output 'ArrowContactChecks.dll'
     (Join-Path $root 'Assets/Scripts/Multiplayer/ContactRenderSample.cs') `
     (Join-Path $root 'Assets/Scripts/Multiplayer/PlayerContactSample.cs') `
     (Join-Path $root 'Assets/Scripts/Multiplayer/NetworkSpikeState.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/TrapContactPreview.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/SpikeObserverHold.cs') `
     (Join-Path $PSScriptRoot 'SpikeContactChecks.cs') `
+    (Join-Path $PSScriptRoot 'TrapContactPreviewChecks.cs') `
     (Join-Path $PSScriptRoot 'ArrowContactChecks.cs')
 if ($LASTEXITCODE -ne 0) {
     throw 'Contact checks failed to compile.'

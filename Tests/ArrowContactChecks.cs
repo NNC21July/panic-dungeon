@@ -23,6 +23,7 @@ internal static class ArrowContactChecks
         Run();
         Console.WriteLine($"Passed {checks} arrow contact checks.");
         SpikeContactChecks.Run();
+        TrapContactPreviewChecks.Run();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -55,6 +56,14 @@ internal static class ArrowContactChecks
             Math.Abs(fraction - 0.5625f) < 0.001f, "relative motion matches moving arrow");
         Check(!PolygonContactDetector.TryGetContactFraction(placement, outline, Vector2.zero,
             new Vector2(9f, 1f), new Vector2(9f, 1f), 0.25f, out _), "same-speed parallel motion");
+
+        // Arrow 2 -> 6, player 4 -> 7: both move right, but the arrow closes the gap without touching.
+        Check(!PolygonContactDetector.TryGetContactFraction(placement, outline, Vector2.zero,
+            new Vector2(8f, 0f), new Vector2(7f, 0f), 0.25f, out _), "same-direction dash with gap does not preview contact");
+        // Arrow 2 -> 6, player 4 -> 6.5: first contact must be detected before the final overlap.
+        Check(PolygonContactDetector.TryGetContactFraction(placement, outline, Vector2.zero,
+            new Vector2(8f, 0f), new Vector2(6.5f, 0f), 0.25f, out fraction) &&
+            fraction > 0f && fraction < 1f, "arrow overtaking same-direction dash detects first touch");
 
         placement = Matrix4x4.identity;
         placement.m00 = 0f;

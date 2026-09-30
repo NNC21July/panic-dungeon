@@ -50,12 +50,14 @@ public partial class NetworkTrapDirector
         }
         spikeHistory.Clear();
         hasSpikeSample = false;
+        InitializeSpikeObservers();
     }
 
     private void ClearSpikePlayback()
     {
         spikeHistory.Clear();
         hasSpikeSample = false;
+        ClearSpikeObservers();
         trapController.PresentSpikeWarning(false, false, 0f);
         if (Object != null)
             Object.ForceRemoteRenderTimeframe = previousSpikeRemoteTimeframe;
@@ -128,6 +130,7 @@ public partial class NetworkTrapDirector
         var toStates = reader.Read(to);
         displayedSpikeSample = new ContactRenderSample { FromTick = from.Tick, ToTick = to.Tick, Alpha = alpha };
         hasSpikeSample = true;
+        PrepareSpikeObservers();
         bool warning = false, isTop = false;
         float warningBlend = 0f;
         for (int i = 0; i < spikes.Length; i++)
@@ -140,6 +143,7 @@ public partial class NetworkTrapDirector
                 continue;
             bool playImpact = hasDisplayedSpike[i] && state.ImpactCount > displayedSpikes[i].ImpactCount;
             Vector2 position = state.Position;
+            bool waitingForOwner = false;
             if (pendingSpikeDeadlines[i] > 0d)
             {
                 bool stillWaiting = Time.unscaledTimeAsDouble < pendingSpikeDeadlines[i] &&
@@ -147,10 +151,17 @@ public partial class NetworkTrapDirector
                     state.ImpactCount == pendingSpikeImpacts[i] &&
                     (state.Phase == SpikePhase.Advancing || state.Phase == SpikePhase.Holding);
                 if (stillWaiting)
+                {
                     position = pendingSpikePositions[i];
+                    waitingForOwner = true;
+                }
                 else
                     pendingSpikeDeadlines[i] = 0d;
             }
+            if (waitingForOwner)
+                observedSpikeHolds[i].Release();
+            else
+                position = GetObservedSpikePosition(i, state);
             spikes[i].ApplyPlayback(position, state.IsSolid, state.WarningBlend, playImpact);
             displayedSpikes[i] = state;
             hasDisplayedSpike[i] = true;
@@ -162,6 +173,7 @@ public partial class NetworkTrapDirector
             }
         }
         trapController.PresentSpikeWarning(warning, isTop, warningBlend);
+        FinishSpikeObservers();
     }
 
     public int SpikeCount => spikes != null ? spikes.Length : 0;
@@ -172,7 +184,7 @@ public partial class NetworkTrapDirector
         state = default;
         sample = displayedSpikeSample;
         if (!hasSpikeSample || index < 0 || index >= SpikeCount || spikes[index] == null ||
-            !hasDisplayedSpike[index] || pendingSpikeDeadlines[index] > 0d)
+            !hasDisplayedSpike[index] || pendingSpikeDeadlines[index] > 0d || observedSpikeHolds[index].IsActive)
             return false;
         state = displayedSpikes[index];
         return state.Phase == SpikePhase.Advancing;
@@ -195,6 +207,7 @@ public partial class NetworkTrapDirector
     {
         if (index < 0 || index >= SpikeCount)
             return;
+        observedSpikeHolds[index].Release();
         pendingSpikeCycles[index] = cycle;
         pendingSpikePositions[index] = position;
         pendingSpikeImpacts[index] = displayedSpikes[index].ImpactCount;

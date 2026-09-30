@@ -158,11 +158,14 @@ public class NetworkPlayerArrowHitReporter : NetworkBehaviour
         }
     }
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority,
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All,
     Channel = RpcChannel.Reliable, TickAligned = false)]
     private void RPC_ResolveArrowContact(NetworkId arrowId, bool accepted, int damageSequence)
     {
-        ResolveLocalArrow(arrowId, accepted, damageSequence);
+        if (Object.HasInputAuthority)
+            ResolveLocalArrow(arrowId, accepted, damageSequence);
+        else if (Runner.TryFindObject(arrowId, out NetworkObject arrowObject))
+            arrowObject.GetComponent<NetworkArrow>()?.ResolveObservedReport(Object.Id, accepted);
     }
 
     private void ResolveLocalArrow(NetworkId arrowId, bool accepted, int damageSequence)
