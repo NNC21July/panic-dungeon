@@ -37,6 +37,7 @@ public class TrapController : MonoBehaviour
     public float CurrentPatternInterval => difficultyScaler.CurSpikeInterval;
     public float DifficultyScaleInterval => diffScaleInterval;
     public DifficultyScaler DifficultyScaler => difficultyScaler;
+    public bool EnemySpawningPaused => curPattern?.PreventsEnemySpawning ?? false;
 
     private void Awake()
     {

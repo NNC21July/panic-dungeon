@@ -8,6 +8,7 @@ public partial class NetworkTrapDirector : NetworkBehaviour
     [SerializeField] private TrapController trapController;
     [SerializeField] private TrapSetup trapSetup;
     [SerializeField] private NetworkObject networkArrowPrefab, networkPoisonArrowPrefab;
+    [SerializeField] private NetworkEnemySpawner enemySpawner;
     [Networked] private NetworkBool TrapsRunning { get; set; }
     [Networked] private TrapPatternId ActivePattern { get; set; }
     [Networked] private float ActiveWarningDuration { get; set; }
@@ -54,6 +55,8 @@ public partial class NetworkTrapDirector : NetworkBehaviour
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        if (enemySpawner != null)
+            enemySpawner.StopSpawning(runner);
         ClearSpikePlayback();
         foreach (Spike spike in trapSetup.TopSpikes)
             UnsubscribeSpike(spike);
@@ -72,7 +75,10 @@ public partial class NetworkTrapDirector : NetworkBehaviour
             UpdateAuthorityState();
         ApplyNetworkStateLocally();
         if (Object.HasStateAuthority)
+        {
             CaptureSpikeStates();
+            enemySpawner.Tick(Runner, IsMatchPlaying, trapController.EnemySpawningPaused, trapController.DifficultyScaler.CurEnemySpawnInterval);
+        }
     }
 
     private void UpdateAuthorityState()

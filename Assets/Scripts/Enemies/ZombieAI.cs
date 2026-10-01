@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(Health))]
 public class ZombieAI : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 2.5f, attackRange = 0.8f, attackDamage = 15f, attackCooldown = 1f;
+    [SerializeField] private ZombieTuning zombieTuning;
     private Rigidbody2D rb;
     private Transform target;
     private Health health, targetHealth;
@@ -13,6 +13,7 @@ public class ZombieAI : MonoBehaviour
 
     private void Awake()
     {
+        SerializedFieldValidator.Validate(this);
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
         health.OnDeath += HandleDeath;
@@ -33,7 +34,7 @@ public class ZombieAI : MonoBehaviour
         }
         if (!canAttack)
         {
-            attackCooldownTimer -= Time.deltaTime;
+            attackCooldownTimer = ZombieRules.AdvanceCooldown(attackCooldownTimer, Time.deltaTime);
             if (attackCooldownTimer <= 0f)
                 canAttack = true;
         }
@@ -41,11 +42,10 @@ public class ZombieAI : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (target != null && !targetHealth.IsDead)
+        if (target != null && targetHealth != null && !targetHealth.IsDead)
         {
-            float sqrDist = ((Vector2)target.position - rb.position).sqrMagnitude;
-            if (sqrDist > attackRange * attackRange)
-                rb.MovePosition(Vector2.MoveTowards(rb.position, target.position, moveSpeed * Time.fixedDeltaTime));
+            if (!ZombieRules.IsInAttackRange(rb.position, target.position, zombieTuning.AttackRange))
+                rb.MovePosition(ZombieRules.MoveTowards(rb.position, target.position, zombieTuning.MoveSpeed, Time.fixedDeltaTime));
             else if (canAttack)
             {
                 rb.linearVelocity = Vector2.zero;
@@ -57,10 +57,10 @@ public class ZombieAI : MonoBehaviour
     private void Attack()
     {
         canAttack = false;
-        attackCooldownTimer = attackCooldown;
+        attackCooldownTimer = zombieTuning.AttackCooldown;
         if (targetHealth != null && !targetHealth.IsDead)
         {
-            targetHealth.TakeDamage(new DamageInfo(attackDamage, gameObject, DamageType.Zombie));
+            ZombieRules.ApplyAttack(targetHealth, zombieTuning.AttackDamage, gameObject);
             if (targetHealth.IsDead)
             {
                 target = null;

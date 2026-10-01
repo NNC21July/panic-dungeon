@@ -377,7 +377,7 @@ MonoBehaviour:
   swordHitbox: {fileID: 1558956650081737702}
   damageableLayers:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 4104
 --- !u!114 &4097093076710487639
 MonoBehaviour:
   m_ObjectHideFlags: 0

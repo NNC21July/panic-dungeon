@@ -4752,6 +4752,7 @@ GameObject:
   - component: {fileID: 1534750430}
   - component: {fileID: 1534750432}
   - component: {fileID: 1534750433}
+  - component: {fileID: 1534750434}
   m_Layer: 0
   m_Name: NetworkMatchManager
   m_TagString: Untagged
@@ -4789,7 +4790,7 @@ MonoBehaviour:
   minimumPlayers: 2
   _State: 0
   countdownDuration: 3
-  matchDuration: 20
+  matchDuration: 120
 --- !u!114 &1534750431
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4842,12 +4843,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a68e2064faa893b4abaa8d6feda00ab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkTrapDirector
+  enemySpawner: {fileID: 1534750434}
   matchManager: {fileID: 1534750430}
   trapController: {fileID: 1581613496}
   trapSetup: {fileID: 1581613497}
-  poisonSplashPrefab: {fileID: 5673423209690850590, guid: d2781ad881a7ccf43af25818b634bd8d, type: 3}
   networkArrowPrefab: {fileID: 1793549609812298304, guid: dd743cff412da2b4689c17705fbec0af, type: 3}
   networkPoisonArrowPrefab: {fileID: 8762443439563781778, guid: d2a5b0b1293578745802884a27d5d448, type: 3}
+--- !u!114 &1534750434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534750428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0713daac19d5475594376976cf443504, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkEnemySpawner
+  zombiePrefab: {fileID: 800001, guid: 58fd416425a1408c9259e8c4403b3cbf, type: 3}
+  roomGen: {fileID: 1581613498}
+  spawnDelay: 10
+  maxEnemiesAlive: 10
+  minSpawnDist: 3
+  spawnPadding: 0.1
+  blockedSpawnLayers:
+    serializedVersion: 2
+    m_Bits: 576
 --- !u!1 &1562650353
 GameObject:
   m_ObjectHideFlags: 0

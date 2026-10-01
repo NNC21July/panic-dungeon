@@ -17,6 +17,7 @@ public class EnemySpawner : MonoBehaviour
     private List<ZombieAI> activeEnemies;
     private DifficultyScaler difficultyScaler;
     private PhysicsScene2D physicsScene;
+    private readonly List<Vector2> playerPositions = new();
 
     private void Awake()
     {
@@ -74,20 +75,11 @@ public class EnemySpawner : MonoBehaviour
         spawnPos = default;
         if (roomGen.OpenFloorPos.Count == 0)
             return false;
-        float minSpawnDistSqr = minSpawnDist * minSpawnDist;
+        playerPositions.Clear();
+        playerPositions.Add(player.position);
         int startIdx = Random.Range(0, roomGen.OpenFloorPos.Count);
-        for (int i = 0; i < roomGen.OpenFloorPos.Count; i++)
-        {
-            int idx = (startIdx + i) % roomGen.OpenFloorPos.Count;
-            Vector2 candidate = roomGen.OpenFloorPos[idx];
-            float distSqr = ((Vector2)player.position - candidate).sqrMagnitude;
-            if (distSqr >= minSpawnDistSqr && SpawnSpaceChecker.IsCircleAreaClear(candidate, zombieSpawnCheckRadius, blockedSpawnLayers, physicsScene))
-            {
-                spawnPos = candidate;
-                return true;
-            }
-        }
-        return false;
+        return EnemySpawnRules.TryFindPosition(roomGen.OpenFloorPos, playerPositions, minSpawnDist, startIdx,
+            candidate => SpawnSpaceChecker.IsCircleAreaClear(candidate, zombieSpawnCheckRadius, blockedSpawnLayers, physicsScene), out spawnPos);
     }
 
     private IEnumerator Spawn()
