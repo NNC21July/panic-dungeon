@@ -15,6 +15,7 @@ public class NetworkPlayerCombat : NetworkBehaviour
     [Networked] private bool IsAttacking { get; set; }
     [Networked] private float AttackTimer { get; set; }
     [Networked] private float CooldownTimer { get; set; }
+    [Networked] public int SwingTick { get; private set; }
     [Networked] private Vector2 attackDirection { get; set; } = Vector2.right;
     private bool renderedAttackLastFrame;
     private readonly Collider2D[] hitResults = new Collider2D[8];
@@ -49,6 +50,7 @@ public class NetworkPlayerCombat : NetworkBehaviour
             if (inputData.AimDirection.sqrMagnitude > 0.0001f)
                 attackDirection = inputData.AimDirection.normalized;
             IsAttacking = true;
+            SwingTick = Runner.Tick.Raw;
             AttackTimer = playerTuning.SwingDuration;
             CooldownTimer = playerTuning.AttackCooldown;
             if (Object.HasStateAuthority)
@@ -92,7 +94,17 @@ public class NetworkPlayerCombat : NetworkBehaviour
         renderedAttackLastFrame = true;
     }
 
-    private void CheckForSwordHits()
+    private void LateUpdate()
+    {
+        if (Object == null || !Object.IsValid || !Object.HasInputAuthority || Object.HasStateAuthority ||
+            !IsAttacking || !gameplayGate.CanAct)
+            return;
+        // Query the final rendered poses, not last physics step's remote zombie positions.
+        Physics2D.SyncTransforms();
+        CheckForSwordHits(true);
+    }
+
+    private void CheckForSwordHits(bool previewOnly = false)
     {
         Vector2 center = swordHitbox.transform.TransformPoint(swordHitbox.offset);
         Vector3 scale = swordHitbox.transform.lossyScale;
@@ -115,9 +127,15 @@ public class NetworkPlayerCombat : NetworkBehaviour
                 continue;
             if (targetHealth.Object == Object)
                 continue;
+            if (previewOnly)
+            {
+                if (targetHealth.GetComponent<NetworkEnemy>() != null)
+                    targetHealth.PreviewSwordContact(Object.Id, SwingTick);
+                continue;
+            }
             if (!damagedTargets.Add(targetHealth))
                 continue;
-            targetHealth.TakeDamage(new DamageInfo(playerTuning.SwordDamage, gameObject, DamageType.Melee));
+            targetHealth.TakeSwordDamage(new DamageInfo(playerTuning.SwordDamage, gameObject, DamageType.Melee), Object.Id, SwingTick);
         }
     }
 

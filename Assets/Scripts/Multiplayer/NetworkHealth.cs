@@ -15,6 +15,9 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
     public event Action OnDamaged;
     public event Action OnHealthChanged;
     public DamageType PresentedDamageType { get; private set; }
+    public bool SuppressPresentedFlash { get; private set; }
+    private readonly HashSet<(NetworkId, int)> shownSwordContacts = new();
+    private readonly Queue<(NetworkId, int)> swordContactOrder = new();
     private int initialDamageSequence;
     private readonly Dictionary<int, double> feedbackWaitingForImpact = new(); // confirmed arrow hits waiting for their visual impact; each with deadline
     private readonly HashSet<int> earlyArrowImpacts = new(); // visual impacts that arrived before their damage notification
@@ -31,6 +34,9 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
             DamageSequence = 0;
         }
         InitializePoison();
+        shownSwordContacts.Clear();
+        swordContactOrder.Clear();
+        SuppressPresentedFlash = false;
         initialDamageSequence = DamageSequence;
         PresentedDamageType = DamageType.Normal;
         feedbackWaitingForImpact.Clear();
@@ -40,6 +46,16 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
     }
 
     public bool TakeDamage(DamageInfo damageInfo)
+    {
+        return ApplyDamage(damageInfo, default, 0);
+    }
+
+    public bool TakeSwordDamage(DamageInfo damageInfo, NetworkId attacker, int swingTick)
+    {
+        return ApplyDamage(damageInfo, attacker, swingTick);
+    }
+
+    private bool ApplyDamage(DamageInfo damageInfo, NetworkId attacker, int swingTick)
     {
         if (!Object.HasStateAuthority || IsDead || damageInfo.Amount <= 0f)
             return false;
@@ -51,7 +67,7 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
             ClearPoison();
         }
         DamageSequence++;
-        RPC_QueueDamageFeedback(DamageSequence, damageInfo.Type);
+        RPC_QueueDamageFeedback(DamageSequence, damageInfo.Type, attacker, swingTick);
         return true;
     }
 
@@ -62,14 +78,17 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All,
     Channel = RpcChannel.Reliable)]
-    private void RPC_QueueDamageFeedback(int sequence, DamageType damageType)
+    private void RPC_QueueDamageFeedback(int sequence, DamageType damageType, NetworkId attacker, int swingTick)
     {
         if (sequence <= initialDamageSequence ||
             shownDamageFeedback.Contains(sequence)) // already shown or historical
             return;
         if (damageType != DamageType.Arrow)
         {
+            SuppressPresentedFlash = damageType == DamageType.Melee && attacker.IsValid &&
+                !RememberSwordContact(attacker, swingTick);
             ShowDamageFeedback(sequence, damageType);
+            SuppressPresentedFlash = false;
             return;
         }
         if (earlyArrowImpacts.Remove(sequence))
@@ -91,6 +110,27 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
         earlyArrowImpacts.Remove(sequence);
         PresentedDamageType = damageType;
         OnDamaged?.Invoke();
+    }
+
+    public void PreviewSwordContact(NetworkId attacker, int swingTick)
+    {
+        if (Object == null || !Object.IsValid || IsDead || !attacker.IsValid ||
+            !RememberSwordContact(attacker, swingTick))
+            return;
+        // Cosmetic only: do not raise OnDamaged or change health for an unconfirmed hit.
+        GetComponent<DamageFlash>()?.PlayFlash();
+    }
+
+    private bool RememberSwordContact(NetworkId attacker, int swingTick)
+    {
+        var key = (attacker, swingTick);
+        if (!shownSwordContacts.Add(key))
+            return false;
+        swordContactOrder.Enqueue(key);
+        // Bound rejected/unconfirmed previews too; no confirmation is required for cleanup.
+        if (swordContactOrder.Count > 128)
+            shownSwordContacts.Remove(swordContactOrder.Dequeue());
+        return true;
     }
 
     public void NotifyArrowImpactShown(int sequence)
@@ -124,6 +164,8 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         poisonEffect = null;
+        shownSwordContacts.Clear();
+        swordContactOrder.Clear();
         poisonTimer = null;
         feedbackWaitingForImpact.Clear();
         earlyArrowImpacts.Clear();

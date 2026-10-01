@@ -239,8 +239,16 @@ public partial class NetworkTrapDirector : NetworkBehaviour
 
     private bool ResolveSpikeDamage(IDamageable damageable, DamageInfo damageInfo)
     {
-        if (!Object.HasStateAuthority)
+        if (!Object.HasStateAuthority || !IsMatchPlaying)
             return false;
+        if (damageable is NetworkHealth enemyHealth && enemyHealth.GetComponent<NetworkEnemy>() != null)
+        {
+            // Zombies are server-controlled and have no player owner to report contact.
+            if (enemyHealth.Object == null || !enemyHealth.Object.IsValid || enemyHealth.Runner != Runner ||
+                !enemyHealth.Object.HasStateAuthority || enemyHealth.IsDead)
+                return false;
+            return enemyHealth.TakeDamage(damageInfo);
+        }
         // A remote player's owner reports visible contact instead of using the host's older player copy.
         if (damageable is NetworkHealth target && !target.Object.HasInputAuthority)
             return false;

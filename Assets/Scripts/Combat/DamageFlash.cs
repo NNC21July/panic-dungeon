@@ -51,6 +51,8 @@ public class DamageFlash : MonoBehaviour
 
     private void HandleNetworkDamaged()
     {
+        if (networkHealth.SuppressPresentedFlash)
+            return;
         PlayFlash();
     }
 
@@ -59,8 +61,10 @@ public class DamageFlash : MonoBehaviour
         PlayFlash();
     }
 
-    private void PlayFlash()
+    public void PlayFlash()
     {
+        if (!isActiveAndEnabled)
+            return;
         if (flashCoroutine != null)
             StopCoroutine(flashCoroutine);
         flashCoroutine = StartCoroutine(Flash());

@@ -13,6 +13,7 @@ public class NetworkMatchUI : NetworkBehaviour
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private TMP_Text timerText;
     private NetworkMatchManager matchManager;
+    private NetworkPerformanceUI performanceUI;
 
     private void Awake()
     {
@@ -22,6 +23,8 @@ public class NetworkMatchUI : NetworkBehaviour
 
     public override void Spawned()
     {
+        if (!Runner.IsServer)
+            performanceUI = NetworkPerformanceUI.Create(Runner, timerText);
         roundOverPanel.SetActive(false);
         darkOverlay.SetActive(false);
         restartButton.gameObject.SetActive(Object.HasStateAuthority);
@@ -56,6 +59,12 @@ public class NetworkMatchUI : NetworkBehaviour
             resultText.text = "You Lose!";
 
         SetActiveIfChanged(restartButton.gameObject, Object.HasStateAuthority);
+    }
+
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        if (performanceUI != null)
+            Destroy(performanceUI.gameObject);
     }
 
     private static void SetActiveIfChanged(GameObject target, bool active)

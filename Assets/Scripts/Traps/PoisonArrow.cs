@@ -11,7 +11,8 @@ public class PoisonArrow : Arrow
     {
         IPoisonReceiver poisonReceiver = other.GetComponentInParent<IPoisonReceiver>();
 
-        if (poisonReceiver != null)
+        // Enemies take the arrow's impact damage and splash, but not the poison status.
+        if (poisonReceiver != null && other.gameObject.layer != GameLayers.Enemy)
             poisonReceiver.ApplyPoison(
                 new PoisonEffect(duration, tickInterval, tickDamage, Shooter));
 

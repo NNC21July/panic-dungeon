@@ -237,6 +237,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkEnemy
   zombieTuning: {fileID: 11400000, guid: 3177072f521446aa8766e754672d4535, type: 2}
+  deathFadeDuration: 0.5
+  deathBrightness: 0.6
 --- !u!114 &800004
 MonoBehaviour:
   m_ObjectHideFlags: 0

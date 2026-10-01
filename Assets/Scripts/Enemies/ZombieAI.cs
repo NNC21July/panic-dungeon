@@ -5,6 +5,10 @@ using UnityEngine;
 public class ZombieAI : MonoBehaviour
 {
     [SerializeField] private ZombieTuning zombieTuning;
+    [SerializeField, Min(0.1f)] private float deathFadeDuration = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float deathBrightness = 0.6f;
+    private ZombieDeathVisual deathVisual;
+    private float deathElapsed;
     private Rigidbody2D rb;
     private Transform target;
     private Health health, targetHealth;
@@ -16,11 +20,22 @@ public class ZombieAI : MonoBehaviour
         SerializedFieldValidator.Validate(this);
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
+        deathVisual = GetComponent<ZombieDeathVisual>();
+        if (deathVisual == null)
+            deathVisual = gameObject.AddComponent<ZombieDeathVisual>();
         health.OnDeath += HandleDeath;
     }
 
     private void Update()
     {
+        if (health.IsDead)
+        {
+            deathElapsed += Time.deltaTime;
+            deathVisual.ShowDeath(deathBrightness, 1f - deathElapsed / Mathf.Max(0.1f, deathFadeDuration));
+            if (deathElapsed >= Mathf.Max(0.1f, deathFadeDuration))
+                Destroy(gameObject);
+            return;
+        }
         if (target == null)
         {
             target = GetTarget();
@@ -42,6 +57,8 @@ public class ZombieAI : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (health.IsDead)
+            return;
         if (target != null && targetHealth != null && !targetHealth.IsDead)
         {
             if (!ZombieRules.IsInAttackRange(rb.position, target.position, zombieTuning.AttackRange))
@@ -72,7 +89,16 @@ public class ZombieAI : MonoBehaviour
 
     private void HandleDeath(DamageInfo damageInfo)
     {
-        Destroy(gameObject);
+        target = null;
+        targetHealth = null;
+        canAttack = false;
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        rb.simulated = false;
+        foreach (Collider2D bodyCollider in GetComponentsInChildren<Collider2D>())
+            bodyCollider.enabled = false;
+        deathElapsed = 0f;
+        deathVisual.ShowDeath(deathBrightness, 1f);
     }
 
     private void OnDestroy()

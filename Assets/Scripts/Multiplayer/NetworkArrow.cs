@@ -240,6 +240,9 @@ public partial class NetworkArrow : NetworkBehaviour
     private bool CanDamageOnContact(Collider2D other)
     {
         NetworkHealth target = other.GetComponentInParent<NetworkHealth>();
+        if (target != null && target.GetComponent<NetworkEnemy>() != null)
+            return target.Object != null && target.Object.IsValid && target.Runner == Runner &&
+                target.Object.HasStateAuthority && !target.IsDead;
         // Host-owned players use local physics. Remote owners report their visible contact.
         return target == null || (target.Object != null && target.Object.IsValid && target.Object.HasInputAuthority);
     }

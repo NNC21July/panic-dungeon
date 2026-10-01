@@ -9,6 +9,8 @@ using UnityEngine;
 public class NetworkEnemy : NetworkBehaviour
 {
     [SerializeField] private ZombieTuning zombieTuning;
+    [SerializeField, Min(0.1f)] private float deathFadeDuration = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float deathBrightness = 0.35f;
     private Rigidbody2D rb;
     private NetworkObject target;
     private NetworkHealth targetHealth;
@@ -16,7 +18,8 @@ public class NetworkEnemy : NetworkBehaviour
     private NetworkHealth health;
     private CircleCollider2D bodyCollider;
     private float attackCooldownTimer;
-    private TickTimer deathTimer;
+    [Networked] private TickTimer deathTimer { get; set; }
+    private ZombieDeathVisual deathVisual;
     public ZombieTuning Tuning => zombieTuning;
 
     private void Awake()
@@ -25,6 +28,9 @@ public class NetworkEnemy : NetworkBehaviour
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<NetworkHealth>();
         bodyCollider = GetComponent<CircleCollider2D>();
+        deathVisual = GetComponent<ZombieDeathVisual>();
+        if (deathVisual == null)
+            deathVisual = gameObject.AddComponent<ZombieDeathVisual>();
     }
 
     public override void Spawned()
@@ -33,7 +39,9 @@ public class NetworkEnemy : NetworkBehaviour
         targetHealth = null;
         matchManager = null;
         attackCooldownTimer = 0f;
-        deathTimer = TickTimer.None;
+        if (Object.HasStateAuthority)
+            deathTimer = TickTimer.None;
+        deathVisual.ResetVisual();
         bodyCollider.enabled = true;
         foreach (GameObject root in gameObject.scene.GetRootGameObjects())
         {
@@ -60,7 +68,7 @@ public class NetworkEnemy : NetworkBehaviour
         {
             StopDeadBody();
             if (!deathTimer.IsRunning)
-                deathTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
+                deathTimer = TickTimer.CreateFromSeconds(Runner, deathFadeDuration + 0.25f);
             if (deathTimer.Expired(Runner))
                 Runner.Despawn(Object);
             return;
@@ -148,7 +156,12 @@ public class NetworkEnemy : NetworkBehaviour
     public override void Render()
     {
         if (health.IsDead)
+        {
             StopDeadBody();
+            float remaining = deathTimer.RemainingTime(Runner) ?? (deathFadeDuration + 0.25f);
+            float opacity = Mathf.Clamp01((remaining - 0.25f) / deathFadeDuration);
+            deathVisual.ShowDeath(deathBrightness, opacity);
+        }
     }
 
     private void StopDeadBody()
