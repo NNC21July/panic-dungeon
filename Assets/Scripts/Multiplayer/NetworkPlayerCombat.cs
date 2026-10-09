@@ -73,6 +73,23 @@ public class NetworkPlayerCombat : NetworkBehaviour
 
     public override void Render()
     {
+        // The creator runs a hidden server and a visible client in the same process.
+        // Never re-enable the hidden runner's sword when presenting an attack.
+        if (!Runner.GetVisible())
+        {
+            if (swordRenderer != null)
+                swordRenderer.enabled = false;
+            if (swordTrail != null)
+            {
+                swordTrail.emitting = false;
+                swordTrail.enabled = false;
+                swordTrail.Clear();
+            }
+            renderedAttackLastFrame = false;
+            return;
+        }
+        if (swordTrail != null)
+            swordTrail.enabled = true;
         if (!IsAttacking)
         {
             if (swordRenderer != null)
@@ -97,7 +114,7 @@ public class NetworkPlayerCombat : NetworkBehaviour
     private void LateUpdate()
     {
         if (Object == null || !Object.IsValid || !Object.HasInputAuthority || Object.HasStateAuthority ||
-            !IsAttacking || !gameplayGate.CanAct)
+            !Runner.GetVisible() || !IsAttacking || !gameplayGate.CanAct)
             return;
         // Query the final rendered poses, not last physics step's remote zombie positions.
         Physics2D.SyncTransforms();

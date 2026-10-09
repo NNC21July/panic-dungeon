@@ -27,7 +27,7 @@ public class NetworkMatchUI : NetworkBehaviour
             performanceUI = NetworkPerformanceUI.Create(Runner, timerText);
         roundOverPanel.SetActive(false);
         darkOverlay.SetActive(false);
-        restartButton.gameObject.SetActive(Object.HasStateAuthority);
+        restartButton.gameObject.SetActive(false);
         countdownText.gameObject.SetActive(false);
         timerText.gameObject.SetActive(false);
     }
@@ -58,7 +58,8 @@ public class NetworkMatchUI : NetworkBehaviour
         else
             resultText.text = "You Lose!";
 
-        SetActiveIfChanged(restartButton.gameObject, Object.HasStateAuthority);
+        SetActiveIfChanged(restartButton.gameObject, matchManager.IsLocalLeader);
+        restartButton.interactable = !matchManager.Restarting;
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)

@@ -334,6 +334,7 @@ MonoBehaviour:
   _CorrectionCount: 0
   _AcceptedDashDirection: {x: 0, y: 0}
   _AcceptedDashCount: 0
+  _AcceptedReportSequence: 0
 --- !u!114 &604642237215053626
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -377,7 +378,8 @@ MonoBehaviour:
   swordHitbox: {fileID: 1558956650081737702}
   damageableLayers:
     serializedVersion: 2
-    m_Bits: 4104
+    m_Bits: 4096
+  _SwingTick: 0
 --- !u!114 &4097093076710487639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -390,6 +392,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba75892567fabde42abe1c9ee7e5fc35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkHealth
+  _IsPoisoned:
+    RawValue: 0
   maxHealth: 100
   arrowFeedbackTimeout: 0.75
   _CurrentHealth: 0
@@ -447,18 +451,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
   playerTuning: {fileID: 11400000, guid: 401aa5736a2f4a2aa521f853952c33b8, type: 2}
   dustEffect: {fileID: 6035401514808129135}
---- !u!114 &8224023533266791271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4898517791944016510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a69f59112ad74ef096e7aa2a9c00effe, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerSpikeHitReporter
 --- !u!114 &8224023533266791270
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -471,6 +463,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62629ce21996d234a857837357e083fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerArrowHitReporter
+  maxReportAge: 1
+  maxContactInterval: 0.1
+--- !u!114 &8224023533266791271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a69f59112ad74ef096e7aa2a9c00effe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerSpikeHitReporter
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0
