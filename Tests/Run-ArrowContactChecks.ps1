@@ -26,6 +26,7 @@ $assembly = Join-Path $output 'ArrowContactChecks.dll'
     (Join-Path $root 'Assets/Scripts/Combat/IDamageable.cs') `
     (Join-Path $root 'Assets/Scripts/Enemies/ZombieRules.cs') `
     (Join-Path $root 'Assets/Scripts/Enemies/EnemySpawnRules.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/CharacterColors.cs') `
     (Join-Path $root 'Assets/Scripts/Traps/StatusEffects/StatusEffect.cs') `
     (Join-Path $root 'Assets/Scripts/Traps/StatusEffects/PoisonEffect.cs') `
     (Join-Path $root 'Assets/Scripts/Traps/StatusEffects/StatusEffectTimer.cs') `
@@ -38,6 +39,7 @@ $assembly = Join-Path $output 'ArrowContactChecks.dll'
     (Join-Path $PSScriptRoot 'TrapContactPreviewChecks.cs') `
     (Join-Path $PSScriptRoot 'PoisonEffectChecks.cs') `
     (Join-Path $PSScriptRoot 'EnemyRulesChecks.cs') `
+    (Join-Path $PSScriptRoot 'CharacterColorChecks.cs') `
     (Join-Path $PSScriptRoot 'ArrowContactChecks.cs')
 if ($LASTEXITCODE -ne 0) {
     throw 'Contact checks failed to compile.'

@@ -19,7 +19,12 @@ public class NetworkMatchManager : NetworkBehaviour
     [Networked] public PlayerRef Winner { get; private set; }
     [Networked] public PlayerRef Leader { get; private set; }
     [Networked] public NetworkBool Restarting { get; private set; }
+    [Networked, Capacity(10)] public NetworkArray<PlayerRef> ColorOwners => default;
+    [Networked] private int readyColors { get; set; }
+    public string SelectionMessage { get; private set; } = "Choose a color, then press Ready.";
+    private double nextSelectionRequestTime;
     private double nextRestartRequestTime;
+    public int MinimumPlayers => minimumPlayers;
     public bool IsLocalLeader => Object != null && Object.IsValid &&
         Runner.LocalPlayer != PlayerRef.None && Runner.LocalPlayer == Leader;
     [SerializeField, Min(0f)] private float countdownDuration = 3f;
@@ -50,11 +55,17 @@ public class NetworkMatchManager : NetworkBehaviour
 
     public override void Spawned()
     {
+        SelectionMessage = "Choose a color, then press Ready.";
+        nextSelectionRequestTime = 0d;
+        nextRestartRequestTime = 0d;
         if (!Object.HasStateAuthority)
             return;
         Winner = PlayerRef.None;
         Leader = PlayerRef.None;
         Restarting = false;
+        readyColors = 0;
+        for (int i = 0; i < CharacterColors.Count; i++)
+            ColorOwners.Set(i, PlayerRef.None);
         RefreshLeader();
         State = NetworkMatchState.WaitingForPlayers;
         CountdownTimer = TickTimer.None;
@@ -68,6 +79,7 @@ public class NetworkMatchManager : NetworkBehaviour
 
         RefreshLeader();
 
+        ReleaseDisconnectedColors();
         if (State == NetworkMatchState.WaitingForPlayers)
             TryBeginCountdown();
         else if (State == NetworkMatchState.Countdown)
@@ -82,7 +94,7 @@ public class NetworkMatchManager : NetworkBehaviour
 
     private void TryBeginCountdown()
     {
-        if (CountReadyPlayers() < minimumPlayers)
+        if (!AllPlayersSelected())
             return;
         CountdownTimer = TickTimer.CreateFromSeconds(Runner, countdownDuration);
         State = NetworkMatchState.Countdown;
@@ -90,7 +102,7 @@ public class NetworkMatchManager : NetworkBehaviour
 
     private void UpdateCountdown()
     {
-        if (CountReadyPlayers() < minimumPlayers)
+        if (!AllPlayersSelected())
         {
             CountdownTimer = TickTimer.None;
             State = NetworkMatchState.WaitingForPlayers;
@@ -218,17 +230,166 @@ public class NetworkMatchManager : NetworkBehaviour
             Debug.Log($"Network match over. Winner: {Winner}", this);
     }
 
-    private int CountReadyPlayers()
+    public override void Render()
     {
-        int readyPlayers = 0;
+        for (int i = 0; i < CharacterColors.Count; i++)
+        {
+            PlayerRef player = ColorOwners[i];
+            if (player == PlayerRef.None || !Runner.TryGetPlayerObject(player, out NetworkObject obj) || obj == null)
+                continue;
+            DamageFlash flash = obj.GetComponent<DamageFlash>();
+            if (flash != null)
+                flash.SetBaseColor(CharacterColors.Get(i));
+        }
+    }
+
+    public int ConnectedPlayerCount
+    {
+        get
+        {
+            int count = 0;
+            foreach (PlayerRef player in Runner.ActivePlayers)
+                if (player != PlayerRef.None)
+                    count++;
+            return count;
+        }
+    }
+
+    public int ReadyPlayerCount
+    {
+        get
+        {
+            int count = 0;
+            for (int i = 0; i < CharacterColors.Count; i++)
+                if (ColorOwners[i] != PlayerRef.None && IsColorReady(i))
+                    count++;
+            return count;
+        }
+    }
+
+    public int FindColor(PlayerRef player)
+    {
+        if (player != PlayerRef.None)
+            for (int i = 0; i < CharacterColors.Count; i++)
+                if (ColorOwners[i] == player)
+                    return i;
+        return -1;
+    }
+
+    public bool IsColorReady(int index) => index >= 0 && index < CharacterColors.Count && (readyColors & (1 << index)) != 0;
+
+    private bool AllPlayersSelected()
+    {
+        if (ConnectedPlayerCount < minimumPlayers || ReadyPlayerCount != ConnectedPlayerCount)
+            return false;
         foreach (PlayerRef player in Runner.ActivePlayers)
         {
-            if (!Runner.TryGetPlayerObject(player, out NetworkObject playerObject))
+            if (player == PlayerRef.None)
                 continue;
-
-            if (playerObject != null && playerObject.GetComponent<NetworkHealth>() != null)
-                readyPlayers++;
+            if (!Runner.TryGetPlayerObject(player, out NetworkObject obj) || obj == null || !obj.IsValid ||
+                obj.GetComponent<NetworkHealth>() == null || !IsColorReady(FindColor(player)))
+                return false;
         }
-        return readyPlayers;
+        return true;
+    }
+
+    private void ReleaseDisconnectedColors()
+    {
+        for (int i = 0; i < CharacterColors.Count; i++)
+        {
+            if (ColorOwners[i] == PlayerRef.None)
+                continue;
+            bool connected = false;
+            foreach (PlayerRef player in Runner.ActivePlayers)
+                if (player == ColorOwners[i])
+                    connected = true;
+            if (connected)
+                continue;
+            ColorOwners.Set(i, PlayerRef.None);
+            readyColors &= ~(1 << i);
+        }
+    }
+
+    public void RequestColor(int index)
+    {
+        if (!CanSendSelection())
+            return;
+        SelectionMessage = "Reserving color...";
+        RPC_SelectColor(index);
+    }
+
+    public void RequestReady(bool ready)
+    {
+        if (!CanSendSelection())
+            return;
+        SelectionMessage = "Updating ready status...";
+        RPC_SetReady(ready);
+    }
+
+    private bool CanSendSelection()
+    {
+        if (Object == null || !Object.IsValid || State != NetworkMatchState.WaitingForPlayers ||
+            Runner.LocalPlayer == PlayerRef.None || Time.unscaledTimeAsDouble < nextSelectionRequestTime)
+            return false;
+        nextSelectionRequestTime = Time.unscaledTimeAsDouble + 0.15d;
+        return true;
+    }
+
+    private bool CanSelect(PlayerRef player)
+    {
+        if (!Object.HasStateAuthority || State != NetworkMatchState.WaitingForPlayers || player == PlayerRef.None)
+            return false;
+        foreach (PlayerRef active in Runner.ActivePlayers)
+            if (active == player)
+                return Runner.TryGetPlayerObject(player, out NetworkObject obj) && obj != null && obj.IsValid;
+        return false;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable)]
+    private void RPC_SelectColor(int index, RpcInfo info = default)
+    {
+        if (!CanSelect(info.Source) || index < 0 || index >= CharacterColors.Count)
+            return;
+        ReleaseDisconnectedColors();
+        int previous = FindColor(info.Source);
+        if (IsColorReady(previous))
+        {
+            RPC_SelectionReply(info.Source, "Press Change Color before picking again.");
+            return;
+        }
+        if (ColorOwners[index] != PlayerRef.None && ColorOwners[index] != info.Source)
+        {
+            RPC_SelectionReply(info.Source, "That color was just picked. Choose another.");
+            return;
+        }
+        if (previous >= 0)
+        {
+            ColorOwners.Set(previous, PlayerRef.None);
+            readyColors &= ~(1 << previous);
+        }
+        ColorOwners.Set(index, info.Source);
+        RPC_SelectionReply(info.Source, "Color selected. Press Ready to confirm.");
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable)]
+    private void RPC_SetReady(bool ready, RpcInfo info = default)
+    {
+        if (!CanSelect(info.Source))
+            return;
+        int index = FindColor(info.Source);
+        if (index < 0)
+            return;
+        if (ready)
+            readyColors |= 1 << index;
+        else
+            readyColors &= ~(1 << index);
+        RPC_SelectionReply(info.Source, ready ? "Ready! Waiting for the other players..." : "Choose a color, then press Ready.");
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable)]
+    private void RPC_SelectionReply(PlayerRef player, string message)
+    {
+        if (Runner.LocalPlayer == player)
+            SelectionMessage = message;
     }
 }

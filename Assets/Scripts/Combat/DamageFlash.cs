@@ -70,6 +70,15 @@ public class DamageFlash : MonoBehaviour
         flashCoroutine = StartCoroutine(Flash());
     }
 
+    public void SetBaseColor(Color color)
+    {
+        if (originalColor == color)
+            return;
+        originalColor = color;
+        if (flashCoroutine == null)
+            spriteRenderer.color = originalColor;
+    }
+
     private IEnumerator Flash()
     {
         float flashTimer = flashDuration;

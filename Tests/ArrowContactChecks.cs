@@ -26,6 +26,7 @@ internal static class ArrowContactChecks
         TrapContactPreviewChecks.Run();
         PoisonEffectChecks.Run();
         EnemyRulesChecks.Run();
+        CharacterColorChecks.Run();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

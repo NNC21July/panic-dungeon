@@ -14,6 +14,7 @@ public class NetworkMatchUI : NetworkBehaviour
     [SerializeField] private TMP_Text timerText;
     private NetworkMatchManager matchManager;
     private NetworkPerformanceUI performanceUI;
+    private NetworkCharacterSelectionUI selectionUI;
 
     private void Awake()
     {
@@ -24,7 +25,10 @@ public class NetworkMatchUI : NetworkBehaviour
     public override void Spawned()
     {
         if (!Runner.IsServer)
+        {
             performanceUI = NetworkPerformanceUI.Create(Runner, timerText);
+            selectionUI = NetworkCharacterSelectionUI.Create(matchManager, timerText);
+        }
         roundOverPanel.SetActive(false);
         darkOverlay.SetActive(false);
         restartButton.gameObject.SetActive(false);
@@ -66,6 +70,8 @@ public class NetworkMatchUI : NetworkBehaviour
     {
         if (performanceUI != null)
             Destroy(performanceUI.gameObject);
+        if (selectionUI != null)
+            Destroy(selectionUI.gameObject);
     }
 
     private static void SetActiveIfChanged(GameObject target, bool active)
