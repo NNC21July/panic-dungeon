@@ -29,8 +29,6 @@ public class NetworkMatchManager : NetworkBehaviour
         Runner.LocalPlayer != PlayerRef.None && Runner.LocalPlayer == Leader;
     [SerializeField, Min(0f)] private float countdownDuration = 3f;
     [Networked] public TickTimer CountdownTimer { get; private set; }
-    [SerializeField, Min(1f)] private float matchDuration = 90f;
-    [Networked] public TickTimer MatchTimer { get; private set; }
     public int CountdownNumber
     {
         get
@@ -40,16 +38,6 @@ public class NetworkMatchManager : NetworkBehaviour
             float remaining =
                 CountdownTimer.RemainingTime(Runner) ?? 0f;
             return Mathf.Max(1, Mathf.CeilToInt(remaining));
-        }
-    }
-    public float MatchSecondsRemaining
-    {
-        get
-        {
-            if (State != NetworkMatchState.Playing)
-                return 0f;
-            float remaining = MatchTimer.RemainingTime(Runner) ?? 0f;
-            return Mathf.Max(0f, remaining);
         }
     }
 
@@ -69,7 +57,6 @@ public class NetworkMatchManager : NetworkBehaviour
         RefreshLeader();
         State = NetworkMatchState.WaitingForPlayers;
         CountdownTimer = TickTimer.None;
-        MatchTimer = TickTimer.None;
     }
 
     public override void FixedUpdateNetwork()
@@ -85,11 +72,7 @@ public class NetworkMatchManager : NetworkBehaviour
         else if (State == NetworkMatchState.Countdown)
             UpdateCountdown();
         else if (State == NetworkMatchState.Playing)
-        {
-            bool endedFromPlayerElim = TryEndMatchFromElimination();
-            if (!endedFromPlayerElim && MatchTimer.Expired(Runner))
-                EndMatch(PlayerRef.None);
-        }
+            TryEndMatchFromElimination();
     }
 
     private void TryBeginCountdown()
@@ -115,14 +98,12 @@ public class NetworkMatchManager : NetworkBehaviour
     private void BeginPlaying()
     {
         CountdownTimer = TickTimer.None;
-        MatchTimer = TickTimer.CreateFromSeconds(Runner, matchDuration);
         State = NetworkMatchState.Playing;
     }
 
     private void EndMatch(PlayerRef winner)
     {
         Winner = winner;
-        MatchTimer = TickTimer.None;
         State = NetworkMatchState.MatchOver;
     }
 

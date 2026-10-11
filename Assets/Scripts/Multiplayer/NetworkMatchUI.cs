@@ -43,10 +43,8 @@ public class NetworkMatchUI : NetworkBehaviour
         if (isCountingDown)
             countdownText.text = matchManager.CountdownNumber.ToString();
 
-        bool isPlaying = matchManager.State == NetworkMatchState.Playing;
-        SetActiveIfChanged(timerText.gameObject, isPlaying);
-        if (isPlaying)
-            timerText.text = matchManager.MatchSecondsRemaining.ToString("F1");
+        // Retained as the font/style source for runtime UI, never displayed as a match timer.
+        SetActiveIfChanged(timerText.gameObject, false);
 
         bool matchOver = matchManager.State == NetworkMatchState.MatchOver;
         SetActiveIfChanged(roundOverPanel, matchOver);

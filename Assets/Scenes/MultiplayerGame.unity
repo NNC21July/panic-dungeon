@@ -3039,6 +3039,8 @@ MonoBehaviour:
   useFixedRoomSeed: 1
   spawnTraps: 1
   roomSeed: 12345
+  spreadPlayerSpawns: 1
+  spreadSpawnPadding: 0.75
   additionalPlayerSpawns:
   - {fileID: 623303632}
   - {fileID: 2100000021}
@@ -4798,7 +4800,6 @@ MonoBehaviour:
   minimumPlayers: 2
   _State: 0
   countdownDuration: 3
-  matchDuration: 120
 --- !u!114 &1534750431
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -154,7 +154,7 @@ CircleCollider2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4104
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
@@ -378,7 +378,7 @@ MonoBehaviour:
   swordHitbox: {fileID: 1558956650081737702}
   damageableLayers:
     serializedVersion: 2
-    m_Bits: 4096
+    m_Bits: 4104
   _SwingTick: 0
 --- !u!114 &4097093076710487639
 MonoBehaviour:
@@ -394,7 +394,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkHealth
   _IsPoisoned:
     RawValue: 0
-  maxHealth: 100
+  maxHealth: 150
   arrowFeedbackTimeout: 0.75
   _CurrentHealth: 0
   _IsDead:
