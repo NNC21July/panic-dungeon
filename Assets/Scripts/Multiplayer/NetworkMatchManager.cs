@@ -143,6 +143,19 @@ public class NetworkMatchManager : NetworkBehaviour
         RPC_RequestRestart();
     }
 
+    public void NotifyRoomClosing()
+    {
+        if (Object.HasStateAuthority)
+            RPC_RoomClosing();
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable)]
+    private void RPC_RoomClosing()
+    {
+        if (!Runner.IsServer)
+            NetworkSessionBootstrap.Instance?.NoticeRoomClosed();
+    }
+
     private void RefreshLeader()
     {
         bool leaderConnected = false;

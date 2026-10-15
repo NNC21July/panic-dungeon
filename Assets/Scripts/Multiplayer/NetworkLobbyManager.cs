@@ -38,6 +38,19 @@ public class NetworkLobbyManager : NetworkBehaviour
         RefreshPlayers();
     }
 
+    public void NotifyRoomClosing()
+    {
+        if (Object.HasStateAuthority)
+            RPC_RoomClosing();
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable)]
+    private void RPC_RoomClosing()
+    {
+        if (!Runner.IsServer)
+            NetworkSessionBootstrap.Instance?.NoticeRoomClosed();
+    }
+
     public override void FixedUpdateNetwork()
     {
         if (Object.HasStateAuthority && !StartingGame)

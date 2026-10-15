@@ -15,6 +15,7 @@ public class NetworkMatchUI : NetworkBehaviour
     private NetworkMatchManager matchManager;
     private NetworkPerformanceUI performanceUI;
     private NetworkCharacterSelectionUI selectionUI;
+    private NetworkSessionUI sessionUI;
 
     private void Awake()
     {
@@ -28,6 +29,7 @@ public class NetworkMatchUI : NetworkBehaviour
         {
             performanceUI = NetworkPerformanceUI.Create(Runner, timerText);
             selectionUI = NetworkCharacterSelectionUI.Create(matchManager, timerText);
+            sessionUI = NetworkSessionUI.Create(Runner, timerText);
         }
         roundOverPanel.SetActive(false);
         darkOverlay.SetActive(false);
@@ -66,6 +68,8 @@ public class NetworkMatchUI : NetworkBehaviour
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        if (sessionUI != null)
+            Destroy(sessionUI.gameObject);
         if (performanceUI != null)
             Destroy(performanceUI.gameObject);
         if (selectionUI != null)

@@ -12,6 +12,7 @@ public class NetworkInputProvider : MonoBehaviour
     private bool resetAccumulatedButtons;
     private Vector2 aimDirection = Vector2.right;
     private Camera inputCamera;
+    private int suppressInputThroughFrame = -1;
 
     private void Awake()
     {
@@ -23,6 +24,11 @@ public class NetworkInputProvider : MonoBehaviour
 
     private void Update()
     {
+        if (!networkRunner.ProvideInput || Time.frameCount <= suppressInputThroughFrame)
+        {
+            accumulatedButtons = default;
+            return;
+        }
         if (resetAccumulatedButtons)
         {
             accumulatedButtons.Set(NetworkInputButton.Dash, false);
@@ -47,6 +53,11 @@ public class NetworkInputProvider : MonoBehaviour
 
     public void CollectInput(NetworkRunner runner, NetworkInput input)
     {
+        if (!runner.ProvideInput || Time.frameCount <= suppressInputThroughFrame)
+        {
+            input.Set(default(NetworkInputData));
+            return;
+        }
         if (!moveAction.action.enabled)
             moveAction.action.Enable();
 
@@ -58,6 +69,14 @@ public class NetworkInputProvider : MonoBehaviour
         };
         input.Set(inputData);
         resetAccumulatedButtons = true;
+    }
+
+    public void ClearMenuInput()
+    {
+        accumulatedButtons = default;
+        resetAccumulatedButtons = false;
+        // Do not turn the Cancel/Leave UI click into a sword attack on the next tick.
+        suppressInputThroughFrame = Time.frameCount + 1;
     }
 
     private void UpdateAimDirection()

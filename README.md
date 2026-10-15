@@ -167,7 +167,7 @@ flowchart TD
 <details>
 <summary>Session lifecycle and component connections</summary>
 
-1. **Create/join:** [NetworkLauncher](Assets/Scripts/Multiplayer/NetworkLauncher.cs) starts the bootstrap server-plus-client flow or connects a client using a room code.
+1. **Create/join:** [MainMenuUI](Assets/Scripts/UI/MainMenuUI.cs) collects a room code and create/join choice. [NetworkSessionBootstrap](Assets/Scripts/Multiplayer/NetworkSessionBootstrap.cs) consumes that request and starts the server-plus-client flow or connects a client. [NetworkLauncher](Assets/Scripts/Multiplayer/NetworkLauncher.cs) now only presents loading and the waiting lobby in MultiplayerSandbox; it no longer owns Create/Join controls.
 2. **Lobby:** [NetworkLobbyManager](Assets/Scripts/Multiplayer/NetworkLobbyManager.cs) tracks membership and spawned-player readiness. A leader requests Start; server-side checks authorize the scene transition.
 3. **Scene setup:** `GameSetup` generates the arena, configures bounds, and places spawn markers. [NetworkPlayerSpawner](Assets/Scripts/Multiplayer/NetworkPlayerSpawner.cs) discovers ordered markers and spawns/registers player objects on the server.
 4. **Selection:** `NetworkMatchManager` reserves unique colors and accepts ready requests. Everyone must be ready, with the minimum player count satisfied, before the countdown begins.
@@ -243,15 +243,16 @@ Docs/Media/       Gameplay screenshots and recording
 
 ### Choose an entry scene
 
-- **Single-player:** open [MainMenu](Assets/Scenes/MainMenu.unity); Play loads [Game](Assets/Scenes/Game.unity).
-- **Multiplayer:** open [MultiplayerSandbox](Assets/Scenes/MultiplayerSandbox.unity). The leader's Start Game request loads [MultiplayerGame](Assets/Scenes/MultiplayerGame.unity).
+- **Player entry:** open [MainMenu](Assets/Scenes/MainMenu.unity). Play opens Create/Join; either choice opens the room-code panel with the matching submit label. Submitting hands the connection request to [MultiplayerSandbox](Assets/Scenes/MultiplayerSandbox.unity), which remains the connection/lobby scene. The leader's Start Game request loads [MultiplayerGame](Assets/Scenes/MultiplayerGame.unity).
+- **Single-player testing:** open [Game](Assets/Scenes/Game.unity) directly. The main menu's Play button now enters multiplayer rather than single-player.
+- **Multiplayer editor testing:** opening `MultiplayerSandbox` directly retains its existing multi-peer development workflow.
 
-The current main menu is not a unified single-player/multiplayer launcher. Opening `MultiplayerGame` by itself does not replace runner/lobby startup.
+The room-code panel displays validation warnings and restores the previous code/mode with an error message after connection failure. Sessions entered through MainMenu return there when leaving/disconnecting. Opening `MultiplayerGame` by itself does not replace runner/lobby startup. The new menu flow still needs Unity runtime validation.
 
 ### Build and run
 
 1. Open Unity's Build Profiles and select the intended **Windows player** target. Check the profile/subtarget and installed support modules rather than assuming every saved local profile is ready for distribution.
-2. Verify the enabled scene list contains `MultiplayerSandbox`, `MainMenu`, `Game`, and `MultiplayerGame`. The current global list places `MultiplayerSandbox` first; select an appropriate first scene if intentionally building a single-player entry instead.
+2. Verify the enabled scene list contains `MainMenu`, `MultiplayerSandbox`, `Game`, and `MultiplayerGame`. The current global list places `MainMenu` first. Rebuild all test peers together after scene-list changes.
 3. Build into a separate output folder such as `Builds/MultiplayerTest`. Close running copies before rebuilding into that folder to avoid locked-file errors.
 4. Copy the **entire build output folder** to another Windows computer, not just the `.exe`.
 5. Run matching builds. Standalone startup uses manual Create Room / Join rather than automatically launching the editor's multi-peer test preset.
@@ -264,15 +265,19 @@ This documents the intended workflow from the checked configuration. A fresh cle
 
 1. On one computer, enter a room code and choose **Create Room**. That application runs both the server and the creator's client.
 2. On another, enter the same code and choose **Join**. Join all intended players before starting the match.
-3. The lobby leader selects **Start Game** once enough players have spawned.
+3. The lobby shows the room code, player count, and roster with **You** / **Leader** labels. Only the leader sees **Start Game**, enabled once enough players have spawned.
 4. Each player selects an available color and presses **Ready**. The countdown begins when everyone is ready.
 5. Play through elimination and have the leader restart after match over.
 
 Room admission closes when the game starts. Mid-match reconnect and host/server migration are not provided. Keep the creator's application running; a leader label transferring between clients does not keep a stopped server alive.
 
+**Leave Room / Leave Game** opens a confirmation. A guest leaves without closing the room; the computer running the server closes the session for everyone. The application returns to Create/Join, not to the desktop. A graceful creator exit displays a room-closed notice; an abrupt disconnect displays a generic connection-loss message. Failed connections also return to Create/Join for another attempt.
+
+This session UI/cleanup change has passed static compilation, but still needs Unity play-mode and multi-computer validation: check guest leave, creator leave, failed join followed by retry, and repeated create/leave cycles. In editor multi-peer testing, Close Local Session shuts down all runners owned by that bootstrap; use separate applications to test an independent guest leaving.
+
 ### Unity multi-peer testing
 
-Use `MultiplayerSandbox` and inspect its `FusionBootstrap` settings before entering Play mode. The development preset supports a non-playing server plus multiple local clients; set Start Mode to Manual when testing Create/Join explicitly. Bootstrap's additional-client controls can add local peers while the room is open.
+Use `MultiplayerSandbox` and inspect its `NetworkSessionBootstrap` settings before entering Play mode. This project-owned subclass retains Fusion's startup workflow and adds session cleanup. The development preset supports a non-playing server plus multiple local clients; test the player-facing Create/Join flow by starting from MainMenu instead. Its inspector's additional-client controls can add local peers while the room is open. Leaving or disconnecting returns to MainMenu even for editor-started sessions. MultiplayerSandbox contains only a loading panel and the runtime waiting-lobby UI, not a second set of Create/Join controls.
 
 Use **Network Runner Controls** to choose the visible client and the input-receiving client. The server is not a playable avatar. Each peer has its own scene/physics context, so seeing copies of player objects under multiple runners is expected.
 
@@ -348,9 +353,8 @@ These notes include historical checkpoint instructions. In particular, the origi
 
 ### Planned, not implemented
 
-- [ ] Expanded lobby roster and player identity display.
-- [ ] Leave-game confirmation, clean menu return, and improved connection-error recovery.
-- [ ] Server handoff/migration when the creator leaves; preserving the match requires more than electing a new leader.
+- [ ] Custom player names (the implemented lobby roster currently uses player numbers).
+- [ ] Server handoff/migration is deferred; creator departure closes the room instead.
 - [ ] Spectating after elimination.
 
 ### Known limitations
@@ -361,7 +365,7 @@ These notes include historical checkpoint instructions. In particular, the origi
 - Movement checks are bounded plausibility checks, not complete anti-cheat or full input replay.
 - Zombie pursuit has no obstacle pathfinding; melee/enemy timing still needs realistic latency evaluation.
 - Multiplayer uses matching fixed-seed scene generation rather than transferring arbitrary generated room layouts.
-- Session retry, late join/reconnect, and disconnect UI are incomplete.
+- Session retry and disconnect UI require runtime regression testing; mid-match join/reconnect is not implemented.
 - A configured maximum of ten players is not equivalent to ten-player validation.
 
 ## Contributions and AI assistance
