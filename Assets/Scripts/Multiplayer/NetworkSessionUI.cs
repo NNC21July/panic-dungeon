@@ -104,12 +104,14 @@ public class NetworkSessionUI : MonoBehaviour
         rows.Clear();
         foreach (PlayerRef player in players)
         {
-            rows.Append("Player ").Append(player.AsIndex + 1);
+            runner.TryGetPlayerObject(player, out NetworkObject obj);
+            NetworkPlayerIdentity identity = obj != null && obj.IsValid ? obj.GetComponent<NetworkPlayerIdentity>() : null;
+            rows.Append(identity != null ? identity.DisplayName : $"Player {player.AsIndex + 1}");
             if (player == runner.LocalPlayer)
                 rows.Append("  -  You");
             if (player == lobby.Leader)
                 rows.Append("  -  Leader");
-            if (!runner.TryGetPlayerObject(player, out NetworkObject obj) || obj == null || !obj.IsValid)
+            if (obj == null || !obj.IsValid)
                 rows.Append("  (loading)");
             rows.AppendLine();
         }

@@ -48,7 +48,7 @@ Move through a confined dungeon arena, dash away from danger, swing a sword at e
 - **Arena:** a generated tile-based room with non-overlapping obstacle placement. Single-player supports randomized layouts; the multiplayer scene currently uses a fixed room seed so peers generate matching geometry.
 - **Traps:** top and bottom spike patterns, left and right arrow patterns, warning indicators, and poison arrows. Difficulty increases by reducing configured trap/warning and enemy-spawn intervals toward minimum values.
 - **Zombies:** pursue living players, switch targets when another is meaningfully closer, attack within range, and darken/fade after death.
-- **Player identity:** ten exclusive color choices, animated selection feedback, and a shared ready count.
+- **Player identity:** locally remembered display names, networked lobby names and overhead nameplates, ten exclusive color choices, animated selection feedback, and a shared ready count. Names allow up to 16 letters/numbers, spaces, `_`, and `-`; duplicates are allowed and names are not authenticated accounts.
 - **PvP placement and collision:** padded, spread-out starting positions; players and zombies can pass through one another physically. Walls, obstacles, and spikes remain relevant to collision, while explicit combat checks still apply damage.
 - **Feedback:** damage flashes, dash particles, poison status, local camera feedback, health UI, and an FPS/ping readout.
 
@@ -353,7 +353,6 @@ These notes include historical checkpoint instructions. In particular, the origi
 
 ### Planned, not implemented
 
-- [ ] Custom player names (the implemented lobby roster currently uses player numbers).
 - [ ] Server handoff/migration is deferred; creator departure closes the room instead.
 - [ ] Spectating after elimination.
 

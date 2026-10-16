@@ -27,6 +27,7 @@ GameObject:
   - component: {fileID: 8034000000000000002}
   - component: {fileID: 8224023533266791270}
   - component: {fileID: 8224023533266791271}
+  - component: {fileID: 8224023533266791272}
   m_Layer: 3
   m_Name: NetworkPlayer
   m_TagString: Untagged
@@ -308,6 +309,7 @@ MonoBehaviour:
   - {fileID: -3169564537378372308}
   - {fileID: 8224023533266791270}
   - {fileID: 8224023533266791271}
+  - {fileID: 8224023533266791272}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7850645773688092266
 MonoBehaviour:
@@ -394,7 +396,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkHealth
   _IsPoisoned:
     RawValue: 0
-  maxHealth: 150
+  maxHealth: 300
   arrowFeedbackTimeout: 0.75
   _CurrentHealth: 0
   _IsDead:
@@ -477,6 +479,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a69f59112ad74ef096e7aa2a9c00effe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerSpikeHitReporter
+--- !u!114 &8224023533266791272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4898517791944016510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de91f20a78734c61b0c96f7877c26bc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerIdentity
+  _Username:
+    _length: 0
+    _data:
+      Data: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  labelHeight: 1.05
+  labelScale: 0.008
+  labelPadding: {x: 8, y: 3}
+  smoothTime: 0.04
 --- !u!1 &5688120884325480044
 GameObject:
   m_ObjectHideFlags: 0

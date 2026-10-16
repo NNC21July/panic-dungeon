@@ -62,12 +62,7 @@ public class NetworkCharacterSelectionUI : MonoBehaviour
             CanvasGroup cornerGroup = border.gameObject.AddComponent<CanvasGroup>();
             cornerGroup.alpha = 0f;
             cornerGroup.blocksRaycasts = false;
-            for (int x = -1; x <= 1; x += 2)
-                for (int y = -1; y <= 1; y += 2)
-                {
-                    MakeLine(border, new Vector2(x * 42f, y * 51f), new Vector2(20f, 2f));
-                    MakeLine(border, new Vector2(x * 51f, y * 42f), new Vector2(2f, 20f));
-                }
+            CornerBorderUI.Create(border, border.sizeDelta, 20f, 2f);
             TMP_Text label = MakeText("State", card, font, "", 16f, new Vector2(120f, 24f), new Vector2(0f, 55f));
             option.Configure(circle, graphic, shimmer, cornerGroup, label, button, CharacterColors.Get(i));
             options[i] = option;
@@ -142,10 +137,4 @@ public class NetworkCharacterSelectionUI : MonoBehaviour
         return text;
     }
 
-    private static void MakeLine(Transform parent, Vector2 position, Vector2 size)
-    {
-        Image image = MakeRect("Corner", parent, size, position).gameObject.AddComponent<Image>();
-        image.color = Color.white;
-        image.raycastTarget = false;
-    }
 }

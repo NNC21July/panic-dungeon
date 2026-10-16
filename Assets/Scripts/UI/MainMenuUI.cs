@@ -7,7 +7,7 @@ public class MainMenuUI : MonoBehaviour
 {
     [SerializeField] private GameObject controlsPanel, darkOverlay;
     [SerializeField] private GameObject playPanel, enterRoomCodePanel;
-    [SerializeField] private TMP_InputField roomCodeInput;
+    [SerializeField] private TMP_InputField roomCodeInput, usernameInput;
     [SerializeField] private Button roomSubmitButton;
     private TMP_Text roomStatus;
     private bool creating, connecting;
@@ -19,6 +19,11 @@ public class MainMenuUI : MonoBehaviour
         playPanel.SetActive(false);
         enterRoomCodePanel.SetActive(false);
         darkOverlay.SetActive(false);
+        usernameInput.characterLimit = PlayerDisplayName.MaxLength;
+        usernameInput.contentType = TMP_InputField.ContentType.Standard;
+        usernameInput.lineType = TMP_InputField.LineType.SingleLine;
+        usernameInput.textComponent.richText = false;
+        usernameInput.SetTextWithoutNotify(PlayerDisplayName.Saved);
         // Reuse the existing button's font so the connection message matches this menu.
         GameObject label = new GameObject("RoomStatus", typeof(RectTransform));
         label.transform.SetParent(enterRoomCodePanel.transform, false);
@@ -75,6 +80,17 @@ public class MainMenuUI : MonoBehaviour
         if (connecting)
             return;
         string code = roomCodeInput.text.Trim();
+        string username = PlayerDisplayName.Clean(usernameInput.text);
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            roomStatus.text = "Enter a username using letters or numbers.";
+            return;
+        }
+        if (username != usernameInput.text.Trim())
+        {
+            roomStatus.text = "Names may contain letters, numbers, spaces, _ and - only.";
+            return;
+        }
         if (string.IsNullOrWhiteSpace(code))
         {
             roomStatus.text = "Enter a room code first.";
@@ -91,6 +107,9 @@ public class MainMenuUI : MonoBehaviour
             return;
         }
         connecting = true;
+        PlayerDisplayName.Save(username);
+        usernameInput.SetTextWithoutNotify(username);
+        usernameInput.interactable = false;
         roomSubmitButton.interactable = false;
         roomCodeInput.interactable = false;
         roomStatus.text = creating ? "Creating room..." : "Joining room...";
