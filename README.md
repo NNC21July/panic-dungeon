@@ -66,7 +66,7 @@ Bindings are defined in [PlayerControls.inputactions](Assets/Input/PlayerControl
 
 ### Responsive movement with bounded server validation
 
-The owning client directly runs the existing movement and dash components. [NetworkPlayerMovementSync](Assets/Scripts/Multiplayer/NetworkPlayerMovementSync.cs) periodically reports position, dash information, a sequence number, and correction generation to the server. Its source default is 30 reports per second; this is a reporting cadence, not a rendering frame-rate limit.
+The owning client directly runs the existing movement and dash components. [NetworkPlayerMovementSync](Assets/Scripts/Multiplayer/Players/NetworkPlayerMovementSync.cs) periodically reports position, dash information, a sequence number, and correction generation to the server. Its source default is 30 reports per second; this is a reporting cadence, not a rendering frame-rate limit.
 
 The server checks report order, timestamps, finite coordinates, gameplay permissions, a capped travel allowance, and swept circle collision against configured walls/obstacles. It publishes accepted positions or issues a correction. Other clients interpolate accepted positions from Fusion snapshot buffers.
 
@@ -80,9 +80,9 @@ The arrow and spike reporters submit visible-contact evidence. The server valida
 
 Important implementations:
 
-- [NetworkPlayerArrowHitReporter](Assets/Scripts/Multiplayer/NetworkPlayerArrowHitReporter.cs) and [NetworkPlayerSpikeHitReporter](Assets/Scripts/Multiplayer/NetworkPlayerSpikeHitReporter.cs)
-- [PolygonContactDetector](Assets/Scripts/Combat/PolygonContactDetector.cs), [ContactHistory](Assets/Scripts/Combat/ContactHistory.cs), and [ContactRenderSample](Assets/Scripts/Multiplayer/ContactRenderSample.cs)
-- [NetworkArrow](Assets/Scripts/Multiplayer/NetworkArrow.cs) and [spike state handling](Assets/Scripts/Multiplayer/NetworkTrapDirector.Spikes.cs)
+- [NetworkPlayerArrowHitReporter](Assets/Scripts/Multiplayer/Traps/Contact/NetworkPlayerArrowHitReporter.cs) and [NetworkPlayerSpikeHitReporter](Assets/Scripts/Multiplayer/Traps/Contact/NetworkPlayerSpikeHitReporter.cs)
+- [PolygonContactDetector](Assets/Scripts/Combat/PolygonContactDetector.cs), [ContactHistory](Assets/Scripts/Combat/ContactHistory.cs), and [ContactRenderSample](Assets/Scripts/Multiplayer/Traps/Contact/ContactRenderSample.cs)
+- [NetworkArrow](Assets/Scripts/Multiplayer/Traps/NetworkArrow.cs) and [spike state handling](Assets/Scripts/Multiplayer/Traps/NetworkTrapDirector.Spikes.cs)
 
 <details>
 <summary>Contact workflow, observer previews, and limitations</summary>
@@ -94,7 +94,7 @@ Important implementations:
 5. Accepted damage changes server-owned health. Confirmation drives the existing health and damage-feedback systems.
 6. Other viewers can make a provisional presentation decision: hide an arrow or temporarily hold a spike at observed contact. These previews do not authorize damage.
 
-[TrapContactPreview](Assets/Scripts/Multiplayer/TrapContactPreview.cs) shares preview lifetime/target rules. [Arrow observers](Assets/Scripts/Multiplayer/NetworkArrow.Observers.cs) and [spike observers](Assets/Scripts/Multiplayer/NetworkTrapDirector.SpikeObservers.cs) implement the different visual responses. Rejection or timeout releases a preview; an arrow may reappear and a spike may require a correction.
+[TrapContactPreview](Assets/Scripts/Multiplayer/Traps/Contact/TrapContactPreview.cs) shares preview lifetime/target rules. [Arrow observers](Assets/Scripts/Multiplayer/Traps/NetworkArrow.Observers.cs) and [spike observers](Assets/Scripts/Multiplayer/Traps/NetworkTrapDirector.SpikeObservers.cs) implement the different visual responses. Rejection or timeout releases a preview; an arrow may reappear and a spike may require a correction.
 
 Spike previews hold the whole local spike, including its body, rather than an independently delayed sprite. This can affect local collision; proximity checks limit interference with the observing player's own contact handling.
 
@@ -111,13 +111,13 @@ Single-player gameplay helpers remain independent of Fusion. Multiplayer compone
 - [ZombieRules](Assets/Scripts/Enemies/ZombieRules.cs): pursuit, attack range/cooldown, and target-switch rules.
 - [ZombieDeathVisual](Assets/Scripts/Enemies/ZombieDeathVisual.cs): common death tint and fade presentation.
 - [StatusEffectTimer](Assets/Scripts/Traps/StatusEffects/StatusEffectTimer.cs): shared status-effect timing used with mode-specific time/authority handling.
-- [TrapController](Assets/Scripts/Traps/TrapController.cs): shared trap execution, with [SinglePlayerTrapDirector](Assets/Scripts/Traps/SinglePlayerTrapDirector.cs) and [NetworkTrapDirector](Assets/Scripts/Multiplayer/NetworkTrapDirector.cs) providing separate orchestration.
+- [TrapController](Assets/Scripts/Traps/TrapController.cs): shared trap execution, with [SinglePlayerTrapDirector](Assets/Scripts/Traps/SinglePlayerTrapDirector.cs) and [NetworkTrapDirector](Assets/Scripts/Multiplayer/Traps/NetworkTrapDirector.cs) providing separate orchestration.
 
 ### Server-managed enemies, matches, and player selection
 
-[NetworkEnemy](Assets/Scripts/Multiplayer/NetworkEnemy.cs) chooses the nearest living player, but retains its current target unless a challenger is closer by a configurable margin. This prevents rapid switching when two players are nearly equidistant. Damage uses server-side range/cooldown checks and an obstruction linecast. Movement is direct pursuit, not pathfinding around obstacles.
+[NetworkEnemy](Assets/Scripts/Multiplayer/Enemies/NetworkEnemy.cs) chooses the nearest living player, but retains its current target unless a challenger is closer by a configurable margin. This prevents rapid switching when two players are nearly equidistant. Damage uses server-side range/cooldown checks and an obstruction linecast. Movement is direct pursuit, not pathfinding around obstacles.
 
-[NetworkMatchManager](Assets/Scripts/Multiplayer/NetworkMatchManager.cs) controls color reservations, readiness, countdown, victory, and restart authorization. Clients request changes; the server checks the sender and current state. Disconnecting players release their colors, and active-player health determines the match outcome.
+[NetworkMatchManager](Assets/Scripts/Multiplayer/Match/NetworkMatchManager.cs) controls color reservations, readiness, countdown, victory, and restart authorization. Clients request changes; the server checks the sender and current state. Disconnecting players release their colors, and active-player health determines the match outcome.
 
 [PlayerSpawnRules](Assets/Scripts/Game/PlayerSpawnRules.cs) selects spread-out positions from safe candidates: first far from the center, then repeatedly maximizing distance to the nearest reserved spawn. [GameSetup](Assets/Scripts/Game/GameSetup.cs) supplies candidates with collider clearance and wall padding. This is a greedy spacing strategy, not a globally optimal placement solver.
 
@@ -167,12 +167,12 @@ flowchart TD
 <details>
 <summary>Session lifecycle and component connections</summary>
 
-1. **Create/join:** [MainMenuUI](Assets/Scripts/UI/MainMenuUI.cs) collects a room code and create/join choice. [NetworkSessionBootstrap](Assets/Scripts/Multiplayer/NetworkSessionBootstrap.cs) consumes that request and starts the server-plus-client flow or connects a client. [NetworkLauncher](Assets/Scripts/Multiplayer/NetworkLauncher.cs) now only presents loading and the waiting lobby in MultiplayerSandbox; it no longer owns Create/Join controls.
-2. **Lobby:** [NetworkLobbyManager](Assets/Scripts/Multiplayer/NetworkLobbyManager.cs) tracks membership and spawned-player readiness. A leader requests Start; server-side checks authorize the scene transition.
-3. **Scene setup:** `GameSetup` generates the arena, configures bounds, and places spawn markers. [NetworkPlayerSpawner](Assets/Scripts/Multiplayer/NetworkPlayerSpawner.cs) discovers ordered markers and spawns/registers player objects on the server.
+1. **Create/join:** [MainMenuUI](Assets/Scripts/UI/MainMenuUI.cs) collects a room code and create/join choice. [NetworkSessionBootstrap](Assets/Scripts/Multiplayer/Session/NetworkSessionBootstrap.cs) consumes that request and starts the server-plus-client flow or connects a client. [NetworkLauncher](Assets/Scripts/Multiplayer/Session/NetworkLauncher.cs) now only presents loading and the waiting lobby in MultiplayerSandbox; it no longer owns Create/Join controls.
+2. **Lobby:** [NetworkLobbyManager](Assets/Scripts/Multiplayer/Session/NetworkLobbyManager.cs) tracks membership and spawned-player readiness. A leader requests Start; server-side checks authorize the scene transition.
+3. **Scene setup:** `GameSetup` generates the arena, configures bounds, and places spawn markers. [NetworkPlayerSpawner](Assets/Scripts/Multiplayer/Players/NetworkPlayerSpawner.cs) discovers ordered markers and spawns/registers player objects on the server.
 4. **Selection:** `NetworkMatchManager` reserves unique colors and accepts ready requests. Everyone must be ready, with the minimum player count satisfied, before the countdown begins.
-5. **Play:** [NetworkPlayerGameplayGate](Assets/Scripts/Multiplayer/NetworkPlayerGameplayGate.cs) gates player action. The server runs traps/enemies; clients move locally and exchange input/reports/state with the server.
-6. **Feedback:** [NetworkHealth](Assets/Scripts/Multiplayer/NetworkHealth.cs) separates authoritative health changes from presentation. Local UI/camera binders select the correct player and runner. Sword contact can preview a zombie flash without predicting its death or changing HP.
+5. **Play:** [NetworkPlayerGameplayGate](Assets/Scripts/Multiplayer/Players/NetworkPlayerGameplayGate.cs) gates player action. The server runs traps/enemies; clients move locally and exchange input/reports/state with the server.
+6. **Feedback:** [NetworkHealth](Assets/Scripts/Multiplayer/Combat/NetworkHealth.cs) separates authoritative health changes from presentation. Local UI/camera binders select the correct player and runner. Sword contact can preview a zombie flash without predicting its death or changing HP.
 7. **End/restart:** the server declares the remaining living player the winner, or a draw at zero survivors. The current leader can request a scene reload after match over.
 
 Single-player uses [RoundManager](Assets/Scripts/Game/RoundManager.cs) and local health instead of the network match lifecycle. Its survival timer is separate from multiplayer's elimination-only rules.

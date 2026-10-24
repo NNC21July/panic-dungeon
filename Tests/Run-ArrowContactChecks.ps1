@@ -27,15 +27,15 @@ $assembly = Join-Path $output 'ArrowContactChecks.dll'
     (Join-Path $root 'Assets/Scripts/Enemies/ZombieRules.cs') `
     (Join-Path $root 'Assets/Scripts/Enemies/EnemySpawnRules.cs') `
     (Join-Path $root 'Assets/Scripts/Game/PlayerSpawnRules.cs') `
-    (Join-Path $root 'Assets/Scripts/Multiplayer/CharacterColors.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/Match/CharacterColors.cs') `
     (Join-Path $root 'Assets/Scripts/Traps/StatusEffects/StatusEffect.cs') `
     (Join-Path $root 'Assets/Scripts/Traps/StatusEffects/PoisonEffect.cs') `
     (Join-Path $root 'Assets/Scripts/Traps/StatusEffects/StatusEffectTimer.cs') `
-    (Join-Path $root 'Assets/Scripts/Multiplayer/ContactRenderSample.cs') `
-    (Join-Path $root 'Assets/Scripts/Multiplayer/PlayerContactSample.cs') `
-    (Join-Path $root 'Assets/Scripts/Multiplayer/NetworkSpikeState.cs') `
-    (Join-Path $root 'Assets/Scripts/Multiplayer/TrapContactPreview.cs') `
-    (Join-Path $root 'Assets/Scripts/Multiplayer/SpikeObserverHold.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/Traps/Contact/ContactRenderSample.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/Traps/Contact/PlayerContactSample.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/Traps/NetworkSpikeState.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/Traps/Contact/TrapContactPreview.cs') `
+    (Join-Path $root 'Assets/Scripts/Multiplayer/Traps/Contact/SpikeObserverHold.cs') `
     (Join-Path $PSScriptRoot 'SpikeContactChecks.cs') `
     (Join-Path $PSScriptRoot 'TrapContactPreviewChecks.cs') `
     (Join-Path $PSScriptRoot 'PoisonEffectChecks.cs') `
