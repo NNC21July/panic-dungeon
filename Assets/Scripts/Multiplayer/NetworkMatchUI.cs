@@ -16,11 +16,16 @@ public class NetworkMatchUI : NetworkBehaviour
     private NetworkPerformanceUI performanceUI;
     private NetworkCharacterSelectionUI selectionUI;
     private NetworkSessionUI sessionUI;
+    private NetworkSpectatorUI spectatorUI;
 
     private void Awake()
     {
         SerializedFieldValidator.Validate(this);
         matchManager = GetComponent<NetworkMatchManager>();
+        resultText.richText = false;
+        resultText.enableAutoSizing = true;
+        resultText.fontSizeMax = resultText.fontSize;
+        resultText.fontSizeMin = Mathf.Min(18f, resultText.fontSize);
     }
 
     public override void Spawned()
@@ -30,6 +35,7 @@ public class NetworkMatchUI : NetworkBehaviour
             performanceUI = NetworkPerformanceUI.Create(Runner, timerText);
             selectionUI = NetworkCharacterSelectionUI.Create(matchManager, timerText);
             sessionUI = NetworkSessionUI.Create(Runner, timerText);
+            spectatorUI = NetworkSpectatorUI.Create(matchManager, timerText);
         }
         roundOverPanel.SetActive(false);
         darkOverlay.SetActive(false);
@@ -57,10 +63,8 @@ public class NetworkMatchUI : NetworkBehaviour
 
         if (matchManager.Winner == PlayerRef.None)
             resultText.text = "Draw!";
-        else if (matchManager.Winner == Runner.LocalPlayer)
-            resultText.text = "You Win!";
         else
-            resultText.text = "You Lose!";
+            resultText.text = $"Winner is: {matchManager.WinnerName}";
 
         SetActiveIfChanged(restartButton.gameObject, matchManager.IsLocalLeader);
         restartButton.interactable = !matchManager.Restarting;
@@ -68,6 +72,8 @@ public class NetworkMatchUI : NetworkBehaviour
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        if (spectatorUI != null)
+            Destroy(spectatorUI.gameObject);
         if (sessionUI != null)
             Destroy(sessionUI.gameObject);
         if (performanceUI != null)

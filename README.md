@@ -342,6 +342,7 @@ These notes include historical checkpoint instructions. In particular, the origi
 - [x] Ten color choices with exclusive reservations and ready confirmation.
 - [x] Spread-out PvP spawns, character pass-through, and elimination-only matches.
 - [x] Leader restart requests and local FPS/ping display.
+- [x] Local spectator camera after elimination, screen-edge previous/next buttons, and a username caption. Targets automatically change when the watched player dies or disconnects; controls hide at match results.
 
 ### Ongoing validation and refinement
 
@@ -350,11 +351,11 @@ These notes include historical checkpoint instructions. In particular, the origi
 - [ ] Contact/feedback consistency under fast movement and network delay.
 - [ ] Clean-checkout build reproducibility and documented runtime test results.
 - [ ] Complete asset attribution and licensing verification.
+- [ ] Spectator runtime checks with at least three players: eliminate the local player, cycle both directions, eliminate/disconnect the watched player, and restart. Verify results hide the controls, the new match restores your own camera, and switching runner visibility does not mix player views.
 
 ### Planned, not implemented
 
 - [ ] Server handoff/migration is deferred; creator departure closes the room instead.
-- [ ] Spectating after elimination.
 
 ### Known limitations
 

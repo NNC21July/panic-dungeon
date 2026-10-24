@@ -17,6 +17,9 @@ public class NetworkMatchManager : NetworkBehaviour
     [Networked, OnChangedRender(nameof(HandleStateChanged))]
     public NetworkMatchState State { get; private set; }
     [Networked] public PlayerRef Winner { get; private set; }
+    [Networked] public NetworkString<_32> WinnerName { get; private set; }
+    [Networked] public int StartingPlayerCount { get; private set; }
+    [Networked] public int LivingPlayerCount { get; private set; }
     [Networked] public PlayerRef Leader { get; private set; }
     [Networked] public NetworkBool Restarting { get; private set; }
     [Networked, Capacity(10)] public NetworkArray<PlayerRef> ColorOwners => default;
@@ -49,6 +52,9 @@ public class NetworkMatchManager : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
         Winner = PlayerRef.None;
+        WinnerName = default;
+        StartingPlayerCount = 0;
+        LivingPlayerCount = 0;
         Leader = PlayerRef.None;
         Restarting = false;
         readyColors = 0;
@@ -97,6 +103,8 @@ public class NetworkMatchManager : NetworkBehaviour
 
     private void BeginPlaying()
     {
+        StartingPlayerCount = ConnectedPlayerCount;
+        LivingPlayerCount = StartingPlayerCount;
         CountdownTimer = TickTimer.None;
         State = NetworkMatchState.Playing;
     }
@@ -104,6 +112,15 @@ public class NetworkMatchManager : NetworkBehaviour
     private void EndMatch(PlayerRef winner)
     {
         Winner = winner;
+        WinnerName = default;
+        if (winner != PlayerRef.None)
+        {
+            NetworkPlayerIdentity identity = null;
+            if (Runner.TryGetPlayerObject(winner, out NetworkObject player) && player != null && player.IsValid)
+                identity = player.GetComponent<NetworkPlayerIdentity>();
+            // Preserve the result even if the winner leaves before others close the results.
+            WinnerName = identity != null ? identity.DisplayName : $"Player {winner.AsIndex + 1}";
+        }
         State = NetworkMatchState.MatchOver;
     }
 
@@ -125,6 +142,7 @@ public class NetworkMatchManager : NetworkBehaviour
             livingPlayers++;
             lastLivingPlayer = player;
         }
+        LivingPlayerCount = livingPlayers;
         if (livingPlayers > 1)
             return false;
 

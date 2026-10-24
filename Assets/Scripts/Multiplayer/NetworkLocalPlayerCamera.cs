@@ -4,18 +4,32 @@ using UnityEngine;
 
 public class NetworkLocalPlayerCamera : NetworkBehaviour
 {
+    private CinemachineCamera playerCamera;
+
     public override void Spawned()
     {
         if (!Object.HasInputAuthority)
             return;
 
-        CinemachineCamera playerCam = FindCameraInPlayerScene();
+        playerCamera = FindCameraInPlayerScene();
+        CinemachineCamera playerCam = playerCamera;
         if (playerCam == null)
             return;
 
         ConfigureImpulseChannel(playerCam);
         playerCam.Follow = transform;
         playerCam.gameObject.SetActive(true);
+    }
+
+    // Changes only this runner's camera, never the target player's input authority.
+    public void FollowTarget(Transform target)
+    {
+        if (Object == null || !Object.IsValid || !Object.HasInputAuthority)
+            return;
+        if (playerCamera == null)
+            playerCamera = FindCameraInPlayerScene();
+        if (playerCamera != null)
+            playerCamera.Follow = target;
     }
 
     private CinemachineCamera FindCameraInPlayerScene()
