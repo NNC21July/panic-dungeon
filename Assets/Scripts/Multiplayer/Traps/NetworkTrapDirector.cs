@@ -1,14 +1,15 @@
 using Fusion;
+using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject))]
 public partial class NetworkTrapDirector : NetworkBehaviour
 {
-    [SerializeField] private NetworkMatchManager matchManager;
-    [SerializeField] private TrapController trapController;
-    [SerializeField] private TrapSetup trapSetup;
-    [SerializeField] private NetworkObject networkArrowPrefab, networkPoisonArrowPrefab;
-    [SerializeField] private NetworkEnemySpawner enemySpawner;
+    [SerializeField, AllowNesting, Required] private NetworkMatchManager matchManager;
+    [SerializeField, AllowNesting, Required] private TrapController trapController;
+    [SerializeField, AllowNesting, Required] private TrapSetup trapSetup;
+    [SerializeField, AllowNesting, Required] private NetworkObject networkArrowPrefab, networkPoisonArrowPrefab;
+    [SerializeField, AllowNesting, Required] private NetworkEnemySpawner enemySpawner;
     [Networked] private NetworkBool TrapsRunning { get; set; }
     [Networked] private TrapPatternId ActivePattern { get; set; }
     [Networked] private float ActiveWarningDuration { get; set; }

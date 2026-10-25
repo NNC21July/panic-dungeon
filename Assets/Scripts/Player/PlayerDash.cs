@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,13 +7,15 @@ using UnityEngine.InputSystem;
 
 public class PlayerDash : MonoBehaviour
 {
-    [SerializeField] private PlayerTuning playerTuning;
-    [SerializeField] private ParticleSystem dustEffect;
+    [SerializeField, Required] private PlayerTuning playerTuning;
+    [SerializeField, Required] private ParticleSystem dustEffect;
     private Rigidbody2D rb;
     private PlayerMovement playerMovement;
     private Health health;
+    [ShowNonSerializedField]
     private bool isDashing = false, canDash = true;
     private Vector2 dashDirection;
+    [ShowNonSerializedField]
     private float dashTimer = 0f, cooldownTimer = 0f;
 
     private void Awake()

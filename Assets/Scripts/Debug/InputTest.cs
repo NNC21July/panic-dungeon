@@ -1,12 +1,13 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class InputTest : MonoBehaviour
 {
-    [SerializeField] private Health damageTarget;
-    [SerializeField] private RoundManager roundManager;
-    [SerializeField] private PlayerReset playerReset;
+    [SerializeField, Required] private Health damageTarget;
+    [SerializeField, Required] private RoundManager roundManager;
+    [SerializeField, Required] private PlayerReset playerReset;
     [SerializeField] private float debugDamage = 25f;
 
     private void Awake()
@@ -29,6 +30,7 @@ public class InputTest : MonoBehaviour
             playerReset.ResetAt(new Vector2(0, 0));
     }
 
+    [NaughtyAttributes.Button("Damage Target", EButtonEnableMode.Playmode)]
     private void DamageTarget()
     {
         if (damageTarget == null)

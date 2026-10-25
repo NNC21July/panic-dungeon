@@ -1,13 +1,15 @@
 using System;
 using TMPro;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HealthUI : MonoBehaviour
 {
+    [Tooltip("Single-player reference. Multiplayer assigns the viewed player at runtime; leave empty there.")]
     [SerializeField] private Health playerHealth;
-    [SerializeField] private Slider healthSlider;
-    [SerializeField] private TMP_Text healthText;
+    [SerializeField, Required] private Slider healthSlider;
+    [SerializeField, Required] private TMP_Text healthText;
     private NetworkHealth networkHealth;
 
     private void Awake()

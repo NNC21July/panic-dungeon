@@ -1,10 +1,11 @@
+using NaughtyAttributes;
 using UnityEngine;
 using System;
 
 public class PoisonArrow : Arrow
 {
     [SerializeField, Min(0.01f)] private float duration, tickInterval, tickDamage;
-    [SerializeField] private ParticleSystem poisonSplash;
+    [SerializeField, Required] private ParticleSystem poisonSplash;
     public Action<Vector2> SplashHandler { get; set; }
 
     protected override void OnSuccessfulHit(Collider2D other, Vector2 impactPos)

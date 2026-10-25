@@ -1,21 +1,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class ArrowShooter : MonoBehaviour
 {
-    [SerializeField] private Arrow arrowPrefab;
-    [SerializeField] private PoisonArrow poisonArrowPrefab;
-    [SerializeField, Range(0f, 1f)] private float poisonArrowChance = 0.2f;
-    [SerializeField] private Color warningFlashColor;
-    [SerializeField] private SpriteRenderer warningLine;
-    [SerializeField, Range(0f, 1f)] private float warningLineAlpha = 0.75f;
-    [SerializeField] private AudioClip fireSfx;
-    [SerializeField] private Sprite chevronSprite;
-    [SerializeField, Min(0.01f)] private float chevronSpacing = 1f, chevronSpeed = 4f;
-    [SerializeField] private Color chevronColor = Color.white;
+    [SerializeField, BoxGroup("Projectiles"), Required] private Arrow arrowPrefab;
+    [SerializeField, BoxGroup("Projectiles"), Required] private PoisonArrow poisonArrowPrefab;
+    [SerializeField, BoxGroup("Projectiles"), Range(0f, 1f)] private float poisonArrowChance = 0.2f;
+    [SerializeField, BoxGroup("Warning")] private Color warningFlashColor;
+    [SerializeField, BoxGroup("Warning"), Required] private SpriteRenderer warningLine;
+    [SerializeField, BoxGroup("Warning"), Range(0f, 1f)] private float warningLineAlpha = 0.75f;
+    [SerializeField, BoxGroup("Audio"), Required] private AudioClip fireSfx;
+    [SerializeField, BoxGroup("Chevrons"), Required] private Sprite chevronSprite;
+    [SerializeField, BoxGroup("Chevrons"), Min(0.01f)] private float chevronSpacing = 1f, chevronSpeed = 4f;
+    [SerializeField, BoxGroup("Chevrons")] private Color chevronColor = Color.white;
     private SpriteRenderer spriteRenderer;
     private Color originalColor, warningLineOriginalColor;
     private Vector2 fireDirection;
@@ -25,6 +26,7 @@ public class ArrowShooter : MonoBehaviour
     private readonly List<SpriteRenderer> chevrons = new();
     private float localWarningLineLength, chevronStartX, chevronOffset, actualChevronSpacing;
     private int chevronCount;
+    [ShowNativeProperty]
     public bool IsActive => isActive;
     public event Action<Arrow> ArrowSpawned;
     public bool CanSpawnArrows { get; set; } = true;

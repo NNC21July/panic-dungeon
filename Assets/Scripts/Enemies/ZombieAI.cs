@@ -1,10 +1,11 @@
+using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Health))]
 public class ZombieAI : MonoBehaviour
 {
-    [SerializeField] private ZombieTuning zombieTuning;
+    [SerializeField, Required] private ZombieTuning zombieTuning;
     [SerializeField, Min(0.1f)] private float deathFadeDuration = 0.5f;
     [SerializeField, Range(0f, 1f)] private float deathBrightness = 0.6f;
     private ZombieDeathVisual deathVisual;

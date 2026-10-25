@@ -1,28 +1,25 @@
+using NaughtyAttributes;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "RoomConfig", menuName = "Scriptable Objects/RoomConfig")]
 public class RoomConfig : ScriptableObject
 {
-    [Header("Room")]
-    [SerializeField, Min(4)] private int roomWidth = 14;
-    [SerializeField, Min(4)] private int roomHeight = 8;
-    [SerializeField, Min(0.1f)] private float tileSize = 1f;
-    [SerializeField, Min(0)] private int edgePadding = 2;
+    [SerializeField, BoxGroup("Room"), Min(4)] private int roomWidth = 14;
+    [SerializeField, BoxGroup("Room"), Min(4)] private int roomHeight = 8;
+    [SerializeField, BoxGroup("Room"), Min(0.1f)] private float tileSize = 1f;
+    [SerializeField, BoxGroup("Room"), Min(0)] private int edgePadding = 2;
 
-    [Header("Spikes")]
-    [SerializeField, Min(0.1f)] private float spikeWidth = 1f;
+    [SerializeField, BoxGroup("Spikes"), Min(0.1f)] private float spikeWidth = 1f;
 
-    [Header("Arrow Shooters")]
-    [SerializeField, Min(0.1f)] private float arrowShooterSpacing = 1f;
+    [SerializeField, BoxGroup("Arrow Shooters"), Min(0.1f)] private float arrowShooterSpacing = 1f;
 
-    [Header("Obstacles")]
-    [SerializeField]
+    [SerializeField, BoxGroup("Obstacles")]
     private Vector2 obstacleSize = Vector2.one;
 
-    [SerializeField, Min(0)]
+    [SerializeField, BoxGroup("Obstacles"), Min(0)]
     private int minObstacleCount = 6;
 
-    [SerializeField, Min(0)]
+    [SerializeField, BoxGroup("Obstacles"), Min(0)]
     private int maxObstacleCount = 9;
 
     public int RoomWidth => roomWidth;

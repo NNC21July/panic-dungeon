@@ -1,10 +1,11 @@
 using System.Collections;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HazardWarningUI : MonoBehaviour
 {
-    [SerializeField] private Image spikeWarningIcon;
+    [SerializeField, Required] private Image spikeWarningIcon;
     [SerializeField, Min(0.01f)] private float flashDuration = 0.4f;
     private Coroutine spikeFlashCoroutine;
 

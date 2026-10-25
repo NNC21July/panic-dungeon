@@ -1,16 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [SerializeField] private ZombieAI zombiePrefab;
-    [SerializeField] private RoomGenerator roomGen;
-    [SerializeField] private float spawnDelay = 10f;
-    [SerializeField] private int maxEnemiesAlive = 4;
-    [SerializeField] private Transform player;
-    [SerializeField, Min(0f)] private float minSpawnDist = 3f, spawnPadding = 0.1f;
-    [SerializeField] private LayerMask blockedSpawnLayers;
+    [SerializeField, BoxGroup("References"), Required] private ZombieAI zombiePrefab;
+    [SerializeField, BoxGroup("References"), Required] private RoomGenerator roomGen;
+    [SerializeField, BoxGroup("Spawning")] private float spawnDelay = 10f;
+    [SerializeField, BoxGroup("Spawning")] private int maxEnemiesAlive = 4;
+    [SerializeField, BoxGroup("References"), Required] private Transform player;
+    [SerializeField, BoxGroup("Spawning"), Min(0f)] private float minSpawnDist = 3f, spawnPadding = 0.1f;
+    [SerializeField, BoxGroup("Spawning")] private LayerMask blockedSpawnLayers;
     private bool spawning = false, spawnPaused;
     private float zombieSpawnCheckRadius;
     private Coroutine spawnCoroutine;

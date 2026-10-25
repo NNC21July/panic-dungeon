@@ -1,8 +1,9 @@
+using NaughtyAttributes;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    [SerializeField] private AudioSource generalSfxSource, trapSfxSource;
+    [SerializeField, Required] private AudioSource generalSfxSource, trapSfxSource;
     public static AudioManager Instance { get; private set; }
 
     private void Awake()

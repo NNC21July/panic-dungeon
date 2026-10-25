@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class TrapSetup : MonoBehaviour
 {
-    [SerializeField] private RoomGenerator roomGen;
-    [SerializeField] private Spike spikePrefab;
-    [SerializeField] private ArrowShooter arrowShooterPrefab;
+    [SerializeField, Required] private RoomGenerator roomGen;
+    [SerializeField, Required] private Spike spikePrefab;
+    [SerializeField, Required] private ArrowShooter arrowShooterPrefab;
     private List<Spike> topSpikes, bottomSpikes;
     private List<ArrowShooter> leftArrowShooters, rightArrowShooters;
     public int RoomWidth => roomGen.Config.RoomWidth;

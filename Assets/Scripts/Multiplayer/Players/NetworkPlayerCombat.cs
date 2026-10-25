@@ -1,4 +1,5 @@
 using Fusion;
+using NaughtyAttributes;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -6,11 +7,11 @@ using System.Collections.Generic;
 [RequireComponent(typeof(NetworkPlayerGameplayGate))]
 public class NetworkPlayerCombat : NetworkBehaviour
 {
-    [SerializeField] private PlayerTuning playerTuning;
-    [SerializeField] private Transform swordPivot;
-    [SerializeField] private TrailRenderer swordTrail;
-    [SerializeField] private SpriteRenderer swordRenderer;
-    [SerializeField] private BoxCollider2D swordHitbox;
+    [SerializeField, AllowNesting, Required] private PlayerTuning playerTuning;
+    [SerializeField, AllowNesting, Required] private Transform swordPivot;
+    [SerializeField, AllowNesting, Required] private TrailRenderer swordTrail;
+    [SerializeField, AllowNesting, Required] private SpriteRenderer swordRenderer;
+    [SerializeField, AllowNesting, Required] private BoxCollider2D swordHitbox;
     [SerializeField] private LayerMask damageableLayers;
     [Networked] private bool IsAttacking { get; set; }
     [Networked] private float AttackTimer { get; set; }

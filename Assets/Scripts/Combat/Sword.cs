@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
 public class Sword : MonoBehaviour
 {
-    [SerializeField] private PlayerTuning playerTuning;
-    [SerializeField] private TrailRenderer swingTrail;
+    [SerializeField, Required] private PlayerTuning playerTuning;
+    [SerializeField, Required] private TrailRenderer swingTrail;
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D swordCollider;
     private GameObject owner;

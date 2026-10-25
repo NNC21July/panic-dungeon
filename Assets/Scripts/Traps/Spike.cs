@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
@@ -10,14 +11,14 @@ using UnityEngine;
 public class Spike : MonoBehaviour
 {
     private static readonly WaitForFixedUpdate FixedUpdateWait = new WaitForFixedUpdate();
-    [SerializeField, Min(0.01f)] private float moveDuration = 5f;
-    [SerializeField, Min(0f)] private float damageAmount = 25f, minLaneOverlap = 0f;
-    [SerializeField] private Color warningFlashColor;
-    [SerializeField] private ParticleSystem impactEffect;
-    [SerializeField] private AudioClip impactSfx;
-    [SerializeField] private Collider2D solidTipCollider;
-    [SerializeField] private Transform tipPoint;
-    [SerializeField] private SpriteRenderer pillarBody;
+    [SerializeField, BoxGroup("Movement and Damage"), Min(0.01f)] private float moveDuration = 5f;
+    [SerializeField, BoxGroup("Movement and Damage"), Min(0f)] private float damageAmount = 25f, minLaneOverlap = 0f;
+    [SerializeField, BoxGroup("Feedback")] private Color warningFlashColor;
+    [SerializeField, BoxGroup("Feedback"), Required] private ParticleSystem impactEffect;
+    [SerializeField, BoxGroup("Feedback"), Required] private AudioClip impactSfx;
+    [SerializeField, BoxGroup("Body References"), Required] private Collider2D solidTipCollider;
+    [SerializeField, BoxGroup("Body References"), Required] private Transform tipPoint;
+    [SerializeField, BoxGroup("Body References"), Required] private SpriteRenderer pillarBody;
     private Vector2 originPos, targetPos, blockedAt = new Vector2(0, 0);
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
@@ -33,13 +34,19 @@ public class Spike : MonoBehaviour
     private RigidbodyInterpolation2D originalInterpolation;
     public Vector2 BodyPosition => rb.position;
     public PolygonCollider2D DamageCollider => spikeCollider;
+    [ShowNativeProperty]
     public bool IsWarning => isWarning;
+    [ShowNativeProperty]
     public bool IsAttacking => isAttacking;
+    [ShowNativeProperty]
     public bool IsRetracting => isRetracting;
+    [ShowNativeProperty]
     public bool IsCycleActive => isCycleActive;
+    [ShowNativeProperty]
     public bool IsBlocked => isBlocked;
     public bool IsSolid => solidTipCollider.enabled;
     public float WarningBlend => warningBlend;
+    [ShowNativeProperty]
     public int ImpactCount => impactCount;
     public float MoveDuration => moveDuration;
     public float BlockedPathProgress => blockedPathProgress;

@@ -1,21 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class RoomGenerator : MonoBehaviour
 {
-    [SerializeField] private RoomConfig roomConfig;
+    [SerializeField, Required] private RoomConfig roomConfig;
 
     [Header("Tilemaps")]
-    [SerializeField] private Tilemap floorTilemap;
-    [SerializeField] private Tilemap wallTilemap;
-    [SerializeField] private TileBase floorTile;
-    [SerializeField] private TileBase wallTile;
-    [SerializeField] private Grid roomGrid;
+    [SerializeField, Required] private Tilemap floorTilemap;
+    [SerializeField, Required] private Tilemap wallTilemap;
+    [SerializeField, Required] private TileBase floorTile;
+    [SerializeField, Required] private TileBase wallTile;
+    [SerializeField, Required] private Grid roomGrid;
 
     [Header("Obstacles")]
-    [SerializeField] private GameObject obstaclePrefab;
+    [SerializeField, Required] private GameObject obstaclePrefab;
 
     private int startX, startY, endX, endY;
     private readonly List<Vector2> floorPos = new();
@@ -30,7 +31,7 @@ public class RoomGenerator : MonoBehaviour
     public Vector2 OuterBotLeft { get; private set; }
     public Vector2 OuterTopRight { get; private set; }
 
-    [SerializeField] private GameObject openFloorDebugPrefab;
+    [SerializeField, Required] private GameObject openFloorDebugPrefab;
     [SerializeField] private bool showOpenFloorDebug;
     private readonly List<GameObject> openFloorDebugMarkers = new();
 

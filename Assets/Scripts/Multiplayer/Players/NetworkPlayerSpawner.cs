@@ -1,10 +1,11 @@
 using Fusion;
+using NaughtyAttributes;
 using UnityEngine;
 using System.Collections.Generic;
 
 public class NetworkPlayerSpawner : SimulationBehaviour, IPlayerJoined, IPlayerLeft, ISceneLoadStart, ISceneLoadDone
 {
-    [SerializeField] private NetworkObject playerPrefab;
+    [SerializeField, AllowNesting, Required] private NetworkObject playerPrefab;
     private Transform[] spawnPoints = System.Array.Empty<Transform>();
     private readonly Dictionary<PlayerRef, int> spawnAssignment = new();
 

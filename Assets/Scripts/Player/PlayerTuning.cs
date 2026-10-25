@@ -1,26 +1,24 @@
+using NaughtyAttributes;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "PlayerTuning", menuName = "Scriptable Objects/PlayerTuning")]
 public class PlayerTuning : ScriptableObject
 {
-    [Header("Movement")]
-    [SerializeField, Min(0f)] private float moveSpeed = 5f, acceleration = 75f, deceleration = 50f;
+    [SerializeField, BoxGroup("Movement"), Min(0f)] private float moveSpeed = 5f, acceleration = 75f, deceleration = 50f;
 
-    [Header("Dash")]
-    [SerializeField, Min(0f)] private float dashSpeed = 22f;
-    [SerializeField, Min(0.01f)] private float dashDuration = 0.15f;
-    [SerializeField, Min(0f)] private float dashCooldown = 1f;
-    [SerializeField] private AnimationCurve dashSpeedCurve = new AnimationCurve(
+    [SerializeField, BoxGroup("Dash"), Min(0f)] private float dashSpeed = 22f;
+    [SerializeField, BoxGroup("Dash"), Min(0.01f)] private float dashDuration = 0.15f;
+    [SerializeField, BoxGroup("Dash"), Min(0f)] private float dashCooldown = 1f;
+    [SerializeField, BoxGroup("Dash")] private AnimationCurve dashSpeedCurve = new AnimationCurve(
         new Keyframe(0f, 1.398873f, 0f, 0f),
         new Keyframe(1.0074735f, 0.25000653f, 0f, 0f)
     );
 
-    [Header("Combat")]
-    [SerializeField, Min(0f)] private float swingAngle = 120f;
-    [SerializeField, Min(0.01f)] private float swingDuration = 0.3f;
-    [SerializeField, Min(0f)] private float attackCooldown = 0.45f;
-    [SerializeField, Min(0f)] private float swordDamage = 35f;
-    [SerializeField] private AnimationCurve swingCurve = new AnimationCurve(
+    [SerializeField, BoxGroup("Combat"), Min(0f)] private float swingAngle = 120f;
+    [SerializeField, BoxGroup("Combat"), Min(0.01f)] private float swingDuration = 0.3f;
+    [SerializeField, BoxGroup("Combat"), Min(0f)] private float attackCooldown = 0.45f;
+    [SerializeField, BoxGroup("Combat"), Min(0f)] private float swordDamage = 35f;
+    [SerializeField, BoxGroup("Combat")] private AnimationCurve swingCurve = new AnimationCurve(
         new Keyframe(0f, 0f, 0f, 0f),
         new Keyframe(0.49997303f, 0.65056086f, 1f, 1f),
         new Keyframe(1f, 1f, 0f, 0f)

@@ -1,11 +1,12 @@
 using System;
+using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class Arrow : MonoBehaviour
 {
     [SerializeField, Min(0.01f)] private float speed = 10f, damageAmount = 20f;
-    [SerializeField] private AudioClip hitSfx;
+    [SerializeField, Required] private AudioClip hitSfx;
     private Rigidbody2D rb;
     private Vector2 travelDirection;
     private bool isInit = false, hasHit = false, hasDealtDamage = false;

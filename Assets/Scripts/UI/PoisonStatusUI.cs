@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using TMPro;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class PoisonStatusUI : MonoBehaviour
 {
+    [Tooltip("Single-player reference. Multiplayer assigns the viewed player at runtime; leave empty there.")]
     [SerializeField] private StatusEffectController statusEffectController;
-    [SerializeField] private TMP_Text poisonStatusTxt;
+    [SerializeField, Required] private TMP_Text poisonStatusTxt;
     [SerializeField, Min(0.01f)] private float flashColorDuration;
     [SerializeField] private Color flashColor;
     private Coroutine flashColorCoroutine;

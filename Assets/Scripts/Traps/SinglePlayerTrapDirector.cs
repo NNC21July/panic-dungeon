@@ -1,10 +1,12 @@
 using System.Collections;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class SinglePlayerTrapDirector : MonoBehaviour
 {
-    [SerializeField] private TrapController trapController;
-    [SerializeField] private EnemySpawner enemySpawner;
+    [SerializeField, Required] private TrapController trapController;
+    [SerializeField, Required] private EnemySpawner enemySpawner;
+    [ShowNonSerializedField]
     private bool roundActive = false;
     private Coroutine trapCoroutine, diffScaleCoroutine;
 

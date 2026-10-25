@@ -1,4 +1,5 @@
 using Fusion;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -6,7 +7,7 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(NetworkRunner))]
 public class NetworkInputProvider : MonoBehaviour
 {
-    [SerializeField] private InputActionReference moveAction, dashAction, attackAction;
+    [SerializeField, Required] private InputActionReference moveAction, dashAction, attackAction;
     private NetworkRunner networkRunner;
     private NetworkButtons accumulatedButtons;
     private bool resetAccumulatedButtons;

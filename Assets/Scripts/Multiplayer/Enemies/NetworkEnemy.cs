@@ -1,4 +1,5 @@
 using Fusion;
+using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject))]
@@ -8,7 +9,7 @@ using UnityEngine;
 [RequireComponent(typeof(CircleCollider2D))]
 public class NetworkEnemy : NetworkBehaviour
 {
-    [SerializeField] private ZombieTuning zombieTuning;
+    [SerializeField, AllowNesting, Required] private ZombieTuning zombieTuning;
     [SerializeField, Min(0.1f)] private float deathFadeDuration = 0.5f;
     [SerializeField, Range(0f, 1f)] private float deathBrightness = 0.35f;
     private Rigidbody2D rb;

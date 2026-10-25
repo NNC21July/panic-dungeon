@@ -1,17 +1,18 @@
 using Fusion;
 using TMPro;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(NetworkMatchManager))]
 public class NetworkMatchUI : NetworkBehaviour
 {
-    [SerializeField] private TMP_Text resultText;
-    [SerializeField] private GameObject roundOverPanel;
-    [SerializeField] private GameObject darkOverlay;
-    [SerializeField] private Button restartButton;
-    [SerializeField] private TMP_Text countdownText;
-    [SerializeField] private TMP_Text timerText;
+    [SerializeField, AllowNesting, Required] private TMP_Text resultText;
+    [SerializeField, AllowNesting, Required] private GameObject roundOverPanel;
+    [SerializeField, AllowNesting, Required] private GameObject darkOverlay;
+    [SerializeField, AllowNesting, Required] private Button restartButton;
+    [SerializeField, AllowNesting, Required] private TMP_Text countdownText;
+    [SerializeField, AllowNesting, Required] private TMP_Text timerText;
     private NetworkMatchManager matchManager;
     private NetworkPerformanceUI performanceUI;
     private NetworkCharacterSelectionUI selectionUI;

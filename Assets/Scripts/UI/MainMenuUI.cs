@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -5,10 +6,10 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuUI : MonoBehaviour
 {
-    [SerializeField] private GameObject controlsPanel, darkOverlay;
-    [SerializeField] private GameObject playPanel, enterRoomCodePanel;
-    [SerializeField] private TMP_InputField roomCodeInput, usernameInput;
-    [SerializeField] private Button roomSubmitButton;
+    [SerializeField, Required] private GameObject controlsPanel, darkOverlay;
+    [SerializeField, Required] private GameObject playPanel, enterRoomCodePanel;
+    [SerializeField, Required] private TMP_InputField roomCodeInput, usernameInput;
+    [SerializeField, Required] private Button roomSubmitButton;
     private TMP_Text roomStatus;
     private bool creating, connecting;
 

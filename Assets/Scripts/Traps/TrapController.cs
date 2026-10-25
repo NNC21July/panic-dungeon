@@ -1,23 +1,24 @@
 using System.Collections;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class TrapController : MonoBehaviour
 {
-    [SerializeField, Min(0.01f)] private float initSpikeInterval = 3f;
-    [SerializeField, Min(0.01f)] private float minSpikeInterval = 0.5f;
-    [SerializeField, Min(0.01f)] private float spikeIntervalReduction = 0.2f;
-    [SerializeField, Min(0.01f)] private float initWarningDuration = 3f;
-    [SerializeField, Min(0.01f)] private float minWarningDuration = 0.9f;
-    [SerializeField, Min(0.01f)] private float warningDurationReduction = 0.1f;
-    [SerializeField, Min(0.01f)] private float warningFlashDuration = 0.5f;
-    [SerializeField, Min(0.01f)] private float spikeRetractDelay = 2f;
-    [SerializeField, Min(0.01f)] private float initEnemySpawnInterval = 5f;
-    [SerializeField, Min(0.01f)] private float minEnemySpawnInterval = 1.5f;
-    [SerializeField, Min(0.01f)] private float enemySpawnIntervalReduction = 0.1f;
-    [SerializeField, Min(0.01f)] private float diffScaleInterval = 6f;
-    [SerializeField] private AudioClip warningSfx;
-    [SerializeField] private TrapSetup trapSetup;
-    [SerializeField] private HazardWarningUI hazardWarningUI;
+    [SerializeField, BoxGroup("Pattern Timing"), Min(0.01f)] private float initSpikeInterval = 3f;
+    [SerializeField, BoxGroup("Pattern Timing"), Min(0.01f)] private float minSpikeInterval = 0.5f;
+    [SerializeField, BoxGroup("Pattern Timing"), Min(0.01f)] private float spikeIntervalReduction = 0.2f;
+    [SerializeField, BoxGroup("Warning"), Min(0.01f)] private float initWarningDuration = 3f;
+    [SerializeField, BoxGroup("Warning"), Min(0.01f)] private float minWarningDuration = 0.9f;
+    [SerializeField, BoxGroup("Warning"), Min(0.01f)] private float warningDurationReduction = 0.1f;
+    [SerializeField, BoxGroup("Warning"), Min(0.01f)] private float warningFlashDuration = 0.5f;
+    [SerializeField, BoxGroup("Pattern Timing"), Min(0.01f)] private float spikeRetractDelay = 2f;
+    [SerializeField, BoxGroup("Enemy Spawning"), Min(0.01f)] private float initEnemySpawnInterval = 5f;
+    [SerializeField, BoxGroup("Enemy Spawning"), Min(0.01f)] private float minEnemySpawnInterval = 1.5f;
+    [SerializeField, BoxGroup("Enemy Spawning"), Min(0.01f)] private float enemySpawnIntervalReduction = 0.1f;
+    [SerializeField, BoxGroup("Difficulty"), Min(0.01f)] private float diffScaleInterval = 6f;
+    [SerializeField, BoxGroup("Warning"), Required] private AudioClip warningSfx;
+    [SerializeField, BoxGroup("References"), Required] private TrapSetup trapSetup;
+    [SerializeField, BoxGroup("References"), Required] private HazardWarningUI hazardWarningUI;
     private Coroutine commandedPatternCoroutine;
     private DifficultyScaler difficultyScaler;
     private SpikePattern topSpikes, bottomSpikes;

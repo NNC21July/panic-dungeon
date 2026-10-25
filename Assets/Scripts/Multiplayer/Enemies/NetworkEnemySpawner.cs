@@ -1,16 +1,17 @@
 using System.Collections.Generic;
 using Fusion;
+using NaughtyAttributes;
 using UnityEngine;
 
 // Called by the server's NetworkTrapDirector tick; clients never run an independent spawn loop.
 public class NetworkEnemySpawner : MonoBehaviour
 {
-    [SerializeField] private NetworkObject zombiePrefab;
-    [SerializeField] private RoomGenerator roomGen;
-    [SerializeField, Min(0f)] private float spawnDelay = 10f;
-    [SerializeField, Min(1)] private int maxEnemiesAlive = 10;
-    [SerializeField, Min(0f)] private float minSpawnDist = 3f, spawnPadding = 0.1f;
-    [SerializeField] private LayerMask blockedSpawnLayers;
+    [SerializeField, BoxGroup("References"), Required] private NetworkObject zombiePrefab;
+    [SerializeField, BoxGroup("References"), Required] private RoomGenerator roomGen;
+    [SerializeField, BoxGroup("Spawning"), Min(0f)] private float spawnDelay = 10f;
+    [SerializeField, BoxGroup("Spawning"), Min(1)] private int maxEnemiesAlive = 10;
+    [SerializeField, BoxGroup("Spawning"), Min(0f)] private float minSpawnDist = 3f, spawnPadding = 0.1f;
+    [SerializeField, BoxGroup("Spawning")] private LayerMask blockedSpawnLayers;
     private readonly List<NetworkObject> activeEnemies = new();
     private readonly List<Vector2> playerPositions = new();
     private TickTimer nextSpawn;

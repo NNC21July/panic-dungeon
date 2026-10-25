@@ -1,20 +1,21 @@
+using NaughtyAttributes;
 using UnityEngine;
 using System.Collections.Generic;
 
 public class GameSetup : MonoBehaviour
 {
-    [SerializeField] private RoomGenerator roomGen;
-    [SerializeField] private TrapSetup trapSetup;
-    [SerializeField] private Transform playerSpawn;
-    [SerializeField] private CameraConfinerSetup camConfinerSetup;
-    [SerializeField] private GameObject player;
+    [SerializeField, Required] private RoomGenerator roomGen;
+    [SerializeField, Required] private TrapSetup trapSetup;
+    [SerializeField, Required] private Transform playerSpawn;
+    [SerializeField, Required] private CameraConfinerSetup camConfinerSetup;
+    [SerializeField, Required] private GameObject player;
     [SerializeField] private LayerMask blockedSpawnLayers;
     [SerializeField, Min(0f)] private float spawnPadding = 0.1f;
     [SerializeField] private bool useFixedRoomSeed, spawnTraps = true;
-    [SerializeField] private int roomSeed = 12345;
+    [SerializeField, ShowIf(nameof(useFixedRoomSeed))] private int roomSeed = 12345;
     [SerializeField] private Transform[] additionalPlayerSpawns = System.Array.Empty<Transform>();
     [SerializeField] private bool spreadPlayerSpawns;
-    [SerializeField, Min(0f)] private float spreadSpawnPadding = 0.75f;
+    [SerializeField, ShowIf(nameof(spreadPlayerSpawns)), Min(0f)] private float spreadSpawnPadding = 0.75f;
     private readonly List<Vector2> spreadCandidates = new();
     private float playerBodyRadius;
     private float playerSpawnCheckRadius;

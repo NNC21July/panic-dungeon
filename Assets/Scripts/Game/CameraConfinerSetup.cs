@@ -1,11 +1,12 @@
 using Unity.Cinemachine;
+using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(PolygonCollider2D))]
 public class CameraConfinerSetup : MonoBehaviour
 {
-    [SerializeField] private RoomGenerator roomGen;
-    [SerializeField] private CinemachineConfiner2D cameraConfiner;
+    [SerializeField, Required] private RoomGenerator roomGen;
+    [SerializeField, Required] private CinemachineConfiner2D cameraConfiner;
     private PolygonCollider2D cameraBounds;
 
     private void Awake()

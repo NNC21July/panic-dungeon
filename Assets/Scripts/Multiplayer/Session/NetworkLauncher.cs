@@ -1,13 +1,14 @@
 using Fusion;
 using TMPro;
+using NaughtyAttributes;
 using UnityEngine;
 
 // Presents the waiting lobby; room creation and joining belong to MainMenuUI.
 public class NetworkLauncher : MonoBehaviour
 {
-    [SerializeField] private TMP_Text statusText;
-    [SerializeField] private GameObject loadingPanel;
-    [SerializeField] private NetworkLobbyManager lobby;
+    [SerializeField, Required] private TMP_Text statusText;
+    [SerializeField, Required] private GameObject loadingPanel;
+    [SerializeField, Required] private NetworkLobbyManager lobby;
     private bool assignedLocalView;
     private NetworkSessionUI sessionUI;
 

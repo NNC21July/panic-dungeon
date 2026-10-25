@@ -1,4 +1,5 @@
 using System;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class Health : MonoBehaviour, IDamageable
@@ -6,9 +7,11 @@ public class Health : MonoBehaviour, IDamageable
     [SerializeField] private float maxHealth = 100f;
     private float curHealth;
     private bool isDead, damageEnabled;
+    [ShowNativeProperty]
     public float CurHealth => curHealth;
     public float MaxHealth => maxHealth;
     public float CurHealthPercent => curHealth / maxHealth;
+    [ShowNativeProperty]
     public bool IsDead => isDead;
 
     public event Action<DamageInfo> OnDamaged, OnDeath;

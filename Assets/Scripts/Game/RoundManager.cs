@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using UnityEngine;
 
 public enum RoundState
@@ -7,19 +8,22 @@ public enum RoundState
 
 public class RoundManager : MonoBehaviour
 {
-    [SerializeField] private SinglePlayerTrapDirector trapDirector;
-    [SerializeField] private Health playerHealth;
-    [SerializeField] private PlayerReset playerReset;
+    [SerializeField, Required] private SinglePlayerTrapDirector trapDirector;
+    [SerializeField, Required] private Health playerHealth;
+    [SerializeField, Required] private PlayerReset playerReset;
     [SerializeField] private float countdownDuration = 3f, roundDuration = 60f;
-    [SerializeField] private Transform playerSpawn;
-    [SerializeField] private AudioClip roundStartSfx, victorySfx, defeatSfx, countdownBeepSfx;
+    [SerializeField, Required] private Transform playerSpawn;
+    [SerializeField, Required] private AudioClip roundStartSfx, victorySfx, defeatSfx, countdownBeepSfx;
     private RoundState curState;
     private float countdownTimer, roundTimer;
     private string roundResult = "";
     private int prevCountdownNum;
     public int CountdownNum => Mathf.CeilToInt(countdownTimer);
+    [ShowNativeProperty]
     public RoundState CurState => curState;
+    [ShowNativeProperty]
     public float RoundTimer => roundTimer;
+    [ShowNativeProperty]
     public string RoundResult => roundResult;
 
     private void Awake()

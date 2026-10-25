@@ -1,14 +1,16 @@
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 
 public class PlayerCombat : MonoBehaviour
 {
-    [SerializeField] private PlayerTuning playerTuning;
-    [SerializeField] private Camera worldCamera;
-    [SerializeField] private Transform swordPivot;
-    [SerializeField] private Sword sword;
+    [SerializeField, Required] private PlayerTuning playerTuning;
+    [SerializeField, Required] private Camera worldCamera;
+    [SerializeField, Required] private Transform swordPivot;
+    [SerializeField, Required] private Sword sword;
     private Health health;
+    [ShowNonSerializedField]
     private bool isAttacking = false, canAttack = true;
     private Coroutine swingCoroutine;
 

@@ -1,13 +1,14 @@
 using TMPro;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class RoundUI : MonoBehaviour
 {
     private const string MainMenuSceneName = "MainMenu";
-    [SerializeField] private RoundManager roundManager;
-    [SerializeField] private TMP_Text countdown, timer, result;
-    [SerializeField] private GameObject roundOverPanel, darkOverlay;
+    [SerializeField, Required] private RoundManager roundManager;
+    [SerializeField, Required] private TMP_Text countdown, timer, result;
+    [SerializeField, Required] private GameObject roundOverPanel, darkOverlay;
 
     private void Awake()
     {

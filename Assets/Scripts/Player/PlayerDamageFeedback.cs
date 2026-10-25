@@ -1,11 +1,12 @@
 using Fusion;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class PlayerDamageFeedback : MonoBehaviour
 {
     [SerializeField, Min(0f)] private float shakeStrength = 0.04f;
     [SerializeField, Range(0f, 1f)] private float damagedVolume = 0.5f;
-    [SerializeField] private AudioClip damagedSfx;
+    [SerializeField, Required] private AudioClip damagedSfx;
     private Health health;
     private NetworkHealth networkHealth;
     private NetworkObject networkObject;

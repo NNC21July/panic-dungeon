@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DamageVignetteUI : MonoBehaviour
 {
+    [Tooltip("Single-player reference. Multiplayer assigns the viewed player at runtime; leave empty there.")]
     [SerializeField] private Health playerHealth;
-    [SerializeField] private Image vignetteImage;
+    [SerializeField, Required] private Image vignetteImage;
     [SerializeField, Min(0.01f)] private float fadeDuration = 0.35f;
     [SerializeField, Range(0f, 1f)] private float maxAlpha = 0.45f;
     private Coroutine fadeCoroutine;

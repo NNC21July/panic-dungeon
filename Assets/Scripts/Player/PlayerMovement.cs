@@ -1,13 +1,15 @@
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private PlayerTuning playerTuning;
+    [SerializeField, Required] private PlayerTuning playerTuning;
     private Rigidbody2D rb;
     private PlayerDash playerDash;
     private Health health;
+    [ShowNonSerializedField]
     private Vector2 moveInput, lastMoveDirection = new Vector2(1, 0);
 
     private void Awake()
