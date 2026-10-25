@@ -1,6 +1,7 @@
 using Unity.Cinemachine;
 using UnityEngine.SceneManagement;
 using UnityEngine;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(CinemachineImpulseSource))]
 public class CameraShake : MonoBehaviour
@@ -8,6 +9,7 @@ public class CameraShake : MonoBehaviour
     [SerializeField, Min(0f)] private float defaultStrength = 0.02f, maxStrength = 0.2f;
     private float pendingStrength;
     private CinemachineImpulseSource impulseSource;
+    private readonly List<(CinemachineImpulseManager.ImpulseEvent impulse, object signal)> ownImpulses = new();
     public static CameraShake Instance { get; private set; }
 
     private void Awake()
@@ -40,6 +42,7 @@ public class CameraShake : MonoBehaviour
 
     private void LateUpdate()
     {
+        ownImpulses.RemoveAll(entry => entry.impulse.Expired || !ReferenceEquals(entry.impulse.SignalSource, entry.signal));
         if (pendingStrength == 0f)
             return;
 
@@ -48,12 +51,28 @@ public class CameraShake : MonoBehaviour
             dir = Vector2.up;
 
         Vector3 velocity = (Vector3)dir * pendingStrength;
-        impulseSource.GenerateImpulse(velocity);
+        var impulse = impulseSource.ImpulseDefinition.CreateAndReturnEvent(transform.position, velocity);
+        if (impulse != null)
+            ownImpulses.Add((impulse, impulse.SignalSource));
         pendingStrength = 0f;
+    }
+
+    public void ClearShake()
+    {
+        pendingStrength = 0f;
+        // Never clear the global impulse manager: other multi-peer cameras use it too.
+        foreach (var entry in ownImpulses)
+            if (ReferenceEquals(entry.impulse.SignalSource, entry.signal) && !entry.impulse.Expired)
+            {
+                entry.impulse.Cancel(CinemachineImpulseManager.Instance.CurrentTime, true);
+                entry.impulse.Channel = 0;
+            }
+        ownImpulses.Clear();
     }
 
     private void OnDestroy()
     {
+        ClearShake();
         if (Instance == this)
             Instance = null;
     }

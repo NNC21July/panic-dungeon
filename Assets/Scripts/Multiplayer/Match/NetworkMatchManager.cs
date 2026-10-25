@@ -11,7 +11,7 @@ public enum NetworkMatchState : byte
 }
 
 [RequireComponent(typeof(NetworkObject))]
-public class NetworkMatchManager : NetworkBehaviour
+public partial class NetworkMatchManager : NetworkBehaviour
 {
     [SerializeField, Min(2)] private int minimumPlayers = 2;
     [Networked, OnChangedRender(nameof(HandleStateChanged))]
@@ -54,6 +54,7 @@ public class NetworkMatchManager : NetworkBehaviour
         Winner = PlayerRef.None;
         WinnerName = default;
         StartingPlayerCount = 0;
+        ResultCount = 0;
         LivingPlayerCount = 0;
         Leader = PlayerRef.None;
         Restarting = false;
@@ -78,7 +79,10 @@ public class NetworkMatchManager : NetworkBehaviour
         else if (State == NetworkMatchState.Countdown)
             UpdateCountdown();
         else if (State == NetworkMatchState.Playing)
+        {
+            UpdateSurvivalResults();
             TryEndMatchFromElimination();
+        }
     }
 
     private void TryBeginCountdown()
@@ -105,12 +109,14 @@ public class NetworkMatchManager : NetworkBehaviour
     {
         StartingPlayerCount = ConnectedPlayerCount;
         LivingPlayerCount = StartingPlayerCount;
+        BeginResults();
         CountdownTimer = TickTimer.None;
         State = NetworkMatchState.Playing;
     }
 
     private void EndMatch(PlayerRef winner)
     {
+        FinishResults();
         Winner = winner;
         WinnerName = default;
         if (winner != PlayerRef.None)

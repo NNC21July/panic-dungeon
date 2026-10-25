@@ -17,6 +17,7 @@ public class NetworkMatchUI : NetworkBehaviour
     private NetworkCharacterSelectionUI selectionUI;
     private NetworkSessionUI sessionUI;
     private NetworkSpectatorUI spectatorUI;
+    private NetworkResultsUI resultsUI;
 
     private void Awake()
     {
@@ -36,6 +37,7 @@ public class NetworkMatchUI : NetworkBehaviour
             selectionUI = NetworkCharacterSelectionUI.Create(matchManager, timerText);
             sessionUI = NetworkSessionUI.Create(Runner, timerText);
             spectatorUI = NetworkSpectatorUI.Create(matchManager, timerText);
+            resultsUI = NetworkResultsUI.Create(matchManager, timerText);
         }
         roundOverPanel.SetActive(false);
         darkOverlay.SetActive(false);
@@ -55,7 +57,7 @@ public class NetworkMatchUI : NetworkBehaviour
         SetActiveIfChanged(timerText.gameObject, false);
 
         bool matchOver = matchManager.State == NetworkMatchState.MatchOver;
-        SetActiveIfChanged(roundOverPanel, matchOver);
+        SetActiveIfChanged(roundOverPanel, false);
         SetActiveIfChanged(darkOverlay, matchOver);
 
         if (!matchOver)
@@ -66,12 +68,14 @@ public class NetworkMatchUI : NetworkBehaviour
         else
             resultText.text = $"Winner is: {matchManager.WinnerName}";
 
-        SetActiveIfChanged(restartButton.gameObject, matchManager.IsLocalLeader);
+        SetActiveIfChanged(restartButton.gameObject, false);
         restartButton.interactable = !matchManager.Restarting;
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        if (resultsUI != null)
+            Destroy(resultsUI.gameObject);
         if (spectatorUI != null)
             Destroy(spectatorUI.gameObject);
         if (sessionUI != null)

@@ -21,6 +21,28 @@ public class NetworkLocalPlayerCamera : NetworkBehaviour
         playerCam.gameObject.SetActive(true);
     }
 
+    // Clear this viewer's effects without touching other runners' impulse channels.
+    public void ResetFeedback()
+    {
+        if (Object == null || !Object.IsValid || !Object.HasInputAuthority)
+            return;
+        CameraShake.FindInScene(gameObject.scene)?.ClearShake();
+        if (playerCamera == null)
+            playerCamera = FindCameraInPlayerScene();
+        CinemachineImpulseListener listener = playerCamera != null ? playerCamera.GetComponent<CinemachineImpulseListener>() : null;
+        if (listener != null)
+        {
+            var settings = listener.ReactionSettings;
+            listener.ReactionSettings = new CinemachineImpulseListener.ImpulseReaction
+            {
+                m_SecondaryNoise = settings.m_SecondaryNoise,
+                AmplitudeGain = settings.AmplitudeGain,
+                FrequencyGain = settings.FrequencyGain,
+                Duration = settings.Duration
+            };
+        }
+    }
+
     // Changes only this runner's camera, never the target player's input authority.
     public void FollowTarget(Transform target)
     {

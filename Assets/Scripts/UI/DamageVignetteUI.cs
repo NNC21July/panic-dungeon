@@ -11,6 +11,7 @@ public class DamageVignetteUI : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float maxAlpha = 0.45f;
     private Coroutine fadeCoroutine;
     private NetworkHealth networkHealth;
+    private int firstDamageSequence;
 
     private void Awake()
     {
@@ -53,11 +54,16 @@ public class DamageVignetteUI : MonoBehaviour
 
     public void Bind(NetworkHealth target)
     {
-        if (target == null)
-            throw new ArgumentNullException(nameof(target));
-
         Unsubscribe();
+        if (fadeCoroutine != null)
+        {
+            StopCoroutine(fadeCoroutine);
+            fadeCoroutine = null;
+        }
+        SetAlpha(0f);
         networkHealth = target;
+        playerHealth = null;
+        firstDamageSequence = target != null && target.Object != null && target.Object.IsValid ? target.DamageSequence : 0;
         if (isActiveAndEnabled)
             Subscribe();
     }
@@ -80,6 +86,8 @@ public class DamageVignetteUI : MonoBehaviour
 
     private void HandleNetworkDamaged()
     {
+        if (networkHealth == null || networkHealth.PresentedDamageSequence <= firstDamageSequence)
+            return;
         PlayVignette();
     }
 

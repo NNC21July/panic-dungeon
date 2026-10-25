@@ -46,7 +46,17 @@ public class PlayerDamageFeedback : MonoBehaviour
     {
         if (networkObject == null || !networkObject.HasInputAuthority)
             return;
+        NetworkLocalPlayerUIBinder binder = GetComponent<NetworkLocalPlayerUIBinder>();
+        if (binder != null && !binder.IsViewingOwnPlayer)
+            return;
         PlayFeedback(networkHealth.PresentedDamageType);
+    }
+
+    // Called by the local viewer's binder for the selected remote player only.
+    public void PlaySpectatorFeedback()
+    {
+        if (networkHealth != null && networkObject != null && networkObject.IsValid)
+            PlayFeedback(networkHealth.PresentedDamageType);
     }
 
     private void HandleDamaged(DamageInfo damageInfo)

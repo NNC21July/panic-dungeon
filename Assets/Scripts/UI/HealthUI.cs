@@ -29,13 +29,15 @@ public class HealthUI : MonoBehaviour
 
     private void UpdateUI()
     {
-        if (networkHealth != null)
+        if (networkHealth != null && networkHealth.Object != null && networkHealth.Object.IsValid)
         {
             SetValues(networkHealth.CurrentHealth, networkHealth.MaxHealth);
             return;
         }
         if (playerHealth != null)
             SetValues(playerHealth.CurHealth, playerHealth.MaxHealth);
+        else
+            SetValues(0f, 0f);
     }
 
     private void SetValues(float current, float maximum)
@@ -46,11 +48,9 @@ public class HealthUI : MonoBehaviour
 
     public void Bind(NetworkHealth target)
     {
-        if (target == null)
-            throw new ArgumentNullException(nameof(target));
-
         Unsubscribe();
         networkHealth = target;
+        playerHealth = null;
         if (isActiveAndEnabled)
             Subscribe();
 

@@ -12,6 +12,7 @@ public class NetworkSpectatorUI : MonoBehaviour
     private TMP_Text caption;
     private Button previousButton, nextButton;
     private NetworkLocalPlayerCamera localCamera;
+    private NetworkLocalPlayerUIBinder localUI;
     private NetworkObject localPlayer, target;
     private readonly List<NetworkObject> livingPlayers = new();
     private bool spectating;
@@ -53,7 +54,7 @@ public class NetworkSpectatorUI : MonoBehaviour
     {
         if (manager == null || manager.Object == null || !manager.Object.IsValid || !manager.Runner.IsRunning)
         {
-            SetVisible(false);
+            StopSpectating(false);
             return;
         }
         NetworkRunner runner = manager.Runner;
@@ -66,6 +67,7 @@ public class NetworkSpectatorUI : MonoBehaviour
         {
             localPlayer = player;
             localCamera = player.GetComponent<NetworkLocalPlayerCamera>();
+            localUI = player.GetComponent<NetworkLocalPlayerUIBinder>();
             target = null;
         }
         NetworkHealth health = player.GetComponent<NetworkHealth>();
@@ -123,6 +125,8 @@ public class NetworkSpectatorUI : MonoBehaviour
     private void SelectTarget(NetworkObject player)
     {
         target = player;
+        if (localUI != null)
+            localUI.BindView(target != null ? target.GetComponent<NetworkHealth>() : null);
         if (localCamera != null)
             localCamera.FollowTarget(target != null ? target.transform : null);
     }
@@ -142,6 +146,9 @@ public class NetworkSpectatorUI : MonoBehaviour
 
     private void StopSpectating(bool restoreCamera)
     {
+        if (spectating && localUI != null)
+            localUI.BindView(restoreCamera && localPlayer != null && localPlayer.IsValid
+                ? localPlayer.GetComponent<NetworkHealth>() : null);
         if (spectating && restoreCamera && localCamera != null && localPlayer != null && localPlayer.IsValid)
             localCamera.FollowTarget(localPlayer.transform);
         spectating = false;

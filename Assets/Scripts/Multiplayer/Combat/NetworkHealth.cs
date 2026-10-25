@@ -15,10 +15,12 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
     public event Action OnDamaged;
     public event Action OnHealthChanged;
     public DamageType PresentedDamageType { get; private set; }
+    public int PresentedDamageSequence { get; private set; }
     public bool SuppressPresentedFlash { get; private set; }
     private readonly HashSet<(NetworkId, int)> shownSwordContacts = new();
     private readonly Queue<(NetworkId, int)> swordContactOrder = new();
     private int initialDamageSequence;
+    private NetworkMatchManager resultsManager;
     private readonly Dictionary<int, double> feedbackWaitingForImpact = new(); // confirmed arrow hits waiting for their visual impact; each with deadline
     private readonly HashSet<int> earlyArrowImpacts = new(); // visual impacts that arrived before their damage notification
     private readonly HashSet<int> shownDamageFeedback = new(); // events already presented; so don't play twice
@@ -34,10 +36,12 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
             DamageSequence = 0;
         }
         InitializePoison();
+        resultsManager = null;
         shownSwordContacts.Clear();
         swordContactOrder.Clear();
         SuppressPresentedFlash = false;
         initialDamageSequence = DamageSequence;
+        PresentedDamageSequence = DamageSequence;
         PresentedDamageType = DamageType.Normal;
         feedbackWaitingForImpact.Clear();
         earlyArrowImpacts.Clear();
@@ -60,11 +64,24 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
         if (!Object.HasStateAuthority || IsDead || damageInfo.Amount <= 0f)
             return false;
 
+        float previousHealth = CurrentHealth;
         CurrentHealth = Mathf.Max(CurrentHealth - damageInfo.Amount, 0f);
         if (CurrentHealth <= 0f)
         {
             IsDead = true;
             ClearPoison();
+        }
+        // Only the server records actual damage; visual feedback never changes match statistics.
+        if (GetComponent<NetworkPlayerIdentity>() != null)
+        {
+            if (resultsManager == null || resultsManager.Object == null || !resultsManager.Object.IsValid)
+                foreach (NetworkMatchManager manager in FindObjectsByType<NetworkMatchManager>())
+                    if (manager.Runner == Runner && manager.Object != null && manager.Object.IsValid)
+                    {
+                        resultsManager = manager;
+                        break;
+                    }
+            resultsManager?.RecordPlayerDamage(Object, attacker, previousHealth - CurrentHealth, IsDead);
         }
         DamageSequence++;
         RPC_QueueDamageFeedback(DamageSequence, damageInfo.Type, attacker, swingTick);
@@ -109,6 +126,7 @@ public partial class NetworkHealth : NetworkBehaviour, IDamageable, IPoisonRecei
         feedbackWaitingForImpact.Remove(sequence);
         earlyArrowImpacts.Remove(sequence);
         PresentedDamageType = damageType;
+        PresentedDamageSequence = sequence;
         OnDamaged?.Invoke();
     }
 
