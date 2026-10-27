@@ -32,6 +32,10 @@ public class NetworkLobbyManager : NetworkBehaviour
         nextStartRequestTime = 0d;
         if (!Object.HasStateAuthority)
             return;
+        // Returning from a completed series opens this same room for a fresh game.
+        Runner.GetComponent<NetworkMatchSeriesState>()?.Clear();
+        if (Runner.SessionInfo.IsValid)
+            Runner.SessionInfo.IsOpen = true;
         Leader = PlayerRef.None;
         StartingGame = false;
         StartError = LobbyStartError.None;

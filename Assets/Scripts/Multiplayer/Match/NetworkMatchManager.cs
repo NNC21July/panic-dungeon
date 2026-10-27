@@ -1,13 +1,13 @@
 using Fusion;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public enum NetworkMatchState : byte
 {
     WaitingForPlayers,
     Countdown,
     Playing,
-    MatchOver
+    MatchOver,
+    PreparingRound
 }
 
 [RequireComponent(typeof(NetworkObject))]
@@ -64,6 +64,7 @@ public partial class NetworkMatchManager : NetworkBehaviour
         RefreshLeader();
         State = NetworkMatchState.WaitingForPlayers;
         CountdownTimer = TickTimer.None;
+        InitializeSeries();
     }
 
     public override void FixedUpdateNetwork()
@@ -83,6 +84,10 @@ public partial class NetworkMatchManager : NetworkBehaviour
             UpdateSurvivalResults();
             TryEndMatchFromElimination();
         }
+        else if (State == NetworkMatchState.MatchOver)
+            UpdateResultsDisplay();
+        else if (State == NetworkMatchState.PreparingRound)
+            PrepareNextRound();
     }
 
     private void TryBeginCountdown()
@@ -98,7 +103,7 @@ public partial class NetworkMatchManager : NetworkBehaviour
         if (!AllPlayersSelected())
         {
             CountdownTimer = TickTimer.None;
-            State = NetworkMatchState.WaitingForPlayers;
+            State = CurrentRound > 1 ? NetworkMatchState.PreparingRound : NetworkMatchState.WaitingForPlayers;
             return;
         }
         if (CountdownTimer.Expired(Runner))
@@ -116,6 +121,8 @@ public partial class NetworkMatchManager : NetworkBehaviour
 
     private void EndMatch(PlayerRef winner)
     {
+        if (State != NetworkMatchState.Playing)
+            return;
         FinishResults();
         Winner = winner;
         WinnerName = default;
@@ -127,7 +134,9 @@ public partial class NetworkMatchManager : NetworkBehaviour
             // Preserve the result even if the winner leaves before others close the results.
             WinnerName = identity != null ? identity.DisplayName : $"Player {winner.AsIndex + 1}";
         }
+        AwardRoundPoints();
         State = NetworkMatchState.MatchOver;
+        StartResultsDisplay();
     }
 
     private bool TryEndMatchFromElimination()
@@ -160,7 +169,7 @@ public partial class NetworkMatchManager : NetworkBehaviour
 
     public void RestartMatch()
     {
-        if (!IsLocalLeader || State != NetworkMatchState.MatchOver || Restarting ||
+        if (!IsLocalLeader || State != NetworkMatchState.MatchOver || !TransitionFailed || Restarting ||
             Time.unscaledTimeAsDouble < nextRestartRequestTime)
             return;
         nextRestartRequestTime = Time.unscaledTimeAsDouble + 1d;
@@ -201,35 +210,14 @@ public partial class NetworkMatchManager : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable)]
     private void RPC_RequestRestart(RpcInfo info = default)
     {
-        if (!Object.HasStateAuthority || State != NetworkMatchState.MatchOver || Restarting || info.Source == PlayerRef.None)
+        if (!Object.HasStateAuthority || State != NetworkMatchState.MatchOver || !TransitionFailed || Restarting || info.Source == PlayerRef.None)
             return;
         RefreshLeader();
         if (info.Source != Leader)
             return;
 
-        SceneRef currentScene = Runner.GetSceneRef(gameObject);
-        if (!currentScene.IsValid)
-        {
-            Debug.LogError("Unable to find the current multiplayer scene.", this);
-            return;
-        }
-        Restarting = true;
-        ReloadMatch(currentScene);
-    }
-
-    private async void ReloadMatch(SceneRef scene)
-    {
-        try
-        {
-            await Runner.LoadScene(scene, LoadSceneMode.Single);
-        }
-        catch (System.Exception exception)
-        {
-            if (this == null || Object == null || !Object.IsValid)
-                return;
-            Restarting = false;
-            Debug.LogError($"Unable to restart multiplayer match: {exception.Message}", this);
-        }
+        TransitionFailed = false;
+        AdvanceSeries();
     }
 
     private void HandleStateChanged()

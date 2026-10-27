@@ -28,6 +28,7 @@ internal static class ArrowContactChecks
         EnemyRulesChecks.Run();
         CharacterColorChecks.Run();
         PlayerSpawnChecks.Run();
+        MatchPointChecks.Run();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

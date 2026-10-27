@@ -9,6 +9,10 @@ public struct MatchPlayerResult : INetworkStruct
     public int Kills;
     public float Duration;
     public NetworkBool Finished;
+    public NetworkBool Participated;
+    public int Placement, RoundPoints, TotalPoints;
+    public float TotalDuration, TotalDamage;
+    public int TotalKills;
 }
 
 public partial class NetworkMatchManager
@@ -19,21 +23,39 @@ public partial class NetworkMatchManager
 
     private void BeginResults()
     {
-        ResultCount = 0;
         matchStartTick = Runner.Tick.Raw;
-        for (int i = 0; i < Results.Length; i++)
-            Results.Set(i, default);
+        for (int i = 0; i < ResultCount; i++)
+        {
+            MatchPlayerResult result = Results[i];
+            result.Damage = 0f;
+            result.Kills = 0;
+            result.Duration = 0f;
+            result.Placement = 0;
+            result.RoundPoints = 0;
+            result.Participated = false;
+            result.Finished = true;
+            Results.Set(i, result);
+        }
         foreach (PlayerRef player in Runner.ActivePlayers)
         {
-            if (player == PlayerRef.None || ResultCount >= Results.Length ||
+            if (player == PlayerRef.None ||
                 !Runner.TryGetPlayerObject(player, out NetworkObject obj) || obj == null)
                 continue;
-            NetworkPlayerIdentity identity = obj.GetComponent<NetworkPlayerIdentity>();
-            Results.Set(ResultCount++, new MatchPlayerResult
+            int index = FindResult(player);
+            if (index < 0)
             {
-                Player = player,
-                Username = identity != null ? identity.DisplayName : $"Player {player.AsIndex + 1}"
-            });
+                if (ResultCount >= Results.Length)
+                    continue;
+                index = ResultCount++;
+                Results.Set(index, default);
+            }
+            NetworkPlayerIdentity identity = obj.GetComponent<NetworkPlayerIdentity>();
+            MatchPlayerResult result = Results[index];
+            result.Player = player;
+            result.Username = identity != null ? identity.DisplayName : $"Player {player.AsIndex + 1}";
+            result.Participated = true;
+            result.Finished = false;
+            Results.Set(index, result);
         }
     }
 
@@ -78,6 +100,31 @@ public partial class NetworkMatchManager
     {
         for (int i = 0; i < ResultCount; i++)
             FinishResult(i);
+    }
+
+    private void AwardRoundPoints()
+    {
+        for (int i = 0; i < ResultCount; i++)
+        {
+            MatchPlayerResult result = Results[i];
+            if (!result.Participated)
+                continue;
+            int placement = 1;
+            for (int j = 0; j < ResultCount; j++)
+            {
+                MatchPlayerResult other = Results[j];
+                if (other.Participated && MatchPointRules.CompareRound(other.Duration, other.Player == Winner,
+                    result.Duration, result.Player == Winner) < 0)
+                    placement++;
+            }
+            result.Placement = placement;
+            result.RoundPoints = MatchPointRules.PlacementPoints(StartingPlayerCount, placement);
+            result.TotalPoints += result.RoundPoints;
+            result.TotalDuration += result.Duration;
+            result.TotalDamage += result.Damage;
+            result.TotalKills += result.Kills;
+            Results.Set(i, result);
+        }
     }
 
     public void RecordPlayerDamage(NetworkObject victim, NetworkId attackerId, float damage, bool killed)

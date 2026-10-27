@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fa13cc9ea77dba4b86119fc9d213537, type: 3}
+  m_Name: ResultsPresentationSettings
+  m_EditorClassIdentifier: 
+  medals:
+  - {fileID: 8494625075034184327, guid: 5afe411fa60d1da4cb3633a4c414ee4f, type: 3}
+  - {fileID: -8390845624486075857, guid: 25d6e91a8b5bbda44adb5d69b91ba88b, type: 3}
+  - {fileID: 6689525740294908592, guid: cb093d5753e2fb9489af9eac39c94971, type: 3}
+  medalSize: {x: 34, y: 36}
+  pointsDelay: 1.5
+  pointsDuration: 1.4
+  pointsScale: 1.5
+  pointsRise: 0
+  medalDelayAfterPoints: 1
+  rankStagger: 0.4
+  medalDuration: 0.65
+  medalEase: 27
+  gradientDuration: 0.65
+  goldLight: {r: 1, g: 0.88, b: 0.28, a: 1}
+  goldDark: {r: 0.66, g: 0.46, b: 0.02, a: 1}
+  silverLight: {r: 0.95, g: 0.98, b: 1, a: 1}
+  silverDark: {r: 0.48, g: 0.56, b: 0.66, a: 1}
+  bronzeLight: {r: 1, g: 0.69, b: 0.42, a: 1}
+  bronzeDark: {r: 0.52, g: 0.25, b: 0.1, a: 1}
+  shineDuration: 1.1
+  shinePause: 1.8
+  shineWidth: 0.12
+  shineStrength: 0.65
