@@ -217,7 +217,7 @@ public partial class NetworkMatchManager : NetworkBehaviour
             return;
 
         TransitionFailed = false;
-        AdvanceSeries();
+        wipeTimer = TickTimer.None;
     }
 
     private void HandleStateChanged()

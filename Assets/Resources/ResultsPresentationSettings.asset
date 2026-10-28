@@ -12,11 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fa13cc9ea77dba4b86119fc9d213537, type: 3}
   m_Name: ResultsPresentationSettings
   m_EditorClassIdentifier: 
+  panelSlideDuration: 1
+  panelSlideEase: 9
+  wipeDuration: 0.45
+  wipeEase: 10
+  wipeColor: {r: 0.12, g: 0.12, b: 0.12, a: 1}
+  tickSound: {fileID: 8300000, guid: 2de2dbbd5edd85c40a414ff42902f3ca, type: 3}
+  dingSound: {fileID: 8300000, guid: 213d9b105ca5b0941a7cbf4c807d6da0, type: 3}
+  whooshSound: {fileID: 8300000, guid: bcb1b6de546ed4a4db5b90c10b50a75f, type: 3}
+  medalSound: {fileID: 8300000, guid: d4cd73c6fb624fb47a155d65cebd1de0, type: 3}
+  victorySound: {fileID: 8300000, guid: 98ba2ed663bde344387b044f8a81d5d4, type: 3}
+  tickVolume: 0.35
+  dingVolume: 0.65
+  whooshVolume: 0.65
+  medalVolume: 0.7
+  victoryVolume: 0.55
+  tickInterval: 0.08
   medals:
   - {fileID: 8494625075034184327, guid: 5afe411fa60d1da4cb3633a4c414ee4f, type: 3}
   - {fileID: -8390845624486075857, guid: 25d6e91a8b5bbda44adb5d69b91ba88b, type: 3}
   - {fileID: 6689525740294908592, guid: cb093d5753e2fb9489af9eac39c94971, type: 3}
-  medalSize: {x: 34, y: 36}
+  medalSize: {x: 30, y: 32}
   pointsDelay: 1.5
   pointsDuration: 1.4
   pointsScale: 1.5

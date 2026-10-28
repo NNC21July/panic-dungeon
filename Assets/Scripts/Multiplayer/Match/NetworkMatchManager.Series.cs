@@ -15,6 +15,7 @@ public partial class NetworkMatchManager
     [Networked] public TickTimer ResultsTimer { get; private set; }
     [Networked] public NetworkBool SeriesComplete { get; private set; }
     [Networked] public NetworkBool TransitionFailed { get; private set; }
+    [Networked] private TickTimer wipeTimer { get; set; }
     private NetworkMatchSeriesState seriesState;
 
     public float ResultsSecondsRemaining => Mathf.Max(0f, ResultsTimer.RemainingTime(Runner) ?? 0f);
@@ -31,6 +32,7 @@ public partial class NetworkMatchManager
         ResultsTimer = TickTimer.None;
         SeriesComplete = false;
         TransitionFailed = false;
+        wipeTimer = TickTimer.None;
         if (seriesState.NextRound <= 1 || seriesState.Results == null || seriesState.Colors == null)
             return;
 
@@ -73,6 +75,7 @@ public partial class NetworkMatchManager
 
     private void StartResultsDisplay()
     {
+        wipeTimer = TickTimer.None;
         SeriesComplete = CurrentRound >= RoundLimit || ConnectedPlayerCount < minimumPlayers;
         ResultsDisplayDuration = Mathf.Max(1f, CurrentRound >= RoundLimit ? finalResultsDuration : resultsDuration);
         TransitionFailed = false;
@@ -83,7 +86,15 @@ public partial class NetworkMatchManager
     {
         if (!SeriesComplete && ConnectedPlayerCount < minimumPlayers)
             SeriesComplete = true;
-        if (!Restarting && !TransitionFailed && ResultsTimer.Expired(Runner))
+        if (Restarting || TransitionFailed || !ResultsTimer.Expired(Runner))
+            return;
+        if (!wipeTimer.IsRunning)
+        {
+            ResultsPresentationSettings settings = Resources.Load<ResultsPresentationSettings>("ResultsPresentationSettings");
+            float duration = settings != null ? Mathf.Max(0.1f, settings.wipeDuration) : 0.45f;
+            wipeTimer = TickTimer.CreateFromSeconds(Runner, duration + 0.15f);
+        }
+        else if (wipeTimer.Expired(Runner))
             AdvanceSeries();
     }
 

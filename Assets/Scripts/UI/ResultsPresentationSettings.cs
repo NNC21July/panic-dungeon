@@ -4,6 +4,20 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Panic Dungeon/Results Presentation")]
 public class ResultsPresentationSettings : ScriptableObject
 {
+    [Header("Panel and Scene Motion")]
+    [Min(0.1f)] public float panelSlideDuration = 0.6f;
+    public Ease panelSlideEase = Ease.OutCubic;
+    [Min(0.1f)] public float wipeDuration = 0.45f;
+    public Ease wipeEase = Ease.InOutCubic;
+    public Color wipeColor = new Color(0.12f, 0.12f, 0.12f, 1f);
+    [Header("Results Audio")]
+    public AudioClip tickSound, dingSound, whooshSound, medalSound, victorySound;
+    [Range(0f, 1f)] public float tickVolume = 0.9f;
+    [Range(0f, 1f)] public float dingVolume = 0.4f;
+    [Range(0f, 1f)] public float whooshVolume = 0.65f;
+    [Range(0f, 1f)] public float medalVolume = 0.5f;
+    [Range(0f, 1f)] public float victoryVolume = 0.55f;
+    [Min(0.02f)] public float tickInterval = 0.08f;
     [Header("Medals (Gold, Silver, Bronze)")]
     public Sprite[] medals = new Sprite[3];
     public Vector2 medalSize = new Vector2(34f, 36f);

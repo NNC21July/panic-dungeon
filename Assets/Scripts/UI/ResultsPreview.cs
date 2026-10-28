@@ -15,10 +15,15 @@ public class ResultsPreview : MonoBehaviour
 
     private void Start()
     {
+        if (FindAnyObjectByType<AudioListener>() == null)
+            gameObject.AddComponent<AudioListener>();
         GameObject canvasObject = new GameObject("PreviewCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         canvasObject.transform.SetParent(transform, false);
         canvasObject.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
         CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+        scaler.enabled = false;
+        scaler.enabled = true;
+        Canvas.ForceUpdateCanvases();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1280f, 900f);
         GameObject style = new GameObject("FontSource", typeof(RectTransform));

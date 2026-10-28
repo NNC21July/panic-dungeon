@@ -19,6 +19,11 @@ public class NetworkResultsUI : MonoBehaviour
     private readonly List<CanvasGroup> awardGroups = new();
     private readonly List<Sequence> scoreTweens = new();
     private ResultsPresentationSettings presentation;
+    private ResultsAudio resultsAudio;
+    private NetworkResultsTransition sceneTransition;
+    private Tween panelEntrance;
+    private float panelSlide;
+    private bool previewWipeStarted;
     private readonly List<Image> medals = new();
     private readonly List<ResultsUsernameShine> usernameShines = new();
     private readonly List<Sequence> podiumTweens = new();
@@ -45,6 +50,8 @@ public class NetworkResultsUI : MonoBehaviour
     private void ReplayPreview()
     {
         previewStarted = Time.unscaledTime;
+        previewWipeStarted = false;
+        sceneTransition?.Cancel();
         presentedFinal = true;
         presentedRound = 3;
         foreach (Image medal in medals)
@@ -65,8 +72,11 @@ public class NetworkResultsUI : MonoBehaviour
         if (ui.presentation == null)
             ui.presentation = ScriptableObject.CreateInstance<ResultsPresentationSettings>();
         ui.group = root.gameObject.AddComponent<CanvasGroup>();
+        ui.resultsAudio = root.gameObject.AddComponent<ResultsAudio>();
+        ui.sceneTransition = NetworkResultsTransition.Get(manager != null ? manager.Runner : null, root.gameObject);
         ui.Show(false);
         ui.Build(styleSource.font);
+        Canvas.ForceUpdateCanvases();
         if (manager != null)
             manager.Runner.AddVisibilityNodes(root.gameObject);
         return ui;
@@ -152,11 +162,17 @@ public class NetworkResultsUI : MonoBehaviour
 
     private void Update()
     {
+        // Prepare even hidden peers so changing the visible runner cannot expose a loading scene.
+        if (!IsPreview && manager != null && manager.Object != null && manager.Object.IsValid &&
+            manager.State == NetworkMatchState.MatchOver && manager.ResultsTimer.Expired(manager.Runner) && !manager.TransitionFailed)
+            sceneTransition.Cover(manager, presentation);
         bool visible = IsPreview || (manager != null && manager.Object != null && manager.Object.IsValid &&
             manager.State == NetworkMatchState.MatchOver && manager.Runner.GetVisible());
         Show(visible);
         if (!visible)
         {
+            if (manager != null && manager.Object != null && manager.Object.IsValid)
+                resultsAudio.Advance(PresentationElapsed, false, DisplayedPointsTotal());
             if (wasVisible)
                 FinishAnimations();
             wasVisible = false;
@@ -169,7 +185,14 @@ public class NetworkResultsUI : MonoBehaviour
         panel.localScale = Vector3.one * Mathf.Max(0.1f, scale);
         if (IsPreview)
         {
+            UpdatePanelEntrance();
+            if (!previewWipeStarted && PresentationElapsed >= 12f)
+            {
+                previewWipeStarted = true;
+                sceneTransition.Cover(null, presentation);
+            }
             UpdatePodium();
+            resultsAudio.Advance(PresentationElapsed, true, DisplayedPointsTotal());
             progressFill.anchorMax = new Vector2(Mathf.Clamp01(PresentationElapsed / 12f), 1f);
             transitionText.text = "PREVIEW — edit ResultsPresentationSettings, then replay";
             restart.gameObject.SetActive(true);
@@ -184,7 +207,9 @@ public class NetworkResultsUI : MonoBehaviour
             PresentResults(animate);
         }
         float remaining = manager.ResultsSecondsRemaining;
+        UpdatePanelEntrance();
         UpdatePodium();
+        resultsAudio.Advance(PresentationElapsed, true, DisplayedPointsTotal());
         progressFill.anchorMax = new Vector2(manager.ResultsProgress, 1f);
         if (manager.TransitionFailed)
             transitionText.text = "Scene transition failed. The room leader can retry.";
@@ -200,6 +225,11 @@ public class NetworkResultsUI : MonoBehaviour
 
     private void PresentResults(bool animate)
     {
+        panelEntrance?.Kill();
+        panelSlide = animate ? 1f : 0f;
+        if (animate)
+            panelEntrance = DOTween.To(() => panelSlide, value => panelSlide = value, 0f,
+                Mathf.Max(0.1f, presentation.panelSlideDuration)).SetEase(presentation.panelSlideEase).SetAutoKill(false).Pause();
         FinishAnimations();
         ResetPodium();
         sortedResults.Clear();
@@ -248,6 +278,18 @@ public class NetworkResultsUI : MonoBehaviour
             if (presentedFinal && (IsPreview || manager.CurrentRound >= manager.RoundLimit) && rank <= 3)
                 PreparePodium(i, rank);
         }
+        bool hasPoints = animate && sortedResults.Exists(result => result.RoundPoints > 0);
+        resultsAudio.Begin(presentation, PresentationElapsed, hasPoints, podiumStarts,
+            presentedFinal && (IsPreview || manager.CurrentRound >= manager.RoundLimit), DisplayedPointsTotal());
+    }
+
+    private int DisplayedPointsTotal()
+    {
+        int total = 0;
+        for (int i = 0; i < sortedResults.Count && i < rows.Count; i++)
+            if (int.TryParse(rows[i][5].text, out int points))
+                total += points;
+        return total;
     }
 
     private void AnimatePoints(int index, MatchPlayerResult result)
@@ -299,8 +341,17 @@ public class NetworkResultsUI : MonoBehaviour
     private void OnDisable() => FinishAnimations();
     private void OnDestroy()
     {
+        panelEntrance?.Kill();
         FinishAnimations();
         ResetPodium();
+    }
+
+    private void UpdatePanelEntrance()
+    {
+        if (panelEntrance != null && panelEntrance.IsActive())
+            panelEntrance.Goto(PresentationElapsed, false);
+        float distance = (((RectTransform)transform).rect.width + panel.rect.width * panel.localScale.x) * 0.5f + 32f;
+        panel.anchoredPosition = new Vector2(-distance * panelSlide, 0f);
     }
 
     private void PreparePodium(int index, int rank)
